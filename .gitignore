@@ -1,0 +1,5 @@
+# Generated on demand by tests/run.sh — never commit a private key.
+tests/*.pem
+
+.DS_Store
+*.log
