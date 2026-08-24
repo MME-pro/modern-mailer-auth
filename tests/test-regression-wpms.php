@@ -114,11 +114,40 @@ $script = function ( $url, $args, $n ) {
 	}
 	return resp( 429, [ 'error' => [ 'code' => 'ApplicationThrottled', 'message' => 'Too many requests' ] ] );
 };
+
+// Queue off for this section. A throttle is retryable, so with the queue on the
+// message is banked for a later attempt and wp_mail() reports success - which is
+// the behaviour we want, and is asserted immediately below. What is being
+// checked here is the error text itself, and that is only observable when the
+// failure is allowed to reach the caller.
+$plugin->settings->update( [ 'queue_enabled' => false ] );
+ModernMailer\Settings::flush_cache();
+
 $err = last_error( 'llar_mail' );
 check( 'error names throttling', $err && false !== stripos( $err->get_error_message(), 'throttl' ),
 	$err ? $err->get_error_message() : 'no error' );
 check( 'error does NOT mention a URL', $err && false === stripos( $err->get_error_message(), 'url' ),
 	$err ? $err->get_error_message() : '' );
+
+echo "\n=== 3b. With the queue on, a throttled message is kept, not lost ===\n";
+// The other half of the same story. The original bug did not merely misreport
+// throttling - it lost the email. Naming the cause correctly is worth little if
+// the message still disappears.
+$plugin->settings->update( [ 'queue_enabled' => true ] );
+ModernMailer\Settings::flush_cache();
+$plugin->queue->purge();
+$plugin->tokens->flush(); $plugin->health->reset();
+
+$sent = llar_mail();
+check( 'the caller is told the message is in hand', true === $sent, var_export( $sent, true ) );
+check( 'and it really is queued', 1 === $plugin->queue->stats()['pending'],
+	wp_json_encode( $plugin->queue->stats() ) );
+
+// It must also still be reported as unhealthy - a queue silently absorbing
+// every send is the same invisible failure in a new costume.
+check( 'the throttling still counted against health', $plugin->health->state()['streak'] >= 1 );
+
+$plugin->queue->purge();
 
 echo "\n=== 4. A failed upstream call can never become a request URL ===\n";
 // Directly exercise the guard with the shapes that slip past WordPress's own

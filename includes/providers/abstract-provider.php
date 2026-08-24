@@ -78,6 +78,33 @@ abstract class Abstract_Provider implements Provider_Interface {
 			$result = $this->request_token();
 
 			if ( is_wp_error( $result ) ) {
+				// The refresh failed, but a token we already hold may still be
+				// inside its real lifetime - get() withholds it early on
+				// purpose, to leave room for exactly this refresh. Spending
+				// that remaining slack is strictly better than dropping an
+				// email we are still authorized to send.
+				//
+				// This is what turns an intermittent outage at the token
+				// endpoint from lost mail into a delivered message: the send
+				// path never touches the network for auth at all.
+				$stale = $this->tokens->get_stale( $key );
+
+				if ( null !== $stale ) {
+					/**
+					 * Fires when a token refresh failed and the previous token
+					 * was used instead.
+					 *
+					 * Worth watching: sending still works, but the site is one
+					 * token lifetime away from failing outright.
+					 *
+					 * @param WP_Error $error Why the refresh failed.
+					 * @param string   $key   Token cache key.
+					 */
+					do_action( 'mmoa_token_refresh_degraded', $result, $key );
+
+					return $stale;
+				}
+
 				return $result;
 			}
 

@@ -51,4 +51,26 @@ interface Provider_Interface {
 	 * Human-readable name, for logs and admin notices.
 	 */
 	public function get_label(): string;
+
+	/**
+	 * Stable identifier, used as the stored provider value and in the REST API.
+	 */
+	public static function slug(): string;
+
+	/**
+	 * The configuration this provider needs, declared rather than hand-built.
+	 *
+	 * Static because the admin app has to list every provider's fields before
+	 * any of them is configured, let alone instantiated.
+	 *
+	 * @return array<int,\ModernMailer\Field>
+	 */
+	public static function fields(): array;
+
+	/**
+	 * Everything the provider chooser needs to render an entry.
+	 *
+	 * @return array{label:string,summary:string,docs:string,category:string,raw_mime:bool}
+	 */
+	public static function describe(): array;
 }

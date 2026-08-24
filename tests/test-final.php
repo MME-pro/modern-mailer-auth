@@ -54,17 +54,48 @@ wp_set_current_user( (int) $admin_id );
 check( 'test user is an administrator', current_user_can( 'manage_options' ) );
 
 $page = new ModernMailer\Admin\Admin_Page( $plugin );
-ob_start();
-$page->render();
-$html = ob_get_clean();
 
-check( 'renders without fatal', strlen( $html ) > 1000, strlen( $html ) . ' bytes' );
+/** Capture one screen's markup. */
+function render_screen( ModernMailer\Admin\Admin_Page $page, string $method ): string {
+	ob_start();
+	$page->$method();
+	return (string) ob_get_clean();
+}
+
+$html   = render_screen( $page, 'render_settings' );
+$backup = render_screen( $page, 'render_backup' );
+$logs   = render_screen( $page, 'render_logs' );
+
+check( 'Settings renders without fatal', strlen( $html ) > 1000, strlen( $html ) . ' bytes' );
+check( 'Backup renders without fatal', strlen( $backup ) > 500, strlen( $backup ) . ' bytes' );
+check( 'Logs renders without fatal', strlen( $logs ) > 150, strlen( $logs ) . ' bytes' );
+
 check( 'provider selector present', false !== strpos( $html, 'id="provider"' ) );
 check( 'access-policy warning shown', false !== strpos( $html, 'New-ApplicationAccessPolicy' ) );
 check( 'Gmail Testing-mode trap warned about', false !== strpos( $html, 'seven days' ) );
 check( 'nonce fields emitted', substr_count( $html, '_wpnonce' ) >= 3, substr_count( $html, '_wpnonce' ) . ' found' );
 check( 'no credential echoed into the form', false === strpos( $html, 'SuperSecretValue123' ) );
 check( 'constant-pinned field marked as such', false !== strpos( $html, 'wp-config.php' ) );
+
+// The backup screen must drive its own slot, or saving it would overwrite the
+// primary's credentials.
+check( 'Backup screen fields are slot-prefixed', false !== strpos( $backup, 'name="backup_provider"' ) );
+check( 'Backup screen does not render primary fields', false === strpos( $backup, 'name="ms_tenant_id"' ) );
+check( 'Backup screen warns when no primary exists', false !== strpos( $backup, 'no primary connection' ) );
+
+// Every form has to say which screen to return to, or actions taken on Backup
+// and Logs would bounce the admin to Settings.
+check( 'Settings forms carry a return page', false !== strpos( $html, 'name="return_page" value="modern-mailer-oauth"' ) );
+check( 'Backup forms carry a return page', false !== strpos( $backup, 'name="return_page" value="modern-mailer-backup"' ) );
+
+check( 'Logs screen shows the send log section', false !== strpos( $logs, 'Send log' ) );
+check( 'Logs screen shows the queue section', false !== strpos( $logs, 'Retry queue' ) );
+
+// The redirect URI must not depend on where the menu lives, or reorganising the
+// admin breaks every existing Google connection.
+$redirect = ModernMailer\Auth\Google_Consent::redirect_uri();
+check( 'OAuth redirect URI points at admin-post.php', false !== strpos( $redirect, 'admin-post.php?action=mmoa_google_callback' ), $redirect );
+check( 'OAuth redirect URI does not reference a menu page', false === strpos( $redirect, 'page=' ), $redirect );
 
 echo "\n=== Site Health ===\n";
 $sh = ( new ModernMailer\Admin\Site_Health( $plugin ) )->run_test();

@@ -3,9 +3,10 @@
 A WordPress plugin that sends mail through the **Microsoft Graph** and **Gmail** APIs
 using OAuth 2.0 — no mailbox password, and nothing that quietly expires.
 
-> **Status: early. Not production-ready.** The Microsoft path and the Google
-> service-account path are complete and covered by tests. The consumer Gmail
-> connect flow and the retry queue are not built yet. See [Status](#status).
+> **Status: early.** All three providers, the backup connection, the retry queue and the
+> Gmail sign-in flow are built and covered by 195 passing assertions — but **none of it has
+> been run against a live Microsoft or Google endpoint yet**, and large attachments are
+> still capped at ~2 MB. See [Status](#status) and [docs/STATUS.md](docs/STATUS.md).
 
 ## Why
 
@@ -36,11 +37,29 @@ at a 4% loss rate.
 
 The error message named the wrong thing entirely, which is what made it so hard to chase.
 
-Three defences against that are already here: tokens are cached for their full lifetime so
-most sends never touch the identity endpoint at all; a failed token fetch aborts instead of
-continuing; and no URL is ever derived from a response body. The fourth and most important
-— a persistent retry queue, so a transient outage delays an email instead of losing it —
-is the next thing to build.
+Follow-up log analysis on that site sharpened the picture. The token request was failing
+with `cURL error 7 ... after 1 ms` — refused instantly, not timed out — recurring for
+minutes at a stretch while the credentials were entirely correct. So the fault was the
+host's outbound DNS, and every one of the lost emails was deliverable moments later.
+
+Four defences against that are now in place:
+
+1. **No URL is ever derived from a response body**, and a URL that would be empty is
+   rejected by name rather than becoming a misleading transport error.
+2. **Tokens are cached for their full lifetime**, so most sends never touch the identity
+   endpoint at all — and if a refresh fails while the previous token is still valid, that
+   token is used rather than losing the message.
+3. **A backup connection** is tried immediately when the primary fails. Separate
+   credentials and a separate endpoint, so it survives faults that are permanent for the
+   primary.
+4. **A persistent retry queue** holds anything that failed for a transient reason and
+   retries it across later requests, backing off from five minutes over roughly two days.
+   In-request retries span seconds; this is the only layer that outlives the outage that
+   actually loses mail.
+
+Failures that cannot be helped by any of that — an oversized attachment, a wrong client
+secret — are never queued and never retried on the backup, because the answer would be the
+same every time.
 
 ## How it works
 
@@ -68,6 +87,10 @@ Adding a transport means implementing three methods, not re-solving MIME.
 
 ## Setup
 
+Everything lives under a top-level **Modern Mailer** menu: **Settings** (site options and
+the primary connection), **Backup** (the fallback connection), **Logs** (the retry queue
+and the send log).
+
 Credentials belong in `wp-config.php`, which keeps them out of database dumps:
 
 ```php
@@ -77,7 +100,36 @@ define( 'MMOA_MS_CLIENT_SECRET', '...' );
 define( 'MMOA_MS_SENDER',        'noreply@yourdomain.com' );
 ```
 
-Anything stored through the settings screen instead is encrypted with libsodium.
+The backup connection takes the same constants with a `BACKUP` infix, so a Google fallback
+behind a Microsoft primary is:
+
+```php
+define( 'MMOA_BACKUP_PROVIDER',                    'gmail_sa' );
+define( 'MMOA_BACKUP_GOOGLE_SA_CLIENT_EMAIL',      '...' );
+define( 'MMOA_BACKUP_GOOGLE_SA_PRIVATE_KEY',       '...' );
+define( 'MMOA_BACKUP_GOOGLE_SENDER',               'noreply@yourdomain.com' );
+```
+
+Pair *different* providers. A second Microsoft app registration in the same tenant shares
+the identity endpoint, so it fails at the same moment as the primary and buys you nothing.
+
+Anything stored through the admin screens instead is encrypted with libsodium.
+
+### Connecting a consumer Gmail account
+
+The Gmail path uses **your own** OAuth client — nothing is proxied through a shared
+application, so the tokens are only ever seen by your site.
+
+1. In your Google Cloud project, create a **Web application** OAuth client.
+2. Add this exact redirect URI, which is the same for both connections:
+   `https://yoursite.com/wp-admin/admin-post.php?action=mmoa_google_callback`
+3. Publish the consent screen to **In production**. Left in Testing, Google expires the
+   refresh token every seven days and sending stops without warning.
+4. Paste the client ID and secret into Modern Mailer, **save**, then press *Sign in with
+   Google*.
+
+Google refuses non-HTTPS redirect URIs except for `localhost`, so this cannot be completed
+on a plain-HTTP staging domain.
 
 > **Scope the Entra app before using it.** The `Mail.Send` *application* permission lets
 > the app send as **any** mailbox in the tenant until you restrict it:
@@ -89,12 +141,22 @@ Anything stored through the settings screen instead is encrypted with libsodium.
 
 ## Tests
 
-109 assertions across 5 files. Every outbound call is stubbed through WordPress's
+195 assertions across 7 files. Every outbound call is stubbed through WordPress's
 `pre_http_request` filter, so the suite needs no credentials and sends nothing.
 
 ```bash
 cd tests && ./run.sh
 ```
+
+| File | Covers |
+|---|---|
+| `test-graph.php` | Microsoft Graph: token flow, send shape, AADSTS error mapping |
+| `test-failures.php` | Mid-life 401 recovery, error message quality, alerting |
+| `test-gmail.php` | Both Google paths, JWT signing, base64url correctness |
+| `test-resilience.php` | Stale-token grace, backup connection, retry queue |
+| `test-google-consent.php` | Gmail sign-in: authorization URL, callback, state replay, disconnect |
+| `test-regression-wpms.php` | The WP Mail SMTP "no valid URL" failure, and that throttled mail is kept |
+| `test-final.php` | End-to-end wp_mail() behaviour, all three admin screens, redirect-URI stability |
 
 The plugin must sit in `wp-content/plugins/` of a working WordPress install. For LocalWP
 or MAMP, point it at the right binary and socket:
@@ -103,15 +165,33 @@ or MAMP, point it at the right binary and socket:
 PHP="/path/to/php" MYSQL_SOCK="/path/to/mysqld.sock" MMOA_TEST_HOST="mysite.local" ./run.sh
 ```
 
+On **Windows** LocalWP there is no socket, and the CLI binary loads no extensions by
+default, so pass the port and the extensions explicitly. Find the port in
+`%APPDATA%\Local\sites.json` under `services.mysql.ports.MYSQL`:
+
+```bash
+PHPDIR="$APPDATA/Local/lightning-services/php-8.2.29+0/bin/win64"
+MMOA_TEST_HOST=mysite.local "$PHPDIR/php.exe" \
+  -d extension_dir="$PHPDIR/ext" \
+  -d extension=php_mysqli.dll -d extension=php_openssl.dll -d extension=php_sodium.dll \
+  -d mysqli.default_port=10013 \
+  test-resilience.php
+```
+
 ## Status
+
+Full detail, including known gaps and what is deliberately out of scope, is in
+[docs/STATUS.md](docs/STATUS.md).
 
 | | |
 |---|---|
 | Microsoft Graph, app-only | works, tested |
 | Google Workspace service account | works, tested |
-| Gmail consumer OAuth | sends and refreshes, but **the connect flow is not built** — the refresh token must be injected manually |
-| Retry queue | **not built** — the highest priority |
-| Large attachments | ~2 MB ceiling; enforced before sending. Messages are base64-encoded twice on this path, so the usable payload is about half the API limit. Chunked upload is planned |
+| Gmail consumer OAuth | works, tested — sign-in prompt, own OAuth client, revocable |
+| Backup connection | works, tested |
+| Retry queue | works, tested |
+| Large attachments | ~2 MB ceiling, enforced before sending. Messages are base64-encoded twice on this path, so the usable payload is about half the API limit. Chunked upload not built |
+| Microsoft certificate credential | not built — `MMOA_MS_CERTIFICATE` is reserved but unread |
 | Setup wizard, i18n, Plugin Check | not done |
 
 ## Licence

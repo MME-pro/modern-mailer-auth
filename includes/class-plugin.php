@@ -8,7 +8,10 @@
 namespace ModernMailer;
 
 use ModernMailer\Admin\Admin_Page;
+use ModernMailer\Admin\App_Page;
 use ModernMailer\Admin\Site_Health;
+use ModernMailer\Api\Rest_Controller;
+use ModernMailer\Auth\Google_Consent;
 use PHPMailer\PHPMailer\PHPMailer;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,6 +29,8 @@ class Plugin {
 	public Http $http;
 	public Logger $logger;
 	public Health_Monitor $health;
+	public Queue $queue;
+	public Google_Consent $consent;
 	public Dispatcher $dispatcher;
 
 	public static function instance(): Plugin {
@@ -43,24 +48,36 @@ class Plugin {
 		$this->http       = new Http();
 		$this->logger     = new Logger( $this->settings );
 		$this->health     = new Health_Monitor( $this->settings );
+		$this->queue      = new Queue( $this->settings );
+		$this->consent    = new Google_Consent( $this->settings, $this->http );
 		$this->dispatcher = new Dispatcher(
 			$this->settings,
 			$this->tokens,
 			$this->http,
 			$this->logger,
-			$this->health
+			$this->health,
+			$this->queue
 		);
 	}
 
 	public function boot(): void {
 		add_action( 'plugins_loaded', [ $this, 'install_mailer' ], 20 );
 		add_action( Logger::CRON_HOOK, [ $this->logger, 'prune' ] );
+		add_action( Queue::CRON_HOOK, [ $this, 'drain_queue' ] );
+		add_filter( 'cron_schedules', [ $this, 'register_schedule' ] );
+		add_action( 'admin_init', [ $this, 'maybe_upgrade' ] );
 
 		if ( is_admin() ) {
+			( new App_Page( $this ) )->register();
 			( new Admin_Page( $this ) )->register();
 		}
 
 		( new Site_Health( $this ) )->register();
+
+		// Registered unconditionally, not only in the admin: rest_api_init fires
+		// on a front-end REST request too, and the admin app is served from a
+		// page that is not always an admin screen by the time these run.
+		( new Rest_Controller( $this ) )->register();
 	}
 
 	/**
@@ -117,19 +134,76 @@ class Plugin {
 		return '' !== $configured ? $configured : $name;
 	}
 
+	/**
+	 * Add the five-minute interval the queue drains on.
+	 *
+	 * Five minutes is the shortest interval worth having: WordPress cron only
+	 * runs when the site gets traffic, so a tighter schedule buys nothing on a
+	 * quiet site and adds needless work on a busy one.
+	 *
+	 * @param array<string,array{interval:int,display:string}> $schedules Existing schedules.
+	 * @return array<string,array{interval:int,display:string}>
+	 */
+	public function register_schedule( $schedules ): array {
+		$schedules = is_array( $schedules ) ? $schedules : [];
+
+		$schedules[ Queue::SCHEDULE_NAME ] = [
+			'interval' => 5 * MINUTE_IN_SECONDS,
+			'display'  => __( 'Every five minutes (Modern Mailer retry queue)', 'modern-mailer-oauth' ),
+		];
+
+		return $schedules;
+	}
+
+	/**
+	 * Create anything a plugin update introduced.
+	 *
+	 * The activation hook does not fire on update, so a site that upgrades into
+	 * this version would otherwise have the queue code but no queue table, and
+	 * every enqueue would fail silently at the exact moment it was needed. Both
+	 * installers no-op once their version option matches, so this costs one
+	 * option read per admin request.
+	 */
+	public function maybe_upgrade(): void {
+		Logger::install();
+		Queue::install();
+
+		if ( ! wp_next_scheduled( Queue::CRON_HOOK ) ) {
+			wp_schedule_event( time() + ( 5 * MINUTE_IN_SECONDS ), Queue::SCHEDULE_NAME, Queue::CRON_HOOK );
+		}
+	}
+
+	/**
+	 * Drain the retry queue. Runs on cron.
+	 */
+	public function drain_queue(): void {
+		if ( ! $this->settings->is_active() ) {
+			return;
+		}
+
+		$this->queue->drain( $this->dispatcher );
+	}
+
 	public static function activate(): void {
 		Logger::install();
+		Queue::install();
 
 		if ( ! wp_next_scheduled( Logger::CRON_HOOK ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', Logger::CRON_HOOK );
 		}
+
+		if ( ! wp_next_scheduled( Queue::CRON_HOOK ) ) {
+			wp_schedule_event( time() + ( 5 * MINUTE_IN_SECONDS ), Queue::SCHEDULE_NAME, Queue::CRON_HOOK );
+		}
 	}
 
 	public static function deactivate(): void {
-		$timestamp = wp_next_scheduled( Logger::CRON_HOOK );
+		foreach ( [ Logger::CRON_HOOK, Queue::CRON_HOOK ] as $hook ) {
+			$timestamp = wp_next_scheduled( $hook );
 
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, Logger::CRON_HOOK );
+			if ( $timestamp ) {
+				wp_unschedule_event( $timestamp, $hook );
+			}
 		}
 	}
 }

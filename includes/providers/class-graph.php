@@ -7,6 +7,7 @@
 
 namespace ModernMailer\Providers;
 
+use ModernMailer\Field;
 use PHPMailer\PHPMailer\PHPMailer;
 use WP_Error;
 
@@ -47,6 +48,47 @@ class Graph extends Abstract_Provider {
 
 	public function get_label(): string {
 		return __( 'Microsoft 365 (Graph)', 'modern-mailer-oauth' );
+	}
+
+	public static function slug(): string {
+		return 'graph';
+	}
+
+	public static function describe(): array {
+		return [
+			'label'    => __( 'Microsoft 365', 'modern-mailer-oauth' ),
+			'summary'  => __( 'App-only authentication through Microsoft Graph. No sign-in prompt and no refresh token, so nothing expires except the client secret.', 'modern-mailer-oauth' ),
+			'docs'     => 'https://learn.microsoft.com/graph/auth-v2-service',
+			'category' => 'oauth',
+			'raw_mime' => true,
+		];
+	}
+
+	public static function fields(): array {
+		return [
+			Field::required( 'ms_tenant_id', __( 'Directory (tenant) ID', 'modern-mailer-oauth' ), __( 'From the Overview page of your Entra app registration.', 'modern-mailer-oauth' ) ),
+			Field::required( 'ms_client_id', __( 'Application (client) ID', 'modern-mailer-oauth' ) ),
+			Field::secret( 'ms_client_secret', __( 'Client secret', 'modern-mailer-oauth' ), __( 'Copy the secret Value, not the Secret ID. Entra shows the Value only once.', 'modern-mailer-oauth' ) ),
+			new Field(
+				key: 'ms_sender',
+				label: __( 'Send as mailbox', 'modern-mailer-oauth' ),
+				type: Field::EMAIL,
+				required: true,
+				help: __( 'A licensed or shared mailbox. Not a distribution list or a bare alias.', 'modern-mailer-oauth' )
+			),
+			new Field(
+				key: 'ms_secret_expires',
+				label: __( 'Secret expires', 'modern-mailer-oauth' ),
+				type: Field::TEXT,
+				help: __( 'Entra secrets last at most 24 months. Record the date and you will be warned before it lapses instead of finding out when mail stops.', 'modern-mailer-oauth' )
+			),
+			new Field(
+				key: 'ms_policy_ack',
+				label: __( 'Access is scoped to specific mailboxes', 'modern-mailer-oauth' ),
+				type: Field::CHECKBOX,
+				help: __( 'Mail.Send lets this app send as any mailbox in the tenant until you restrict it with New-ApplicationAccessPolicy.', 'modern-mailer-oauth' )
+			),
+		];
 	}
 
 	public function get_max_message_bytes(): int {
@@ -337,7 +379,13 @@ class Graph extends Abstract_Provider {
 				$status,
 				'' !== $message ? $message : __( 'no details supplied', 'modern-mailer-oauth' )
 			),
-			[ 'graph_code' => $code ]
+			// The status travels with the error so Failure can recognise a 5xx
+			// or a 429 as transient even when we have no specific mapping for
+			// the body Microsoft returned.
+			[
+				'graph_code' => $code,
+				'status'     => $status,
+			]
 		);
 	}
 }

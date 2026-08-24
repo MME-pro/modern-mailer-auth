@@ -21,9 +21,15 @@ defined( 'ABSPATH' ) || exit;
  */
 abstract class Abstract_Gmail extends Abstract_Provider {
 
-	protected const TOKEN_URL  = 'https://oauth2.googleapis.com/token';
-	protected const API_BASE   = 'https://gmail.googleapis.com/gmail/v1';
-	protected const SEND_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+	/**
+	 * Public because the consent flow needs the same endpoint and scope this
+	 * transport uses. Two copies of an OAuth scope string is exactly the kind
+	 * of drift that produces a grant which authorizes the wrong thing.
+	 */
+	public const TOKEN_URL  = 'https://oauth2.googleapis.com/token';
+	public const SEND_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+
+	protected const API_BASE = 'https://gmail.googleapis.com/gmail/v1';
 
 	/**
 	 * messages.send accepts 5 MB in a simple request; base64url costs 4/3, so
@@ -176,7 +182,12 @@ abstract class Abstract_Gmail extends Abstract_Provider {
 				$status,
 				'' !== $message ? $message : __( 'no details supplied', 'modern-mailer-oauth' )
 			),
-			[ 'reason' => $reason ]
+			// See the note in Graph::map_error() - Failure needs the status to
+			// tell a transient 503 apart from a permanent 400.
+			[
+				'reason' => $reason,
+				'status' => $status,
+			]
 		);
 	}
 }

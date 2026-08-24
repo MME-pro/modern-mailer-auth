@@ -38,27 +38,81 @@ class Secrets {
 	private const OPTION = 'mmoa_secrets';
 
 	/**
+	 * Which connection's credentials this instance reads and writes.
+	 *
+	 * Mirrors Settings::$slot exactly, and for the same reason: providers ask
+	 * for `ms_client_secret` and the slot decides which one that is.
+	 */
+	public function __construct( private string $slot = '' ) {}
+
+	/**
+	 * A view of these credentials scoped to one connection slot.
+	 */
+	public function for_slot( string $slot ): Secrets {
+		return $slot === $this->slot ? $this : new self( $slot );
+	}
+
+	/**
+	 * Storage key for a credential in this slot.
+	 */
+	private function storage_key( string $key ): string {
+		return '' === $this->slot ? $key : $this->slot . '_' . $key;
+	}
+
+	/**
+	 * The wp-config.php constant for a credential in this slot, or null.
+	 */
+	private function constant_for( string $key ): ?string {
+		$constant = self::CONSTANTS[ $key ] ?? null;
+
+		// The map above covers the credentials whose constant name does not
+		// follow from the key - MMOA_GOOGLE_SA_PRIVATE_KEY for google_sa_key
+		// and so on. Everything a provider declares as secret gets the derived
+		// name, so a new provider needs no entry here at all.
+		if ( null === $constant ) {
+			$field = Provider_Registry::all_fields()[ $key ] ?? null;
+
+			if ( null !== $field && $field->secret ) {
+				$constant = '' !== $field->constant
+					? 'MMOA_' . $field->constant
+					: 'MMOA_' . strtoupper( $key );
+			}
+		}
+
+		if ( null === $constant || '' === $this->slot ) {
+			return $constant;
+		}
+
+		return 'MMOA_' . strtoupper( $this->slot ) . '_' . substr( $constant, 5 );
+	}
+
+	/**
 	 * Is this credential pinned by a constant?
 	 */
 	public function is_constant( string $key ): bool {
-		return isset( self::CONSTANTS[ $key ] ) && defined( self::CONSTANTS[ $key ] );
+		$constant = $this->constant_for( $key );
+
+		return null !== $constant && defined( $constant );
 	}
 
 	/**
 	 * Read a credential. Returns '' when unset.
 	 */
 	public function get( string $key ): string {
-		if ( $this->is_constant( $key ) ) {
-			return (string) constant( self::CONSTANTS[ $key ] );
+		$constant = $this->constant_for( $key );
+
+		if ( null !== $constant && defined( $constant ) ) {
+			return (string) constant( $constant );
 		}
 
-		$stored = get_option( self::OPTION, [] );
+		$stored  = get_option( self::OPTION, [] );
+		$storage = $this->storage_key( $key );
 
-		if ( ! is_array( $stored ) || ! isset( $stored[ $key ] ) ) {
+		if ( ! is_array( $stored ) || ! isset( $stored[ $storage ] ) ) {
 			return '';
 		}
 
-		return $this->decrypt( (string) $stored[ $key ] );
+		return $this->decrypt( (string) $stored[ $storage ] );
 	}
 
 	/**
@@ -73,13 +127,14 @@ class Secrets {
 			return;
 		}
 
-		$stored = get_option( self::OPTION, [] );
-		$stored = is_array( $stored ) ? $stored : [];
+		$stored  = get_option( self::OPTION, [] );
+		$stored  = is_array( $stored ) ? $stored : [];
+		$storage = $this->storage_key( $key );
 
 		if ( '' === $value ) {
-			unset( $stored[ $key ] );
+			unset( $stored[ $storage ] );
 		} else {
-			$stored[ $key ] = $this->encrypt( $value );
+			$stored[ $storage ] = $this->encrypt( $value );
 		}
 
 		update_option( self::OPTION, $stored, false );

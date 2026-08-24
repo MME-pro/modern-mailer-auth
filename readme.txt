@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.0
+Stable tag: 0.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,7 @@ This plugin removes the refresh token from the design entirely.
 * Failures are loud. `wp_mail()` returns an accurate result, `wp_mail_failed` fires with a real error, repeated failures raise an admin notice and a Site Health warning, and the `mmoa_send_failing` action lets you route alerts anywhere.
 * Error messages name the actual misconfiguration - which credential is wrong, which Exchange policy is missing - instead of echoing a raw API response.
 * Client secret expiry warnings, because an Entra secret lasts at most 24 months and its expiry is a scheduled outage.
+* A backup connection and a persistent retry queue, so a transient fault at your host delays an email instead of losing it. Failures that no retry can help - an oversized attachment, a wrong secret - are reported immediately instead.
 * Credentials belong in wp-config.php. Anything stored in the database instead is encrypted with libsodium.
 
 == External services ==
@@ -67,6 +68,31 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.4.1 =
+* Reworked the Other SMTP form: server, username and password on one row; encryption as TLS / SSL / None radio buttons; the port set automatically from the encryption and still editable; authentication as an explicit on/off choice, on by default.
+* Switching authentication off now disables the username and password rather than leaving them looking editable, and a username missing while authentication is on is reported before anything is dialled.
+
+= 0.4.0 =
+* Added Other SMTP - any server that speaks SMTP, including the SMTP endpoint of a service not listed here. Host, port, STARTTLS or implicit TLS, and an optional username and password.
+* Verifying an SMTP connection opens a real session and authenticates, so a wrong port, the wrong encryption or a bad password is reported before the first message is sent rather than after.
+* SMTP replies are classified correctly for retrying: a 4xx (greylisting, over quota) is held and tried again, a 5xx rejection is reported immediately and not retried.
+
+= 0.3.0 =
+* Rebuilt the admin as a single-page app: Dashboard, Connections, Email Logs and Settings under one menu, with a sending-status indicator on every screen.
+* Added a Sign in with Google button for the consumer Gmail connection, alongside the redirect URI it needs and a plain explanation of what the consent prompt grants.
+* Added a REST API the admin app runs on. Provider settings forms are generated from each provider's declared fields, so a provider added by another plugin gets a working form without any UI changes.
+* Added SendGrid, Postmark and Mailgun.
+* Added a notice when another plugin has taken over wp_mail(), which previously left this plugin configured but silently not sending.
+
+= 0.2.0 =
+* Moved to a top-level Modern Mailer menu with three screens: Settings, Backup and Logs. The Logs entry carries a count when the retry queue is holding anything.
+* The Google OAuth redirect URI is now `admin-post.php?action=mmoa_google_callback`, which does not change if the admin menu is ever reorganised.
+* Added a backup connection. When the primary fails, the message is retried immediately against a second, independently configured provider.
+* Added a retry queue. A send that fails for a transient reason - a network or DNS fault at the host, a throttle, a 5xx - is held and retried across later requests instead of being lost. Attempts back off from five minutes and stop after about two days.
+* A failed token refresh now falls back to the cached token while it is still genuinely valid, so a brief outage at the identity endpoint no longer costs an email.
+* Added the Gmail sign-in flow. Enter your own OAuth client ID and secret, connect the account through Google's consent prompt, and revoke it again from the same screen.
+* Queued and abandoned mail is surfaced in Site Health and on the settings screen, so mail that was never delivered cannot pass unnoticed.
 
 = 0.1.0 =
 * Initial release: Microsoft Graph app-only, Google service account, and Gmail OAuth providers.

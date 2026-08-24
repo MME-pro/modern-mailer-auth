@@ -3,3 +3,7 @@ tests/*.pem
 
 .DS_Store
 *.log
+
+# Node toolchain for the admin app. build/ IS committed, so the plugin can be
+# installed from the repo without anyone needing to run npm.
+node_modules/

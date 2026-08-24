@@ -1,0 +1,211 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Design system.
+ *
+ * shadcn's token contract - --background, --foreground, --primary, --muted and
+ * so on - so any shadcn component drops in unmodified. The values are not
+ * shadcn's defaults, because a plugin that ships the default zinc palette looks
+ * like every other shadcn project and like nothing in particular.
+ *
+ * The direction: a warm near-neutral base with a near-black primary, and one
+ * saturated brand violet used sparingly for focus, active state and data. That
+ * gives buttons real weight without a coloured wash over everything, and leaves
+ * saturation free to mean something - which matters here, because the three
+ * states this interface has to communicate instantly are delivered, waiting and
+ * lost.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--radius: 0.7rem;
+
+	/* Warm neutral rather than blue-grey - it reads softer next to the
+	   WordPress chrome without going beige. */
+	--background: oklch(0.985 0.002 90);
+	--foreground: oklch(0.21 0.008 285);
+
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.21 0.008 285);
+
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.21 0.008 285);
+
+	/* Near-black primary. Confident, and it never fights the status colours. */
+	--primary: oklch(0.22 0.008 285);
+	--primary-foreground: oklch(0.985 0 0);
+
+	--secondary: oklch(0.968 0.003 90);
+	--secondary-foreground: oklch(0.22 0.008 285);
+
+	--muted: oklch(0.968 0.003 90);
+	--muted-foreground: oklch(0.552 0.012 285);
+
+	--accent: oklch(0.968 0.003 90);
+	--accent-foreground: oklch(0.22 0.008 285);
+
+	--destructive: oklch(0.577 0.225 27);
+	--destructive-foreground: oklch(0.985 0 0);
+
+	--border: oklch(0.922 0.004 90);
+	--input: oklch(0.922 0.004 90);
+	--ring: oklch(0.55 0.23 295);
+
+	/* Brand. One colour, used for focus, active nav and the chart. */
+	--brand: oklch(0.55 0.23 295);
+	--brand-foreground: oklch(0.985 0 0);
+	--brand-subtle: oklch(0.965 0.025 295);
+
+	/* Status. Never used decoratively - each one means exactly one thing. */
+	--success: oklch(0.58 0.15 155);
+	--success-subtle: oklch(0.965 0.04 155);
+	--warning: oklch(0.68 0.16 70);
+	--warning-subtle: oklch(0.97 0.045 70);
+	--danger: oklch(0.577 0.225 27);
+	--danger-subtle: oklch(0.965 0.035 27);
+
+	--chart-1: oklch(0.55 0.23 295);
+	--chart-2: oklch(0.577 0.225 27);
+}
+
+.dark {
+	--background: oklch(0.16 0.006 285);
+	--foreground: oklch(0.96 0.002 90);
+	--card: oklch(0.205 0.007 285);
+	--card-foreground: oklch(0.96 0.002 90);
+	--popover: oklch(0.205 0.007 285);
+	--popover-foreground: oklch(0.96 0.002 90);
+	--primary: oklch(0.96 0.002 90);
+	--primary-foreground: oklch(0.21 0.008 285);
+	--secondary: oklch(0.26 0.008 285);
+	--secondary-foreground: oklch(0.96 0.002 90);
+	--muted: oklch(0.26 0.008 285);
+	--muted-foreground: oklch(0.68 0.012 285);
+	--accent: oklch(0.26 0.008 285);
+	--accent-foreground: oklch(0.96 0.002 90);
+	--destructive: oklch(0.64 0.21 25);
+	--border: oklch(1 0 0 / 10%);
+	--input: oklch(1 0 0 / 14%);
+	--ring: oklch(0.62 0.21 295);
+	--brand: oklch(0.66 0.21 295);
+	--brand-subtle: oklch(0.28 0.06 295);
+	--success: oklch(0.68 0.15 155);
+	--success-subtle: oklch(0.26 0.05 155);
+	--warning: oklch(0.75 0.15 70);
+	--warning-subtle: oklch(0.28 0.05 70);
+	--danger: oklch(0.64 0.21 25);
+	--danger-subtle: oklch(0.28 0.06 25);
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	--color-brand: var(--brand);
+	--color-brand-foreground: var(--brand-foreground);
+	--color-brand-subtle: var(--brand-subtle);
+	--color-success: var(--success);
+	--color-success-subtle: var(--success-subtle);
+	--color-warning: var(--warning);
+	--color-warning-subtle: var(--warning-subtle);
+	--color-danger: var(--danger);
+	--color-danger-subtle: var(--danger-subtle);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * WordPress wraps every admin page in its own font stack and a 13px base, and
+ * injects notices into the flow. The app opts out of all of it here rather
+ * than fighting it selector by selector further down.
+ */
+#mmoa-app {
+	font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+		"Helvetica Neue", sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+	color: var(--foreground);
+	background: var(--background);
+	margin-left: -20px;
+	min-height: calc(100vh - 32px);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#mmoa-app *,
+#mmoa-app *::before,
+#mmoa-app *::after {
+	box-sizing: border-box;
+	border-color: var(--border);
+}
+
+#mmoa-app :focus-visible {
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
+}
+
+/* WordPress's own input styles are aggressive enough to override ours. */
+#mmoa-app input:not([type="checkbox"]):not([type="radio"]),
+#mmoa-app select,
+#mmoa-app textarea {
+	box-shadow: none;
+	min-height: 0;
+	margin: 0;
+	background-image: none;
+}
+
+#mmoa-app input:focus,
+#mmoa-app select:focus,
+#mmoa-app textarea:focus {
+	box-shadow: none;
+	outline: none;
+}
+
+/*
+ * The signature texture: a faint dot grid behind the header. Subtle enough to
+ * read as paper rather than decoration, and the one thing on the page that is
+ * purely aesthetic.
+ */
+.mmoa-grid {
+	background-image: radial-gradient(
+		circle at 1px 1px,
+		color-mix(in oklch, var(--foreground) 12%, transparent) 1px,
+		transparent 0
+	);
+	background-size: 22px 22px;
+	mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#mmoa-app *,
+	#mmoa-app *::before,
+	#mmoa-app *::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

@@ -7,6 +7,7 @@
 
 namespace ModernMailer\Providers;
 
+use ModernMailer\Field;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +31,27 @@ class Gmail_OAuth extends Abstract_Gmail {
 
 	public function get_label(): string {
 		return __( 'Gmail (OAuth)', 'modern-mailer-oauth' );
+	}
+
+	public static function slug(): string {
+		return 'gmail_oauth';
+	}
+
+	public static function describe(): array {
+		return [
+			'label'    => __( 'Gmail', 'modern-mailer-oauth' ),
+			'summary'  => __( 'Consumer @gmail.com accounts, using your own OAuth client and a one-time sign-in. The only path here that holds a refresh token, and it can be revoked.', 'modern-mailer-oauth' ),
+			'docs'     => 'https://developers.google.com/gmail/api/guides/sending',
+			'category' => 'oauth',
+			'raw_mime' => true,
+		];
+	}
+
+	public static function fields(): array {
+		return [
+			Field::required( 'google_client_id', __( 'OAuth client ID', 'modern-mailer-oauth' ), __( 'From Credentials in your own Google Cloud project. It must be a Web application client.', 'modern-mailer-oauth' ) ),
+			Field::secret( 'google_client_sec', __( 'OAuth client secret', 'modern-mailer-oauth' ) ),
+		];
 	}
 
 	/**

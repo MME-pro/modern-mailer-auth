@@ -83,6 +83,40 @@ class Site_Health {
 			return $result;
 		}
 
+		// Mail that ran out of retries is the one state worth shouting about:
+		// unlike a failing send, it is finished, and nothing else will surface
+		// it. Checked before the secret-expiry warning because data already lost
+		// outranks an outage that has not happened yet.
+		$queue = $this->plugin->queue->stats();
+
+		if ( $queue['failed'] > 0 ) {
+			$result['status']         = 'critical';
+			$result['badge']['color'] = 'red';
+			$result['label']          = __( 'Some email was never delivered', 'modern-mailer-oauth' );
+			$result['description']    = '<p>' . sprintf(
+				/* translators: %d: number of abandoned messages. */
+				esc_html( _n( '%d message exhausted every retry and has been abandoned.', '%d messages exhausted every retry and have been abandoned.', (int) $queue['failed'], 'modern-mailer-oauth' ) ),
+				(int) $queue['failed']
+			) . '</p>';
+			$result['actions']        = $this->logs_link();
+
+			return $result;
+		}
+
+		if ( $queue['pending'] > 0 ) {
+			$result['status']         = 'recommended';
+			$result['badge']['color'] = 'orange';
+			$result['label']          = __( 'Email is queued for retry', 'modern-mailer-oauth' );
+			$result['description']    = '<p>' . sprintf(
+				/* translators: %d: number of messages waiting. */
+				esc_html( _n( '%d message could not be sent on the first attempt and is waiting to be retried. Nothing has been lost, but sending is not healthy.', '%d messages could not be sent on the first attempt and are waiting to be retried. Nothing has been lost, but sending is not healthy.', (int) $queue['pending'], 'modern-mailer-oauth' ) ),
+				(int) $queue['pending']
+			) . '</p>';
+			$result['actions']        = $this->logs_link();
+
+			return $result;
+		}
+
 		// An Entra client secret that quietly expires is a scheduled outage.
 		// Warning ahead of time is the difference between a two-minute job and
 		// an incident.
@@ -108,8 +142,20 @@ class Site_Health {
 	private function settings_link(): string {
 		return sprintf(
 			'<p><a href="%s">%s</a></p>',
-			esc_url( admin_url( 'options-general.php?page=modern-mailer-oauth' ) ),
+			esc_url( Admin_Page::url() ),
 			esc_html__( 'Open mail settings', 'modern-mailer-oauth' )
+		);
+	}
+
+	/**
+	 * Queue problems are acted on from the Logs screen, not from Settings -
+	 * that is where the affected messages and the retry controls are.
+	 */
+	private function logs_link(): string {
+		return sprintf(
+			'<p><a href="%s">%s</a></p>',
+			esc_url( Admin_Page::url( 'modern-mailer-logs' ) ),
+			esc_html__( 'Review queued mail', 'modern-mailer-oauth' )
 		);
 	}
 }

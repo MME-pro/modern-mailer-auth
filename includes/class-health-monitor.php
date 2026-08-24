@@ -145,7 +145,7 @@ class Health_Monitor {
 				__( "%1\$d consecutive emails have failed to send.\n\nMost recent error:\n%2\$s\n\nSettings: %3\$s", 'modern-mailer-oauth' ),
 				$streak,
 				$error->get_error_message(),
-				admin_url( 'options-general.php?page=modern-mailer-oauth' )
+				admin_url( 'admin.php?page=modern-mailer-oauth' )
 			);
 
 			$mailer->send();

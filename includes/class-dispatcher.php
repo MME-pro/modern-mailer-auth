@@ -7,9 +7,6 @@
 
 namespace ModernMailer;
 
-use ModernMailer\Providers\Gmail_OAuth;
-use ModernMailer\Providers\Gmail_Service_Account;
-use ModernMailer\Providers\Graph;
 use ModernMailer\Providers\Provider_Interface;
 use PHPMailer\PHPMailer\PHPMailer;
 use WP_Error;
@@ -17,50 +14,169 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Chooses a provider, enforces limits, sends, and records the outcome.
+ * Chooses a connection, enforces limits, sends, and records the outcome.
+ *
+ * Three things stand between a transient fault and a lost email, in the order
+ * they are tried:
+ *
+ * 1. Http retries the request a few times inside this page load. Good for a
+ *    dropped packet or a brief throttle.
+ * 2. If the primary connection still fails, the backup connection is tried.
+ *    Separate credentials and a separate endpoint, so it survives faults that
+ *    are permanent for the primary.
+ * 3. If that fails too and the failure looks transient, the message goes on the
+ *    queue and is retried across later requests over the following hours.
+ *
+ * The escalation only happens when it can help, which is what Failure decides.
+ * An oversized attachment is not retried anywhere, because no amount of
+ * patience or alternative credentials will make it fit.
  */
 class Dispatcher {
 
-	private ?Provider_Interface $provider = null;
+	/** @var array<string,?Provider_Interface> Slot => provider, once built. */
+	private array $providers = [];
+
+	/**
+	 * Set while a queue drain is running, so a retry cannot re-enqueue itself.
+	 */
+	private bool $draining = false;
 
 	public function __construct(
 		private Settings $settings,
 		private Token_Store $tokens,
 		private Http $http,
 		private Logger $logger,
-		private Health_Monitor $health
+		private Health_Monitor $health,
+		private Queue $queue
 	) {}
 
 	/**
-	 * Build the provider for the current settings, or null if unconfigured.
+	 * The provider for a connection slot, or null if that slot is unconfigured.
 	 */
-	public function provider(): ?Provider_Interface {
-		if ( null !== $this->provider ) {
-			return $this->provider;
+	public function provider( string $slot = Settings::SLOT_PRIMARY ): ?Provider_Interface {
+		// Deliberately isset() rather than array_key_exists(): a null result
+		// must not be memoized. An unconfigured slot asked about early in the
+		// request - by Site Health, by an admin screen - would otherwise cache
+		// "no provider" and keep answering that after the settings are saved,
+		// which reads as the plugin silently refusing to send.
+		if ( isset( $this->providers[ $slot ] ) ) {
+			return $this->providers[ $slot ];
 		}
 
-		$class = [
-			Settings::PROVIDER_GRAPH       => Graph::class,
-			Settings::PROVIDER_GMAIL_SA    => Gmail_Service_Account::class,
-			Settings::PROVIDER_GMAIL_OAUTH => Gmail_OAuth::class,
-		][ $this->settings->get( 'provider' ) ] ?? null;
+		$scoped = $this->settings->for_slot( $slot );
+		$class  = Provider_Registry::class_for( (string) $scoped->get( 'provider' ) );
 
-		if ( null === $class ) {
-			return null;
-		}
+		// Providers receive the slot-scoped settings and are otherwise
+		// identical, which is why adding a backup connection needed no changes
+		// inside any provider.
+		$this->providers[ $slot ] = null === $class
+			? null
+			: new $class( $scoped, $this->tokens, $this->http );
 
-		$this->provider = new $class( $this->settings, $this->tokens, $this->http );
-
-		return $this->provider;
+		return $this->providers[ $slot ];
 	}
 
 	/**
-	 * Send a built MIME message.
+	 * Discard the memoized providers.
+	 *
+	 * Providers capture their credentials when constructed, so anything that
+	 * changes settings mid-request - saving the form, a test suite reconfiguring
+	 * the site - has to invalidate them or the next send uses the old ones.
+	 */
+	public function reset_providers(): void {
+		$this->providers = [];
+	}
+
+	/**
+	 * Send a built MIME message, escalating through backup and queue.
 	 *
 	 * @return true|WP_Error
 	 */
 	public function dispatch( string $raw_mime, PHPMailer $mailer ) {
-		$provider = $this->provider();
+		$result = $this->attempt( Settings::SLOT_PRIMARY, $raw_mime, $mailer );
+
+		if ( true === $result ) {
+			$this->health->record_success();
+
+			return true;
+		}
+
+		if ( Failure::should_try_backup( $result ) && null !== $this->provider( Settings::SLOT_BACKUP ) ) {
+			$primary_error = $result;
+			$result        = $this->attempt( Settings::SLOT_BACKUP, $raw_mime, $mailer );
+
+			if ( true === $result ) {
+				/**
+				 * Fires when the backup connection delivered what the primary
+				 * could not.
+				 *
+				 * Sending is working, but on the fallback path - worth knowing
+				 * before the backup is the only thing left.
+				 *
+				 * @param WP_Error $primary_error Why the primary failed.
+				 */
+				do_action( 'mmoa_backup_used', $primary_error );
+
+				$this->health->record_success();
+
+				return true;
+			}
+		}
+
+		// Sending genuinely failed, whatever happens to the message next. The
+		// admin needs to know that even if the queue later delivers it, because
+		// a queue quietly absorbing every send is exactly the silent breakage
+		// this plugin exists to prevent.
+		$this->health->record_failure( $result );
+
+		// Last resort: keep the message so a later request can try again. Only
+		// worth doing for a failure that could plausibly resolve on its own.
+		if ( ! $this->draining && Failure::is_retryable( $result ) ) {
+			$queued = $this->queue->enqueue(
+				$raw_mime,
+				$this->recipients( $mailer ),
+				(string) $mailer->Subject,
+				$result
+			);
+
+			if ( $queued ) {
+				// Reported as success to the caller, because from wp_mail()'s
+				// point of view the message has been accepted for delivery and
+				// no longer needs the caller to do anything. Returning false
+				// here would make correctly-written plugins show the user an
+				// error for mail that is about to arrive.
+				return true;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send a message that came off the queue.
+	 *
+	 * Same path, minus the re-enqueue: the row already exists and the queue is
+	 * managing its own attempt count and backoff.
+	 *
+	 * @return true|WP_Error
+	 */
+	public function dispatch_raw( string $raw_mime, PHPMailer $mailer ) {
+		$this->draining = true;
+
+		try {
+			return $this->dispatch( $raw_mime, $mailer );
+		} finally {
+			$this->draining = false;
+		}
+	}
+
+	/**
+	 * One attempt against one connection, logged and recorded.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function attempt( string $slot, string $raw_mime, PHPMailer $mailer ) {
+		$provider = $this->provider( $slot );
 
 		if ( null === $provider ) {
 			return new WP_Error(
@@ -84,15 +200,22 @@ class Dispatcher {
 			$result = $provider->send( $raw_mime, $mailer );
 		}
 
+		// Every attempt is logged, including one the backup went on to rescue -
+		// the log is the record of what actually happened on the wire. Health
+		// is decided once, by dispatch(), from the final outcome.
 		$this->logger->record( $provider, $mailer, $bytes, $result );
 
-		if ( is_wp_error( $result ) ) {
-			$this->health->record_failure( $result );
-		} else {
-			$this->health->record_success();
-		}
-
 		return $result;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	private function recipients( PHPMailer $mailer ): array {
+		return array_map(
+			static fn( array $addr ): string => $addr[0],
+			array_merge( $mailer->getToAddresses(), $mailer->getCcAddresses(), $mailer->getBccAddresses() )
+		);
 	}
 
 	/**

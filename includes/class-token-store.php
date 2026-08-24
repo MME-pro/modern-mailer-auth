@@ -46,6 +46,38 @@ class Token_Store {
 	}
 
 	/**
+	 * Return a cached token that has entered the refresh window but has not
+	 * actually expired yet, or null.
+	 *
+	 * This is the last line of defence when the identity provider is
+	 * unreachable. `get()` deliberately stops handing out a token SKEW seconds
+	 * before real expiry so that a refresh happens while there is still slack;
+	 * but if that refresh cannot complete - the token endpoint is down, DNS is
+	 * failing, the network is filtered - the old token is still cryptographically
+	 * valid and the API will still accept it.
+	 *
+	 * Failing the send in that window means losing an email we had everything
+	 * needed to deliver. Callers must only reach for this after a refresh has
+	 * actually failed, never in place of one.
+	 */
+	public function get_stale( string $key ): ?string {
+		$all = $this->all();
+
+		if ( ! isset( $all[ $key ]['token'], $all[ $key ]['expires_at'] ) ) {
+			return null;
+		}
+
+		// No skew here - the only question is whether it is genuinely still
+		// valid. A second of headroom is left so we never hand back a token
+		// that expires between here and the API reading it.
+		if ( time() >= ( (int) $all[ $key ]['expires_at'] - 1 ) ) {
+			return null;
+		}
+
+		return (string) $all[ $key ]['token'];
+	}
+
+	/**
 	 * @param int $expires_in Lifetime in seconds, as reported by the provider.
 	 */
 	public function put( string $key, string $token, int $expires_in ): void {

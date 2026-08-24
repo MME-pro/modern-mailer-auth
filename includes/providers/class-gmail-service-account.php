@@ -8,6 +8,7 @@
 namespace ModernMailer\Providers;
 
 use ModernMailer\Auth\Jwt_Signer;
+use ModernMailer\Field;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,6 +28,41 @@ class Gmail_Service_Account extends Abstract_Gmail {
 
 	public function get_label(): string {
 		return __( 'Google Workspace (service account)', 'modern-mailer-oauth' );
+	}
+
+	public static function slug(): string {
+		return 'gmail_sa';
+	}
+
+	public static function describe(): array {
+		return [
+			'label'    => __( 'Google Workspace', 'modern-mailer-oauth' ),
+			'summary'  => __( 'Service account with domain-wide delegation. Like app-only auth: no consent screen and no refresh token to expire. Workspace domains only.', 'modern-mailer-oauth' ),
+			'docs'     => 'https://developers.google.com/identity/protocols/oauth2/service-account',
+			'category' => 'oauth',
+			'raw_mime' => true,
+		];
+	}
+
+	public static function fields(): array {
+		return [
+			Field::required( 'google_sa_email', __( 'Service account email', 'modern-mailer-oauth' ), __( 'The client_email value from the downloaded JSON key.', 'modern-mailer-oauth' ) ),
+			new Field(
+				key: 'google_sa_key',
+				label: __( 'Private key', 'modern-mailer-oauth' ),
+				type: Field::TEXTAREA,
+				secret: true,
+				required: true,
+				help: __( 'The private_key value from the same JSON, including the BEGIN and END lines.', 'modern-mailer-oauth' )
+			),
+			new Field(
+				key: 'google_sender',
+				label: __( 'Send as mailbox', 'modern-mailer-oauth' ),
+				type: Field::EMAIL,
+				required: true,
+				help: __( 'The Workspace user this service account impersonates.', 'modern-mailer-oauth' )
+			),
+		];
 	}
 
 	protected function mailbox(): string {

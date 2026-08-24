@@ -117,9 +117,9 @@ $plugin->secrets->set( 'google_client_sec', 'client-secret' );
 $plugin->secrets->set( 'google_refresh', 'refresh-token-value' );
 $plugin->tokens->flush(); $plugin->health->reset();
 
-// Rebuild the dispatcher so it picks up the new provider.
-$r = new ReflectionClass( ModernMailer\Dispatcher::class );
-$p = $r->getProperty( 'provider' ); $p->setAccessible( true ); $p->setValue( $plugin->dispatcher, null );
+// Drop the memoized provider so the dispatcher picks up the new settings.
+ModernMailer\Settings::flush_cache();
+$plugin->dispatcher->reset_providers();
 
 $sent = wp_mail( 'someone@example.com', 'OAuth test', 'Body' );
 check( 'wp_mail() returned true', true === $sent, var_export( $sent, true ) );
