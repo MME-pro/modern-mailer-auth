@@ -194,6 +194,18 @@ Full detail, including known gaps and what is deliberately out of scope, is in
 | Microsoft certificate credential | not built — `MMOA_MS_CERTIFICATE` is reserved but unread |
 | Setup wizard, i18n, Plugin Check | not done |
 
+## Releasing
+
+Pushing a `v*` tag builds the installable zip in GitHub Actions and publishes it
+as a release; sites find it themselves through the built-in update checker, so
+publishing the release is the deploy. The exact commands, including the version
+bump, are in [docs/RELEASING.md](docs/RELEASING.md).
+
+```bash
+git add -A && git commit -m "Release 0.4.3 - ..." && git push origin main
+git tag v0.4.3 && git push origin v0.4.3
+```
+
 ## Licence
 
 GPL-2.0-or-later. See [LICENSE](LICENSE).
