@@ -31,11 +31,34 @@ class Updater {
 
 	private const CACHE_KEY = 'mmoa_update_check';
 
-	/** How long a successful answer is trusted. */
-	private const CACHE_TTL = 6 * HOUR_IN_SECONDS;
+	/**
+	 * How long a successful answer is trusted.
+	 *
+	 * Short, because six hours meant a published release could sit unnoticed for
+	 * most of a working day.
+	 *
+	 * Not zero, though, and the reason is worth stating: this filter runs on
+	 * nearly every admin page load - the update-count bubble in the menu reads
+	 * the same transient - so an uncached check would put a blocking HTTPS
+	 * request in front of every page. It would also burn through GitHub's
+	 * unauthenticated limit of sixty requests an hour per IP, and on shared
+	 * hosting that IP is shared, so the resulting failure would not even be
+	 * confined to this site. The outcome of removing the cache is fewer update
+	 * notices, not more.
+	 *
+	 * Fifteen minutes is at most four calls an hour, and anyone who wants an
+	 * answer sooner has Check Again, which skips this entirely.
+	 */
+	private const CACHE_TTL = 15 * MINUTE_IN_SECONDS;
 
-	/** How long a failure is remembered, so a broken network is not retried on every request. */
-	private const FAILURE_TTL = 30 * MINUTE_IN_SECONDS;
+	/**
+	 * How long a failure is remembered.
+	 *
+	 * Deliberately shorter than the success window now. A failure is usually a
+	 * blip - a timeout, a momentary rate limit - and retrying in five minutes
+	 * costs little, where remembering it for half an hour delays the recovery.
+	 */
+	private const FAILURE_TTL = 5 * MINUTE_IN_SECONDS;
 
 	private Http $http;
 
@@ -47,6 +70,29 @@ class Updater {
 		add_filter( 'site_transient_update_plugins', [ $this, 'inject_update' ] );
 		add_filter( 'plugins_api', [ $this, 'plugin_details' ], 10, 3 );
 		add_action( 'upgrader_process_complete', [ $this, 'flush_cache' ], 10, 2 );
+
+		// "Check Again" has to mean it.
+		add_action( 'load-update-core.php', [ $this, 'honour_force_check' ] );
+	}
+
+	/**
+	 * Discard our cached answer when an admin explicitly asks for a re-check.
+	 *
+	 * WordPress's "Check Again" button links to update-core.php?force-check=1,
+	 * and core responds by throwing away *its* update transient and rebuilding
+	 * it. That rebuild runs inject_update() again - which, without this, was
+	 * answered straight from our own six-hour cache.
+	 *
+	 * The effect was that a site which last checked while an older release was
+	 * current kept reporting itself up to date, and no amount of clicking would
+	 * change it until the cache aged out. A button labelled "Check Again" that
+	 * does not check again is worse than no button.
+	 */
+	public function honour_force_check(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading a core flag, not acting on input.
+		if ( ! empty( $_GET['force-check'] ) ) {
+			delete_site_transient( self::CACHE_KEY );
+		}
 	}
 
 	private function basename(): string {
@@ -157,6 +203,31 @@ class Updater {
 		if ( is_array( $extra ) && 'plugin' === ( $extra['type'] ?? '' ) ) {
 			delete_site_transient( self::CACHE_KEY );
 		}
+	}
+
+	/**
+	 * What the update check currently knows.
+	 *
+	 * Exists so the failure can be *seen*. Until now an update check that could
+	 * not reach GitHub - a firewall, a proxy, an outbound block, a rate limit -
+	 * did exactly what a successful check with no new release does: nothing at
+	 * all. The site simply never offered an update and there was no way to tell
+	 * the two apart from the admin.
+	 *
+	 * @return array{installed:string,latest:string,package:string,reachable:bool,from_cache:bool,repo:string}
+	 */
+	public function status(): array {
+		$had_cache = is_array( get_site_transient( self::CACHE_KEY ) );
+		$release   = $this->latest_release();
+
+		return [
+			'installed'  => VERSION,
+			'latest'     => (string) ( $release['version'] ?? '' ),
+			'package'    => (string) ( $release['package'] ?? '' ),
+			'reachable'  => null !== $release,
+			'from_cache' => $had_cache,
+			'repo'       => self::REPO,
+		];
 	}
 
 	/**
