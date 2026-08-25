@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.7.1
+Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,9 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.7.2 =
+* The plugin screens now use the full width of the admin area. They were capped at 1240px, which left a growing empty margin on wide monitors while the email log and the provider grid were the things that wanted the room.
 
 = 0.7.1 =
 * Clicking a tab no longer leaves a pale outline behind it. The ring was firing on plain focus, which a mouse click triggers as well as the Tab key; it now appears only for keyboard focus, where it is needed.

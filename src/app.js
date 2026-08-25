@@ -64,7 +64,12 @@ const Shell = () => {
 		<div id="mmoa-app">
 			<Nav health={ data?.health } queue={ data?.queue } />
 
-			<main className="px-6 py-8 sm:px-8 max-w-[1240px]">
+			{ /* Full width on purpose. The header band already spans the whole admin
+				     area, so capping the content left a growing empty gutter on wide
+				     screens - while the log table and the provider grid were exactly
+				     the things that wanted the room. Line length is still held where
+				     it actually matters: on the paragraphs, per component. */ }
+				<main className="w-full px-6 py-8 sm:px-8">
 				{ isLoading ? (
 					<Spinner />
 				) : (
