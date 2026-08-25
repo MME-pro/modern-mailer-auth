@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,11 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.7.3 =
+* Updates now appear promptly. The check remembered its answer for six hours, so a release could sit unnoticed for most of a working day; it is now fifteen minutes, and a failed check is retried after five rather than thirty.
+* Check Again on the Updates screen now really does check again. It was rebuilding WordPress own list while still reading the plugin cached answer, so clicking it changed nothing until the cache expired.
+* Added an update entry to Tools, Site Health. A check that cannot reach GitHub used to look exactly like a check that found nothing new - the site simply never offered an update and nothing said why. It now reports whether the check is getting through, and names the usual causes when it is not.
 
 = 0.7.2 =
 * The plugin screens now use the full width of the admin area. They were capped at 1240px, which left a growing empty margin on wide monitors while the email log and the provider grid were the things that wanted the room.
