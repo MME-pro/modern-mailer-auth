@@ -61,6 +61,9 @@ class Provider_Registry {
 			Providers\Sendgrid::class,
 			Providers\Postmark::class,
 			Providers\Mailgun::class,
+			Providers\Brevo::class,
+			Providers\Smtp2go::class,
+			Providers\Resend::class,
 			Providers\Smtp::class,
 		];
 

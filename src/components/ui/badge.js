@@ -22,7 +22,7 @@ const badgeVariants = cva(
 				warning:
 					'border-warning/25 bg-warning-subtle text-warning',
 				danger: 'border-danger/20 bg-danger-subtle text-danger',
-				brand: 'border-brand/20 bg-brand-subtle text-brand',
+				brand: 'border-brand/25 bg-brand-subtle text-brand-deep',
 			},
 		},
 		defaultVariants: { variant: 'default' },

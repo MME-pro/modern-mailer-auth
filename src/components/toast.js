@@ -9,6 +9,10 @@ export const useToast = () => useContext( ToastContext );
 /**
  * Transient confirmations, in the sonner shape shadcn uses.
  *
+ * Pinned top-right, offset to clear the WordPress admin bar - which is fixed
+ * at the top of the viewport at 46px on small screens and 32px above that.
+ * A plain top-6 would put every confirmation underneath it.
+ *
  * Only for things the reader does not need to act on - "Saved", "Connected".
  * Anything that has to be read and acted upon goes into the page as an Alert
  * instead, because a message that disappears after five seconds is the wrong
@@ -36,7 +40,7 @@ export const ToastProvider = ( { children } ) => {
 			{ children }
 
 			<div
-				className="pointer-events-none fixed bottom-6 right-6 z-[99999] flex w-[min(400px,calc(100vw-3rem))] flex-col gap-2"
+				className="pointer-events-none fixed top-[54px] right-6 z-[99999] flex w-[min(400px,calc(100vw-3rem))] flex-col gap-2 sm:top-11"
 				role="region"
 				aria-live="polite"
 			>
@@ -48,7 +52,7 @@ export const ToastProvider = ( { children } ) => {
 							key={ toast.id }
 							className={ cn(
 								'pointer-events-auto flex items-start gap-3 rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg',
-								'animate-in slide-in-from-bottom-3 fade-in duration-200'
+								'animate-in slide-in-from-top-2 fade-in duration-200'
 							) }
 						>
 							<Icon

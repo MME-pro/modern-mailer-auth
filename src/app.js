@@ -64,7 +64,7 @@ const Shell = () => {
 		<div id="mmoa-app">
 			<Nav health={ data?.health } queue={ data?.queue } />
 
-			<main className="px-6 py-6 max-w-[1180px]">
+			<main className="px-6 py-8 sm:px-8 max-w-[1240px]">
 				{ isLoading ? (
 					<Spinner />
 				) : (

@@ -16,52 +16,47 @@ import { Panel, Button, Badge, FormField, Spinner, Input, inputClass } from '../
 import { cn } from '../lib/utils';
 import GoogleConnect from '../components/google-connect';
 import ProviderForm from '../components/provider-form';
+import ProviderLogo from '../components/provider-logo';
 
-const ProviderPicker = ( { providers, categories, selected, onSelect } ) => (
-	<div className="grid gap-5">
-		{ Object.entries( categories ).map( ( [ key, title ] ) => {
-			const inGroup = providers.filter( ( p ) => p.category === key );
-
-			if ( inGroup.length === 0 ) {
-				return null;
-			}
+/**
+ * The provider chooser.
+ *
+ * One wrapping row rather than grouped sections. With a dozen providers the
+ * grouping added three headings and three grids to scan before you could find
+ * the one you already knew you wanted; a single field of marks is faster to
+ * search, and the logo does the identifying that a heading used to.
+ */
+const ProviderPicker = ( { providers, selected, onSelect } ) => (
+	<div className="flex flex-wrap gap-2.5">
+		{ providers.map( ( provider ) => {
+			const active = selected === provider.slug;
 
 			return (
-				<div key={ key }>
-					<h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground m-0 mb-2">
-						{ title }
-					</h3>
-					<div className="grid gap-2.5 grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
-						{ inGroup.map( ( provider ) => {
-							const active = selected === provider.slug;
+				<button
+					key={ provider.slug }
+					type="button"
+					title={ provider.summary }
+					aria-pressed={ active }
+					onClick={ () => onSelect( provider.slug ) }
+					className={ cn(
+						'group relative flex w-[132px] cursor-pointer flex-col items-center gap-2.5 rounded-xl border p-4 text-center transition-all',
+						active
+							? 'border-brand bg-brand-subtle ring-1 ring-brand'
+							: 'border-border bg-card hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-sm'
+					) }
+				>
+					<ProviderLogo slug={ provider.slug } className="size-8" />
 
-							return (
-								<button
-									key={ provider.slug }
-									type="button"
-									onClick={ () => onSelect( provider.slug ) }
-									className={ `text-left p-3.5 rounded-xl border transition-colors cursor-pointer ${
-										active
-											? 'border-brand bg-brand-subtle ring-1 ring-brand'
-											: 'border-border bg-card hover:border-input'
-									}` }
-								>
-									<div className="flex items-center justify-between gap-2">
-										<span className="text-[13px] font-semibold text-foreground">
-											{ provider.label }
-										</span>
-										{ active && (
-											<Check size={ 15 } className="text-brand shrink-0" />
-										) }
-									</div>
-									<p className="text-[12px] text-muted-foreground m-0 mt-1">
-										{ provider.summary }
-									</p>
-								</button>
-							);
-						} ) }
-					</div>
-				</div>
+					<span className="text-[13px] leading-tight font-medium">
+						{ provider.label }
+					</span>
+
+					{ active && (
+						<span className="absolute top-2 right-2 inline-flex size-4 items-center justify-center rounded-full bg-brand text-brand-foreground">
+							<Check className="size-2.5" strokeWidth={ 3 } />
+						</span>
+					) }
+				</button>
 			);
 		} ) }
 	</div>
@@ -178,7 +173,6 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 			>
 				<ProviderPicker
 					providers={ data.providers }
-					categories={ categories }
 					selected={ provider }
 					onSelect={ ( slug ) => {
 						setProvider( slug );
@@ -199,7 +193,7 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 								href={ current.docs }
 								target="_blank"
 								rel="noreferrer"
-								className="text-[13px] text-brand no-underline hover:underline self-center"
+								className="text-[13px] text-brand-deep no-underline hover:underline self-center"
 							>
 								{ __( 'Documentation', 'modern-mailer-oauth' ) }
 							</a>
@@ -500,7 +494,6 @@ const Connections = () => {
 				<ConnectionPanel
 					key={ activeId }
 					slot={ activeId }
-					categories={ categories }
 					title={ ( current || connections[ 0 ] )?.name }
 				/>
 

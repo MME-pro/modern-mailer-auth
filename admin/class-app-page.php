@@ -117,10 +117,23 @@ class App_Page {
 			true
 		);
 
+		// Fraunces for display, Inter Tight for everything else. Registered as a
+		// dependency of the app stylesheet so the faces are requested before the
+		// rules that use them, rather than after the first paint.
+		//
+		// display=swap on purpose: a private-bank serif is worth waiting a
+		// moment for, but not worth showing an admin a blank screen for.
+		wp_enqueue_style(
+			'mmoa-fonts',
+			'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap',
+			[],
+			null
+		);
+
 		wp_enqueue_style(
 			'mmoa-app',
 			PLUGIN_URL . 'build/index.css',
-			[],
+			[ 'mmoa-fonts' ],
 			$asset['version']
 		);
 
@@ -146,8 +159,18 @@ class App_Page {
 		// The app replaces the page entirely. The noscript fallback is not
 		// decoration: an admin whose bundle failed to load should be told that,
 		// not left looking at a blank screen.
+		//
+		// The screen-reader heading and the wp-header-end rule are load-bearing.
+		// WordPress relocates every admin notice - its own and any other
+		// plugin's - to just after the first h1 inside .wrap, or to .wp-header-end
+		// if one exists. Without them, notices were being injected into the
+		// middle of the app's own header band, landing on top of the wordmark.
+		// This gives them somewhere to go above the app instead.
 		?>
 		<div class="wrap" style="margin:0;padding:0">
+			<h1 class="screen-reader-text"><?php esc_html_e( 'Modern Mailer', 'modern-mailer-oauth' ); ?></h1>
+			<hr class="wp-header-end" style="display:none" />
+
 			<div id="mmoa-app-root">
 				<noscript>
 					<p style="padding:2rem">

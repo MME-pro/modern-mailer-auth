@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.5.2
+Stable tag: 0.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,32 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.7.1 =
+* Clicking a tab no longer leaves a pale outline behind it. The ring was firing on plain focus, which a mouse click triggers as well as the Tab key; it now appears only for keyboard focus, where it is needed.
+
+= 0.7.0 =
+* Reworked the interface palette and typography. Cool neutrals with a single indigo accent, and Plus Jakarta Sans with Inter in place of the previous warm paper-and-serif treatment, which read as somebody else's brand rather than as a dashboard.
+* Added Brevo, SMTP2GO and Resend, bringing the provider list to ten.
+* Every provider now shows its own logo. The marks are drawn inline rather than loaded from the provider, so the screen makes no third-party request and nothing breaks if one is unreachable.
+* The provider chooser is now a single wrapping row instead of three grouped sections - with ten providers, one field of marks is quicker to search than three headings and three grids.
+
+= 0.6.2 =
+* Fixed the admin styling actually reaching the page. WordPress ships plain element rules that are unlayered, and an unlayered rule beats a layered one whatever its specificity - so every heading size, heading colour and link colour in the app was silently losing to WordPress. The tabs were rendering in WordPress blue and the wordmark near-black on the dark band.
+* WordPress admin notices no longer land in the middle of the plugin header. They were being relocated to just after the first heading inside the page, which was the wordmark.
+* Confirmations now appear at the top right, clear of the admin bar.
+* The activity chart has a proper empty state instead of a blank panel.
+
+= 0.6.1 =
+* Redesigned the dark theme. It was the light palette inverted rather than designed - cards barely separated from the canvas, the header band was darker than the page and disappeared, and oxblood lightened into pink. It is now built as the same room at night: elevation from lightness rather than shadow, chrome lighter than the canvas, and the semantic colours held to garnet and jade instead of drifting to pink and mint.
+* Dark can now actually be chosen. There is a toggle in the header, remembered per browser; before this the dark styles existed but nothing ever applied them.
+* Rebuilt the tabs around a single brass rule that travels between them rather than five that take turns appearing, measured from the labels so it stays correct in any translation.
+
+= 0.6.0 =
+* Gave the admin a visual identity. Paper canvas, ink chrome and a single brass accent, with Fraunces for display type and Inter Tight for everything else - a private bank's own collateral rather than a default admin template.
+* The dashboard leads with one figure at display size rather than four equal cards, so the screen says what it is about before you read a word.
+* Added an engine-turned guilloche - the rosette engraved on banknotes and share certificates - behind the header band and, faintly, behind the chart. It appears exactly twice.
+* Colour now means one thing each: brass is the only decorative accent, and oxblood and malachite appear on failure and delivery and nowhere else.
 
 = 0.5.2 =
 * The Modern Mailer menu no longer has submenus. It opens straight onto the app, which carries its own tabs - Dashboard, Connections, Routing, Email Logs and Settings - so there is one navigation to follow rather than two that had to agree with each other.

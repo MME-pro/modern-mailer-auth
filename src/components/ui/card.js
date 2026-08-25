@@ -5,7 +5,7 @@ function Card( { className, ...props } ) {
 		<div
 			data-slot="card"
 			className={ cn(
-				'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs',
+				'sheet sheet-hover text-card-foreground flex flex-col gap-6 rounded-lg py-6',
 				className
 			) }
 			{ ...props }
@@ -30,7 +30,7 @@ function CardTitle( { className, ...props } ) {
 	return (
 		<h3
 			data-slot="card-title"
-			className={ cn( 'leading-none font-semibold tracking-tight m-0', className ) }
+			className={ cn( 'font-display text-[17px] font-normal leading-none tracking-[-0.01em] m-0', className ) }
 			{ ...props }
 		/>
 	);

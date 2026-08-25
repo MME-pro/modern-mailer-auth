@@ -22,13 +22,13 @@ const buttonVariants = cva(
 				brand:
 					'bg-brand text-brand-foreground shadow-sm hover:bg-brand/90 active:scale-[0.98]',
 				destructive:
-					'bg-danger text-white shadow-sm hover:bg-danger/90 active:scale-[0.98]',
+					'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-[0.98]',
 				outline:
 					'border bg-card shadow-xs hover:bg-muted hover:text-accent-foreground',
 				secondary:
 					'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/70',
 				ghost: 'hover:bg-muted hover:text-accent-foreground',
-				link: 'text-brand underline-offset-4 hover:underline',
+				link: 'text-brand-deep underline-offset-4 hover:underline',
 			},
 			size: {
 				default: 'h-9 px-4 py-2 has-[>svg]:px-3',

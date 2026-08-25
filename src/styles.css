@@ -1,110 +1,184 @@
-@import "tailwindcss";
+/*
+ * Tailwind is imported in pieces so the UTILITIES land unlayered.
+ *
+ * This is the fix for a whole class of bugs rather than one. wp-admin ships
+ * plain element rules - h2, h3 { font-size: 1.3em }, a { color: #2271b1 } - and
+ * they are unlayered. An unlayered rule beats a layered one no matter the
+ * specificity, so with utilities inside @layer utilities every heading size and
+ * link colour in this app silently lost to WordPress.
+ *
+ * Unlayered, a utility class (0,1,0) simply outranks an element selector
+ * (0,0,1) and the cascade does the right thing on its own.
+ */
+@layer theme, base, components;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
 @import "tw-animate-css";
 
 /*
  * Design system.
  *
- * shadcn's token contract - --background, --foreground, --primary, --muted and
- * so on - so any shadcn component drops in unmodified. The values are not
- * shadcn's defaults, because a plugin that ships the default zinc palette looks
- * like every other shadcn project and like nothing in particular.
+ * The token *contract* is shadcn's - --background, --foreground, --primary,
+ * --muted and so on - so any shadcn component drops in unmodified. The values
+ * are not shadcn's, and are not another dark SaaS palette either.
  *
- * The direction: a warm near-neutral base with a near-black primary, and one
- * saturated brand violet used sparingly for focus, active state and data. That
- * gives buttons real weight without a coloured wash over everything, and leaves
- * saturation free to mean something - which matters here, because the three
- * states this interface has to communicate instantly are delivered, waiting and
- * lost.
+ * The direction is a private bank's own collateral: heavy paper stock, ink
+ * chrome, brass fittings. Light-first, deliberately - making the workspace
+ * paper and the navigation ink says more about the product than a fourth dark
+ * dashboard would, and it sits better inside wp-admin's own light chrome.
+ *
+ * Three coloured tokens, and only one is decorative. Brass carries the
+ * personality. Oxblood and malachite are semantic: they appear on failure and
+ * delivery and nowhere else. The moment an accent becomes decoration the
+ * palette stops meaning anything - which matters here, because the three states
+ * this interface must communicate instantly are delivered, waiting and lost.
  */
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--radius: 0.7rem;
+	--radius: 10px;
 
-	/* Warm neutral rather than blue-grey - it reads softer next to the
-	   WordPress chrome without going beige. */
-	--background: oklch(0.985 0.002 90);
-	--foreground: oklch(0.21 0.008 285);
+	/* Cool canvas. Slightly blue rather than slightly yellow. */
+	--background: #f6f7f9;
+	--foreground: #101828;
 
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.21 0.008 285);
+	--card: #ffffff;
+	--card-foreground: #101828;
 
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.21 0.008 285);
+	--popover: #ffffff;
+	--popover-foreground: #101828;
 
-	/* Near-black primary. Confident, and it never fights the status colours. */
-	--primary: oklch(0.22 0.008 285);
-	--primary-foreground: oklch(0.985 0 0);
+	/* Near-black slate, so buttons carry weight without spending the accent on
+	   every action on screen. */
+	--primary: #101828;
+	--primary-foreground: #ffffff;
 
-	--secondary: oklch(0.968 0.003 90);
-	--secondary-foreground: oklch(0.22 0.008 285);
+	--secondary: #f2f4f7;
+	--secondary-foreground: #101828;
 
-	--muted: oklch(0.968 0.003 90);
-	--muted-foreground: oklch(0.552 0.012 285);
+	--muted: #f2f4f7;
+	--muted-foreground: #667085;
 
-	--accent: oklch(0.968 0.003 90);
-	--accent-foreground: oklch(0.22 0.008 285);
+	--accent: #f2f4f7;
+	--accent-foreground: #101828;
 
-	--destructive: oklch(0.577 0.225 27);
-	--destructive-foreground: oklch(0.985 0 0);
+	--border: #e4e7ec;
+	--input: #d0d5dd;
+	--ring: #4f46e5;
 
-	--border: oklch(0.922 0.004 90);
-	--input: oklch(0.922 0.004 90);
-	--ring: oklch(0.55 0.23 295);
+	/* The accent. Indigo, for active state, focus, links and the primary data
+	   series - and nothing else. */
+	--brand: #4f46e5;
+	--brand-foreground: #ffffff;
+	--brand-subtle: #eef0ff;
+	--brand-deep: #4338ca;
 
-	/* The switch track when off. Deliberately its own token rather than --input:
-	   that is a border colour at 92% lightness, and a white thumb sitting on it
-	   is all but invisible - the control reads as a blank pill with no state. */
-	--switch-off: oklch(0.80 0.009 90);
-	--switch-thumb: oklch(1 0 0);
+	/* Chrome. Deep navy-slate, cool enough to belong to the same family as the
+	   canvas rather than reading as a separate design. */
+	--ink: #0f172a;
+	--ink-raised: #1b2436;
+	--ink-line: #2a3549;
+	--ink-foreground: #e8ecf4;
+	--ink-muted: #94a3b8;
 
-	/* Brand. One colour, used for focus, active nav and the chart. */
-	--brand: oklch(0.55 0.23 295);
-	--brand-foreground: oklch(0.985 0 0);
-	--brand-subtle: oklch(0.965 0.025 295);
+	/* Semantic only. Never borders, never headings, never decoration. */
+	--success: #067647;
+	--success-subtle: #ecfdf3;
+	--warning: #b54708;
+	--warning-subtle: #fffaeb;
+	--danger: #d92d20;
+	--danger-subtle: #fef3f2;
 
-	/* Status. Never used decoratively - each one means exactly one thing. */
-	--success: oklch(0.58 0.15 155);
-	--success-subtle: oklch(0.965 0.04 155);
-	--warning: oklch(0.68 0.16 70);
-	--warning-subtle: oklch(0.97 0.045 70);
-	--danger: oklch(0.577 0.225 27);
-	--danger-subtle: oklch(0.965 0.035 27);
+	--destructive: #d92d20;
+	--destructive-foreground: #ffffff;
 
-	--chart-1: oklch(0.55 0.23 295);
-	--chart-2: oklch(0.577 0.225 27);
+	--switch-off: #cbd2dd;
+	--switch-thumb: #ffffff;
+
+	--chart-1: #4f46e5;
+	--chart-2: #f04438;
+
+	--font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+	--font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/*
+ * Dark: the same room at night, not the light theme turned inside out.
+ *
+ * Three things drive it, and each is a correction of the obvious approach.
+ *
+ * Elevation is built from lightness, not shadow. A shadow cast on near-black is
+ * invisible, so every surface has to separate by its own value - roughly six
+ * points per step, which is what makes a card read as sitting on the canvas
+ * rather than painted onto it.
+ *
+ * The chrome inverts its relationship to the canvas. On paper the header is
+ * darker than the page; at night it is *lighter*, like a lit bar in a dark
+ * room. Keeping it darker - the literal inversion - made the band vanish.
+ *
+ * And brass finally gets to carry text. On paper it manages about 3:1 and is
+ * restricted to graphics; against near-black the same hue clears 8:1, so the
+ * accent that had to stay decorative in daylight can speak here.
+ */
 .dark {
-	--background: oklch(0.16 0.006 285);
-	--foreground: oklch(0.96 0.002 90);
-	--card: oklch(0.205 0.007 285);
-	--card-foreground: oklch(0.96 0.002 90);
-	--popover: oklch(0.205 0.007 285);
-	--popover-foreground: oklch(0.96 0.002 90);
-	--primary: oklch(0.96 0.002 90);
-	--primary-foreground: oklch(0.21 0.008 285);
-	--secondary: oklch(0.26 0.008 285);
-	--secondary-foreground: oklch(0.96 0.002 90);
-	--muted: oklch(0.26 0.008 285);
-	--muted-foreground: oklch(0.68 0.012 285);
-	--accent: oklch(0.26 0.008 285);
-	--accent-foreground: oklch(0.96 0.002 90);
-	--destructive: oklch(0.64 0.21 25);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 14%);
-	--ring: oklch(0.62 0.21 295);
-	--switch-off: oklch(0.42 0.012 285);
-	--switch-thumb: oklch(0.98 0.002 90);
-	--brand: oklch(0.66 0.21 295);
-	--brand-subtle: oklch(0.28 0.06 295);
-	--success: oklch(0.68 0.15 155);
-	--success-subtle: oklch(0.26 0.05 155);
-	--warning: oklch(0.75 0.15 70);
-	--warning-subtle: oklch(0.28 0.05 70);
-	--danger: oklch(0.64 0.21 25);
-	--danger-subtle: oklch(0.28 0.06 25);
+	--background: #0b1120;
+	--foreground: #e8ecf4;
+
+	--card: #131c2e;
+	--card-foreground: #e8ecf4;
+
+	--popover: #18223a;
+	--popover-foreground: #e8ecf4;
+
+	--primary: #e8ecf4;
+	--primary-foreground: #0b1120;
+
+	--secondary: #1c2740;
+	--secondary-foreground: #e8ecf4;
+
+	--muted: #1c2740;
+	--muted-foreground: #94a3b8;
+
+	--accent: #1c2740;
+	--accent-foreground: #e8ecf4;
+
+	/* Structure has to stay visible or the layout dissolves into one dark field. */
+	--border: #2a3651;
+	--input: #35435f;
+	--ring: #818cf8;
+
+	/* Indigo lifts at night; the daylight value is too dense on a dark ground. */
+	--brand: #818cf8;
+	--brand-foreground: #0b1120;
+	--brand-subtle: #1e2344;
+	/* Inverted on purpose: in daylight "deep" means darker for contrast against
+	   white, at night it must be lighter or every accent link goes unreadable. */
+	--brand-deep: #a5b0ff;
+
+	--ink: #131c2e;
+	--ink-raised: #1a2438;
+	--ink-line: #2a3651;
+	--ink-foreground: #e8ecf4;
+	--ink-muted: #94a3b8;
+
+	--success: #47cd89;
+	--success-subtle: #0d2b1e;
+	--warning: #fdb022;
+	--warning-subtle: #2b1d08;
+	--danger: #f97066;
+	--danger-subtle: #2d1512;
+
+	--destructive: #f97066;
+	/* The destructive fill is light here, so its label must be dark. */
+	--destructive-foreground: #0b1120;
+
+	--switch-off: #3d4a66;
+	--switch-thumb: #e8ecf4;
+
+	--chart-1: #818cf8;
+	--chart-2: #f97066;
 }
 
 @theme inline {
@@ -128,11 +202,18 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 
+	--color-ink: var(--ink);
+	--color-ink-raised: var(--ink-raised);
+	--color-ink-line: var(--ink-line);
+	--color-ink-foreground: var(--ink-foreground);
+	--color-ink-muted: var(--ink-muted);
+
 	--color-switch-off: var(--switch-off);
 	--color-switch-thumb: var(--switch-thumb);
 	--color-brand: var(--brand);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-subtle: var(--brand-subtle);
+	--color-brand-deep: var(--brand-deep);
 	--color-success: var(--success);
 	--color-success-subtle: var(--success-subtle);
 	--color-warning: var(--warning);
@@ -142,29 +223,41 @@
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
+	--font-display: var(--font-display);
+	--font-sans: var(--font-sans);
+
+	--radius-sm: calc(var(--radius) - 6px);
+	--radius-md: calc(var(--radius) - 4px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 }
 
 /*
- * WordPress wraps every admin page in its own font stack and a 13px base, and
- * injects notices into the flow. The app opts out of all of it here rather
- * than fighting it selector by selector further down.
+ * Living inside wp-admin.
+ *
+ * Deliberately UNLAYERED. An unlayered rule outranks every layered one whatever
+ * the specificity, and wp-admin is entirely unlayered - so anything parked in
+ * @layer base loses to it. That is why the tabs came out WordPress blue and the
+ * wordmark rendered near-black on the ink band.
+ *
+ * The heading font-family is NOT here. As an element rule it would beat a
+ * font-sans utility at the call site, which is what turned the small category
+ * labels into serif capitals. Headings opt into the display face with a class.
  */
 #mmoa-app {
-	font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-		"Helvetica Neue", sans-serif;
+	font-family: var(--font-sans);
 	font-size: 14px;
 	line-height: 1.5;
-	font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 	color: var(--foreground);
 	background: var(--background);
 	margin-left: -20px;
 	min-height: calc(100vh - 32px);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	/* Every figure here sits in a column that has to align - metrics, table
+	   values, axis labels. Tabular by default is cheaper than remembering it
+	   at each call site. */
+	font-variant-numeric: tabular-nums;
 }
 
 #mmoa-app *,
@@ -174,9 +267,61 @@
 	border-color: var(--border);
 }
 
+/*
+ * wp-admin styles  and  with its own colours, and both
+ * outspecify a utility class. Without these two resets the wordmark renders
+ * near-black on the ink band and every tab comes out WordPress blue - which
+ * is precisely what happened.
+ */
+#mmoa-app h1,
+#mmoa-app h2,
+#mmoa-app h3,
+#mmoa-app h4 {
+	color: inherit;
+	margin: 0;
+}
+
+#mmoa-app a {
+	color: inherit;
+	text-decoration: none;
+}
+
+#mmoa-app a:focus,
+#mmoa-app a:hover {
+	color: inherit;
+	box-shadow: none;
+}
+
+/*
+ * Focus is brass, offset, never removed. The accent doubles as the focus
+ * colour on purpose - it is already this interface's one signal of "here is
+ * the live thing", which is what focus means.
+ */
+/*
+ * A ring for keyboard focus, nothing for a mouse click.
+ *
+ * Clicking a tab was drawing a pale 2px outline that lingered while the element
+ * held focus - clearly visible against the dark header as a white border. It
+ * came from plain :focus, which fires on click as well as on Tab, so the fix is
+ * to clear it there and keep the ring only where it earns its place.
+ *
+ * Deliberately NOT a blanket outline:none. Removing focus outright makes the
+ * interface unusable from a keyboard, which is a real cost to real people
+ * rather than a cosmetic one.
+ */
+#mmoa-app :focus:not(:focus-visible) {
+	outline: none;
+	box-shadow: none;
+}
+
 #mmoa-app :focus-visible {
 	outline: 2px solid var(--ring);
 	outline-offset: 2px;
+	border-radius: 3px;
+}
+
+#mmoa-app ::selection {
+	background: color-mix(in oklab, var(--brand) 28%, transparent);
 }
 
 /* WordPress's own input styles are aggressive enough to override ours. */
@@ -196,19 +341,66 @@
 	outline: none;
 }
 
-/*
- * The signature texture: a faint dot grid behind the header. Subtle enough to
- * read as paper rather than decoration, and the one thing on the page that is
- * purely aesthetic.
- */
-.mmoa-grid {
-	background-image: radial-gradient(
-		circle at 1px 1px,
-		color-mix(in oklch, var(--foreground) 12%, transparent) 1px,
-		transparent 0
-	);
-	background-size: 22px 22px;
-	mask-image: linear-gradient(to bottom, black, transparent);
+@layer utilities {
+	/*
+	 * The card treatment: a sheet laid on paper rather than a box drawn on it.
+	 * A 1px border at full strength is heavier than this design wants, so the
+	 * separation comes from a hairline plus a very soft, very wide shadow.
+	 */
+	.sheet {
+		background: var(--card);
+		border: 1px solid var(--border);
+		box-shadow:
+			0 1px 2px rgb(15 27 28 / 0.04),
+			0 8px 24px -16px rgb(15 27 28 / 0.14);
+	}
+
+	.sheet-hover {
+		transition:
+			box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+			transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.sheet-hover:hover {
+		transform: translateY(-1px);
+		box-shadow:
+			0 2px 4px rgb(15 27 28 / 0.05),
+			0 16px 32px -18px rgb(15 27 28 / 0.2);
+	}
+
+	/*
+	 * Page-load stagger, done in CSS rather than with an animation library.
+	 * Framer Motion would add roughly 50KB to a bundle that already ships
+	 * inside every admin page load, to buy an effect that is four lines of
+	 * keyframes - the wrong trade for a plugin.
+	 */
+	.stagger > * {
+		animation: mmoa-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	.stagger > *:nth-child(1) { animation-delay: 0ms; }
+	.stagger > *:nth-child(2) { animation-delay: 45ms; }
+	.stagger > *:nth-child(3) { animation-delay: 90ms; }
+	.stagger > *:nth-child(4) { animation-delay: 135ms; }
+	.stagger > *:nth-child(5) { animation-delay: 180ms; }
+	.stagger > *:nth-child(n + 6) { animation-delay: 225ms; }
+
+	@keyframes mmoa-rise {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/* Ink chrome keeps a dark scrollbar so it gains no bright seam. */
+	.ink-scroll {
+		scrollbar-width: thin;
+		scrollbar-color: var(--ink-line) transparent;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,6 +408,7 @@
 	#mmoa-app *::before,
 	#mmoa-app *::after {
 		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 	}
 }
