@@ -8,6 +8,7 @@ import { ToastProvider, useToast } from './components/toast';
 import Dashboard from './screens/dashboard';
 import Connections from './screens/connections';
 import Logs from './screens/logs';
+import Routing from './screens/routing';
 import Settings from './screens/settings';
 
 const queryClient = new QueryClient( {
@@ -70,6 +71,7 @@ const Shell = () => {
 					<Routes>
 						<Route path="/dashboard" element={ <Dashboard /> } />
 						<Route path="/connections" element={ <Connections /> } />
+						<Route path="/routing" element={ <Routing /> } />
 						<Route path="/logs" element={ <Logs /> } />
 						<Route path="/settings" element={ <Settings /> } />
 						<Route

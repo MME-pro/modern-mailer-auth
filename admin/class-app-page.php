@@ -39,6 +39,15 @@ class App_Page {
 		add_action( 'admin_notices', [ $this, 'conflict_notice' ] );
 	}
 
+	/**
+	 * One menu entry, no submenus.
+	 *
+	 * The app already carries its own tabs, and duplicating them in the
+	 * WordPress sidebar meant two navigations for one set of destinations -
+	 * which then had to be kept in step with each other, and which disagreed
+	 * about where you were the moment you moved between tabs inside the app
+	 * without the sidebar noticing.
+	 */
 	public function add_menu(): void {
 		add_menu_page(
 			__( 'Modern Mailer', 'modern-mailer-oauth' ),
@@ -47,26 +56,10 @@ class App_Page {
 			self::SLUG,
 			[ $this, 'render' ],
 			'dashicons-email-alt',
+			// Just below Settings, so it sits with configuration rather than
+			// among the content menus.
 			80
 		);
-
-		$submenus = [
-			''             => __( 'Dashboard', 'modern-mailer-oauth' ),
-			'connections'  => __( 'Connections', 'modern-mailer-oauth' ),
-			'logs'         => __( 'Email Logs', 'modern-mailer-oauth' ),
-			'settings'     => __( 'Settings', 'modern-mailer-oauth' ),
-		];
-
-		foreach ( $submenus as $route => $label ) {
-			add_submenu_page(
-				self::SLUG,
-				$label,
-				$label,
-				self::CAPABILITY,
-				'' === $route ? self::SLUG : self::SLUG . '#/' . $route,
-				'' === $route ? [ $this, 'render' ] : '__return_null'
-			);
-		}
 	}
 
 	/**

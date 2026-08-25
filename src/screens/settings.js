@@ -3,37 +3,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSettings, saveSettings } from '../api/client';
 import { useToast } from '../components/toast';
-import { Panel, Button, FormField, Spinner, Input, Label, Switch, inputClass } from '../components/ui';
-
-/**
- * A setting that is on or off.
- *
- * The switch sits on the right and the explanation fills the row, which is the
- * arrangement that survives long help text - and the help here is long on
- * purpose, because these are the settings where the consequence of getting it
- * wrong is invisible until mail goes missing.
- */
-const Toggle = ( { checked, onChange, disabled, label, help, id } ) => (
-	<div className="flex items-start justify-between gap-6 rounded-lg border p-4">
-		<div className="min-w-0 grid gap-1">
-			<Label htmlFor={ id } className="font-medium">
-				{ label }
-			</Label>
-			{ help && (
-				<p className="text-xs text-muted-foreground m-0 max-w-prose leading-relaxed">
-					{ help }
-				</p>
-			) }
-		</div>
-		<Switch
-			id={ id }
-			checked={ !! checked }
-			disabled={ disabled }
-			onCheckedChange={ onChange }
-			className="mt-0.5 shrink-0"
-		/>
-	</div>
-);
+import { Panel, Button, FormField, Spinner, ToggleRow, inputClass } from '../components/ui';
 
 const Settings = () => {
 	const toast = useToast();
@@ -109,7 +79,7 @@ const Settings = () => {
 					</FormField>
 
 					<div className="sm:col-span-2">
-						<Toggle
+						<ToggleRow
 							id="mmoa-force-from"
 							checked={ values.force_from }
 							onChange={ ( v ) => set( 'force_from', v ) }
@@ -128,7 +98,7 @@ const Settings = () => {
 
 			<Panel title={ __( 'Reliability', 'modern-mailer-oauth' ) }>
 				<div className="grid gap-4">
-					<Toggle
+					<ToggleRow
 						id="mmoa-queue-enabled"
 						checked={ values.queue_enabled }
 						onChange={ ( v ) => set( 'queue_enabled', v ) }
@@ -152,7 +122,7 @@ const Settings = () => {
 				) }
 			>
 				<div className="grid gap-4">
-					<Toggle
+					<ToggleRow
 						id="mmoa-log-enabled"
 						checked={ values.log_enabled }
 						onChange={ ( v ) => set( 'log_enabled', v ) }

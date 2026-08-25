@@ -44,3 +44,19 @@ export const sendTestEmail = ( to ) =>
 
 export const queueAction = ( action ) =>
 	request( `/queue/${ action }`, { method: 'POST' } );
+
+export const listConnections = () => request( '/connections' );
+
+export const addConnection = ( name ) =>
+	request( '/connections', { method: 'POST', data: { name } } );
+
+export const renameConnection = ( id, name ) =>
+	request( `/connections/${ id }/manage`, { method: 'POST', data: { name } } );
+
+export const deleteConnection = ( id ) =>
+	request( `/connections/${ id }/manage`, { method: 'DELETE' } );
+
+export const getRouting = () => request( '/routing' );
+
+export const saveRouting = ( enabled, rules ) =>
+	request( '/routing', { method: 'POST', data: { enabled, rules } } );

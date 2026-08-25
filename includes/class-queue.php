@@ -48,7 +48,7 @@ class Queue {
 	public const SCHEDULE_NAME = 'mmoa_five_minutes';
 
 	private const DB_VERSION_OPTION = 'mmoa_queue_db_version';
-	private const DB_VERSION        = '1';
+	private const DB_VERSION        = '2';
 
 	/**
 	 * Rows to attempt per drain.
@@ -115,6 +115,7 @@ class Queue {
 				next_attempt_at datetime NOT NULL,
 				claimed_at datetime DEFAULT NULL,
 				claim_token varchar(40) NOT NULL DEFAULT '',
+				slot varchar(40) NOT NULL DEFAULT '',
 				attempts smallint(5) unsigned NOT NULL DEFAULT 0,
 				status varchar(16) NOT NULL DEFAULT 'pending',
 				recipients text NOT NULL,
@@ -153,7 +154,7 @@ class Queue {
 	 * @param string[] $recipients Envelope recipients, for the admin screen.
 	 * @return bool True when the message is safely persisted.
 	 */
-	public function enqueue( string $raw_mime, array $recipients, string $subject, WP_Error $error ): bool {
+	public function enqueue( string $raw_mime, array $recipients, string $subject, WP_Error $error, string $slot = '' ): bool {
 		if ( ! $this->is_enabled() ) {
 			return false;
 		}
@@ -171,6 +172,7 @@ class Queue {
 				'next_attempt_at' => gmdate( 'Y-m-d H:i:s', time() + $this->backoff( 1 ) ),
 				'attempts'        => 0,
 				'status'          => 'pending',
+				'slot'            => $slot,
 				'recipients'      => implode( ', ', $recipients ),
 				'subject'         => $subject,
 				'raw_mime'        => $raw_mime,
@@ -178,7 +180,7 @@ class Queue {
 				'error_code'      => (string) $error->get_error_code(),
 				'error_message'   => $error->get_error_message(),
 			],
-			[ '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s' ]
+			[ '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' ]
 		);
 
 		return (bool) $inserted;
@@ -205,7 +207,8 @@ class Queue {
 
 			$result = $dispatcher->dispatch_raw(
 				(string) $row->raw_mime,
-				$this->rebuild_mailer( $row )
+				$this->rebuild_mailer( $row ),
+				(string) ( $row->slot ?? '' )
 			);
 
 			if ( true === $result ) {

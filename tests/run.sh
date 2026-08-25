@@ -32,7 +32,7 @@ if [ ! -f test-sa-key.pem ]; then
 fi
 trap 'rm -f test-sa-key.pem' EXIT
 
-for test in test-graph.php test-failures.php test-gmail.php test-resilience.php test-google-consent.php test-smtp.php test-regression-wpms.php test-final.php; do
+for test in test-graph.php test-failures.php test-gmail.php test-resilience.php test-google-consent.php test-smtp.php test-routing.php test-regression-wpms.php test-final.php; do
 	echo "--- ${test} ---"
 	"$PHP" "${ARGS[@]}" "$test" || status=1
 done

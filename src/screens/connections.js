@@ -1,15 +1,19 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, ShieldCheck, Send, AlertTriangle } from 'lucide-react';
+import { Check, ShieldCheck, Send, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import {
 	getConnection,
 	saveConnection,
 	verifyConnection,
 	sendTestEmail,
+	listConnections,
+	addConnection,
+	deleteConnection,
 } from '../api/client';
 import { useToast } from '../components/toast';
-import { Panel, Button, Badge, FormField, Spinner, inputClass } from '../components/ui';
+import { Panel, Button, Badge, FormField, Spinner, Input, inputClass } from '../components/ui';
+import { cn } from '../lib/utils';
 import GoogleConnect from '../components/google-connect';
 import ProviderForm from '../components/provider-form';
 
@@ -63,7 +67,35 @@ const ProviderPicker = ( { providers, categories, selected, onSelect } ) => (
 	</div>
 );
 
-const ConnectionPanel = ( { slot, categories } ) => {
+/**
+ * What each connection is for.
+ *
+ * The two built-ins have fixed meanings worth stating on the screen; an
+ * additional connection means whatever the routing rules make it mean, so it
+ * gets pointed at the screen that decides that.
+ */
+const describeSlot = ( slot ) => {
+	if ( 'primary' === slot ) {
+		return __(
+			'Every message is attempted here first, unless a routing rule sends it elsewhere.',
+			'modern-mailer-oauth'
+		);
+	}
+
+	if ( 'backup' === slot ) {
+		return __(
+			'Tried immediately when the connection that was chosen fails. Use a different provider - two connections sharing one identity endpoint go down together.',
+			'modern-mailer-oauth'
+		);
+	}
+
+	return __(
+		'Used only for messages a routing rule sends here. Set those up under Routing.',
+		'modern-mailer-oauth'
+	);
+};
+
+const ConnectionPanel = ( { slot, categories, title } ) => {
 	const toast = useToast();
 	const queryClient = useQueryClient();
 	const [ provider, setProvider ] = useState( '' );
@@ -141,19 +173,8 @@ const ConnectionPanel = ( { slot, categories } ) => {
 	return (
 		<div className="grid gap-5">
 			<Panel
-				title={
-					slot === 'primary'
-						? __( 'Primary connection', 'modern-mailer-oauth' )
-						: __( 'Backup connection', 'modern-mailer-oauth' )
-				}
-				description={
-					slot === 'primary'
-						? __( 'Every message is attempted here first.', 'modern-mailer-oauth' )
-						: __(
-								'Tried immediately when the primary fails. Use a different provider - two connections sharing one identity endpoint go down together.',
-								'modern-mailer-oauth'
-						  )
-				}
+				title={ title || __( 'Connection', 'modern-mailer-oauth' ) }
+				description={ describeSlot( slot ) }
 			>
 				<ProviderPicker
 					providers={ data.providers }
@@ -287,39 +308,204 @@ const TestEmail = () => {
 	);
 };
 
-const Connections = () => {
-	const [ slot, setSlot ] = useState( 'primary' );
-	const { data } = useQuery( { queryKey: [ 'bootstrap' ] } );
-	const categories = data?.categories || {};
+/**
+ * The list of connections down the side.
+ *
+ * Primary and Backup are fixed - one is what sends by default and the other is
+ * the fallback, so neither can be removed or renamed without the words meaning
+ * something else. Everything after them exists to give a routing rule somewhere
+ * to point.
+ */
+const ConnectionList = ( { connections, selected, max, onSelect } ) => {
+	const toast = useToast();
+	const queryClient = useQueryClient();
+	const [ adding, setAdding ] = useState( false );
+	const [ name, setName ] = useState( '' );
+
+	const refresh = () => {
+		queryClient.invalidateQueries( { queryKey: [ 'connection-list' ] } );
+		queryClient.invalidateQueries( { queryKey: [ 'bootstrap' ] } );
+		queryClient.invalidateQueries( { queryKey: [ 'routing' ] } );
+	};
+
+	const add = useMutation( {
+		mutationFn: () => addConnection( name ),
+		onSuccess: ( result ) => {
+			if ( ! result.ok ) {
+				toast( result.message, 'bad' );
+				return;
+			}
+
+			setAdding( false );
+			setName( '' );
+			refresh();
+			onSelect( result.id );
+			toast( __( 'Connection added. Choose a provider for it.', 'modern-mailer-oauth' ) );
+		},
+		onError: ( error ) => toast( error.message, 'bad' ),
+	} );
+
+	const remove = useMutation( {
+		mutationFn: deleteConnection,
+		onSuccess: ( result ) => {
+			toast( result.message, result.ok ? 'ok' : 'bad' );
+			refresh();
+			onSelect( 'primary' );
+		},
+		onError: ( error ) => toast( error.message, 'bad' ),
+	} );
+
+	const additional = connections.filter( ( c ) => ! c.builtin );
+	const full = additional.length >= max;
 
 	return (
-		<div className="grid gap-5">
-			<div className="inline-flex p-1 bg-muted rounded-lg self-start">
-				{ [
-					[ 'primary', __( 'Primary', 'modern-mailer-oauth' ) ],
-					[ 'backup', __( 'Backup', 'modern-mailer-oauth' ) ],
-				].map( ( [ key, label ] ) => (
-					<button
-						key={ key }
-						type="button"
-						onClick={ () => setSlot( key ) }
-						className={ `inline-flex items-center gap-1.5 px-3.5 h-8 rounded-md text-[13px] font-medium border-0 cursor-pointer transition-colors ${
-							slot === key
-								? 'bg-card text-foreground shadow-sm'
-								: 'bg-transparent text-muted-foreground hover:text-foreground'
-						}` }
-					>
-						{ label }
-						{ key === 'backup' && data?.health?.has_backup && (
-							<Badge variant="success">{ __( 'active', 'modern-mailer-oauth' ) }</Badge>
+		<div className="grid gap-2 content-start">
+			{ connections.map( ( connection ) => {
+				const active = selected === connection.id;
+
+				return (
+					<div
+						key={ connection.id }
+						className={ cn(
+							'group flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors',
+							active ? 'border-brand bg-brand-subtle' : 'bg-card hover:bg-muted'
 						) }
-					</button>
-				) ) }
+					>
+						<button
+							type="button"
+							onClick={ () => onSelect( connection.id ) }
+							className="flex-1 min-w-0 text-left bg-transparent border-0 cursor-pointer p-0"
+						>
+							<span className="block text-sm font-medium truncate">
+								{ connection.name }
+							</span>
+							<span className="block text-xs text-muted-foreground truncate">
+								{ connection.configured
+									? connection.provider
+									: __( 'Not configured', 'modern-mailer-oauth' ) }
+							</span>
+						</button>
+
+						{ connection.configured && (
+							<span
+								aria-hidden="true"
+								className="size-1.5 rounded-full bg-success shrink-0"
+							/>
+						) }
+
+						{ ! connection.builtin && (
+							<Button
+								variant="ghost"
+								size="icon"
+								className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+								aria-label={ sprintf(
+									/* translators: %s: connection name. */
+									__( 'Remove %s', 'modern-mailer-oauth' ),
+									connection.name
+								) }
+								busy={ remove.isPending }
+								onClick={ () => {
+									// Deleting takes the stored credentials with
+									// it, which is not recoverable from here.
+									// eslint-disable-next-line no-alert
+									if (
+										window.confirm(
+											sprintf(
+												/* translators: %s: connection name. */
+												__(
+													'Remove %s and its stored credentials? Any routing rule using it will be deleted too.',
+													'modern-mailer-oauth'
+												),
+												connection.name
+											)
+										)
+									) {
+										remove.mutate( connection.id );
+									}
+								} }
+							>
+								<Trash2 className="text-danger" />
+							</Button>
+						) }
+					</div>
+				);
+			} ) }
+
+			{ adding ? (
+				<div className="grid gap-2 rounded-lg border p-3">
+					<Input
+						autoFocus
+						placeholder={ __( 'Connection name', 'modern-mailer-oauth' ) }
+						value={ name }
+						onChange={ ( e ) => setName( e.target.value ) }
+						onKeyDown={ ( e ) => e.key === 'Enter' && add.mutate() }
+					/>
+					<div className="flex gap-2">
+						<Button size="sm" variant="default" busy={ add.isPending } onClick={ () => add.mutate() }>
+							{ __( 'Add', 'modern-mailer-oauth' ) }
+						</Button>
+						<Button size="sm" variant="ghost" onClick={ () => setAdding( false ) }>
+							{ __( 'Cancel', 'modern-mailer-oauth' ) }
+						</Button>
+					</div>
+				</div>
+			) : (
+				<Button
+					variant="outline"
+					size="sm"
+					disabled={ full }
+					onClick={ () => setAdding( true ) }
+				>
+					<Plus />
+					{ full
+						? __( 'Connection limit reached', 'modern-mailer-oauth' )
+						: __( 'Add connection', 'modern-mailer-oauth' ) }
+				</Button>
+			) }
+		</div>
+	);
+};
+
+const Connections = () => {
+	const [ selected, setSelected ] = useState( 'primary' );
+	const { data: bootstrap } = useQuery( { queryKey: [ 'bootstrap' ] } );
+	const { data: list, isLoading } = useQuery( {
+		queryKey: [ 'connection-list' ],
+		queryFn: listConnections,
+	} );
+
+	const categories = bootstrap?.categories || {};
+
+	if ( isLoading ) {
+		return <Spinner />;
+	}
+
+	const connections = list?.connections || [];
+	const current = connections.find( ( c ) => c.id === selected );
+
+	// A connection can disappear underneath the selection - deleted here, or in
+	// another tab - so fall back rather than rendering an empty panel.
+	const activeId = current ? selected : 'primary';
+
+	return (
+		<div className="grid gap-5 lg:grid-cols-[260px_1fr] items-start">
+			<ConnectionList
+				connections={ connections }
+				selected={ activeId }
+				max={ list?.max ?? 10 }
+				onSelect={ setSelected }
+			/>
+
+			<div className="grid gap-5 min-w-0">
+				<ConnectionPanel
+					key={ activeId }
+					slot={ activeId }
+					categories={ categories }
+					title={ ( current || connections[ 0 ] )?.name }
+				/>
+
+				{ 'primary' === activeId && <TestEmail /> }
 			</div>
-
-			<ConnectionPanel key={ slot } slot={ slot } categories={ categories } />
-
-			{ slot === 'primary' && <TestEmail /> }
 		</div>
 	);
 };

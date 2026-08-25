@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.4.2
+Stable tag: 0.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,20 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.5.2 =
+* The Modern Mailer menu no longer has submenus. It opens straight onto the app, which carries its own tabs - Dashboard, Connections, Routing, Email Logs and Settings - so there is one navigation to follow rather than two that had to agree with each other.
+
+= 0.5.1 =
+* Fixed the on/off switches. The thumb was almost the same colour as the track when a switch was off, so the control read as a blank pill that gave no sign of its state - or that it was a control at all. The off track now has its own colour, the thumb carries a shadow, and the switch is larger and easier to hit.
+* Clicking the text beside a switch now toggles it. It previously did nothing: the label pointed at a button, which browsers do not reliably activate that way.
+
+= 0.5.0 =
+* Added additional connections. Beyond Primary and Backup you can now configure up to ten more, each with its own provider and its own credentials.
+* Added smart routing. Rules send matching email through a chosen connection - receipts through a transactional sender, a newsletter through somewhere else. Conditions can test the subject, the To, Cc or Bcc addresses, the recipient domain or the From address; conditions in a group are combined with And, groups with Or, and the first matching rule wins.
+* Routing chooses the path and nothing more: a routed message that fails still falls back to the backup connection and then to the retry queue, exactly as an unrouted one does.
+* A rule pointing at a connection that has been deleted, or one left without a condition, is ignored rather than capturing mail. Deleting a connection removes its stored credentials and any rule that referenced it.
+* The queue records which connection a message was routed to, so a retry cannot silently move it to a different sender after the rules change.
 
 = 0.4.2 =
 * The plugin now checks GitHub for its own updates. New versions appear on the Plugins screen and under Dashboard - Updates like any other plugin, and update with one click or automatically if the site has auto-updates on.

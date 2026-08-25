@@ -23,7 +23,13 @@ class Settings {
 	public const PROVIDER_GMAIL_SA     = 'gmail_sa';
 	public const PROVIDER_GMAIL_OAUTH  = 'gmail_oauth';
 
-	/** The two connection slots. The backup is optional. */
+	/**
+	 * The two built-in connection slots.
+	 *
+	 * Any other string is an additional connection, stored under its own
+	 * prefix. Nothing here is limited to two - the prefix mechanism was always
+	 * general, and additional connections use it unchanged.
+	 */
 	public const SLOT_PRIMARY = '';
 	public const SLOT_BACKUP  = 'backup';
 
@@ -67,6 +73,15 @@ class Settings {
 		'alert_email'     => [ '', 'MMOA_ALERT_EMAIL', 'email' ],
 
 		'queue_enabled'   => [ true, null, 'bool' ],
+
+		// Additional connections beyond primary and backup: [ id => name ].
+		// Only the names live here; every credential a connection holds is
+		// stored under its own slot prefix by the same mechanism the backup
+		// already uses.
+		'connections'     => [ [], null, 'list' ],
+
+		'routing_enabled' => [ false, null, 'bool' ],
+		'routing_rules'   => [ [], null, 'list' ],
 	];
 
 	/**
@@ -275,6 +290,45 @@ class Settings {
 	}
 
 	/**
+	 * Sanitize a nested array of scalars.
+	 *
+	 * Keys are restricted to the characters a structured payload actually needs,
+	 * so a crafted key cannot become anything surprising when this is read back
+	 * and iterated. Depth is capped for the same reason a recursive walk over
+	 * untrusted input always should be.
+	 *
+	 * @param array<mixed> $value Raw array.
+	 * @return array<mixed>
+	 */
+	private function sanitize_list( array $value, int $depth = 0 ): array {
+		if ( $depth > 6 ) {
+			return [];
+		}
+
+		$out = [];
+
+		foreach ( $value as $key => $item ) {
+			$key = is_int( $key ) ? $key : preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) $key );
+
+			if ( '' === $key && ! is_int( $key ) ) {
+				continue;
+			}
+
+			if ( is_array( $item ) ) {
+				$out[ $key ] = $this->sanitize_list( $item, $depth + 1 );
+			} elseif ( is_bool( $item ) ) {
+				$out[ $key ] = $item;
+			} elseif ( is_int( $item ) || is_float( $item ) ) {
+				$out[ $key ] = $item;
+			} else {
+				$out[ $key ] = sanitize_text_field( (string) $item );
+			}
+		}
+
+		return $out;
+	}
+
+	/**
 	 * @param mixed $value Raw value.
 	 * @return mixed Sanitized value.
 	 */
@@ -286,6 +340,12 @@ class Settings {
 				return (int) $value;
 			case 'email':
 				return sanitize_email( (string) $value );
+			case 'list':
+				// Nested arrays - the connection list and the routing rules.
+				// Sanitized recursively rather than trusted, because these
+				// arrive from the admin app as JSON and end up in an option
+				// that other code reads back as structured data.
+				return is_array( $value ) ? $this->sanitize_list( $value ) : [];
 			case 'provider':
 				return array_key_exists( (string) $value, self::provider_labels() )
 					? (string) $value

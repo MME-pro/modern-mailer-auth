@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Skeleton } from './ui/skeleton';
 import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 import {
 	Card,
 	CardHeader,
@@ -67,6 +68,58 @@ export const Panel = ( { title, description, actions, footer, children, classNam
 		{ footer && <CardFooter className="border-t pt-6">{ footer }</CardFooter> }
 	</Card>
 );
+
+/**
+ * A setting that is on or off, with room for the explanation it needs.
+ *
+ * The label is clickable but is deliberately NOT wired with `htmlFor`. Radix
+ * renders a switch as a <button>, and a label pointing at a button does not
+ * reliably activate it across browsers - the text looks clickable and does
+ * nothing. So the label toggles through its own handler, and the switch is tied
+ * to it with aria-labelledby instead, which is what screen readers need anyway.
+ *
+ * Doing both would toggle twice in any browser that does forward the click.
+ */
+export const ToggleRow = ( { id, checked, onChange, disabled, label, help, className } ) => {
+	const labelId = `${ id }-label`;
+
+	return (
+		<div
+			className={ cn(
+				'flex items-start justify-between gap-6 rounded-lg border p-4 transition-colors',
+				! disabled && 'hover:bg-muted/40',
+				className
+			) }
+		>
+			<div className="min-w-0 grid gap-1">
+				<label
+					id={ labelId }
+					onClick={ () => ! disabled && onChange( ! checked ) }
+					className={ cn(
+						'text-sm font-medium leading-none w-fit',
+						disabled ? 'opacity-60' : 'cursor-pointer'
+					) }
+				>
+					{ label }
+				</label>
+				{ help && (
+					<p className="text-xs text-muted-foreground m-0 max-w-prose leading-relaxed">
+						{ help }
+					</p>
+				) }
+			</div>
+
+			<Switch
+				id={ id }
+				aria-labelledby={ labelId }
+				checked={ !! checked }
+				disabled={ disabled }
+				onCheckedChange={ onChange }
+				className="mt-0.5 shrink-0"
+			/>
+		</div>
+	);
+};
 
 /**
  * A labelled form control.

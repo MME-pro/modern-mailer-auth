@@ -14,11 +14,16 @@ use ModernMailer\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The admin screens, their form handlers, and the failure notice.
+ * Form handlers, the failure notice, and the no-JavaScript screens.
  *
- * Three pages under one top-level menu: Settings (site-wide options and the
- * primary connection), Backup (the fallback connection), and Logs (the send log
- * and the retry queue).
+ * The menu belongs to App_Page, which mounts the admin app. What stays here is
+ * everything that cannot live inside it: the Google sign-in round trip, which
+ * leaves the browser and comes back as a top-level GET rather than a REST call,
+ * and the admin-post handlers behind the server-rendered views.
+ *
+ * Those views are no longer reachable from a menu. They are kept because they
+ * are a working fallback that needs no JavaScript, and because the test suite
+ * renders them to assert the same data the app shows.
  */
 class Admin_Page {
 
@@ -69,71 +74,6 @@ class Admin_Page {
 		// otherwise silently break every existing connection.
 		add_action( 'admin_post_' . Google_Consent::CALLBACK_ACTION, [ $this, 'handle_google_callback' ] );
 		add_action( 'admin_notices', [ $this, 'failure_notice' ] );
-	}
-
-	public function add_page(): void {
-		add_menu_page(
-			__( 'Modern Mailer', 'modern-mailer-oauth' ),
-			__( 'Modern Mailer', 'modern-mailer-oauth' ),
-			self::CAPABILITY,
-			self::SLUG,
-			[ $this, 'render_settings' ],
-			'dashicons-email-alt',
-			// Just below Settings, so it sits with configuration rather than
-			// among content menus.
-			80
-		);
-
-		// The first submenu must reuse the parent slug, otherwise WordPress
-		// shows a duplicate entry labelled after the whole menu.
-		add_submenu_page(
-			self::SLUG,
-			__( 'Modern Mailer Settings', 'modern-mailer-oauth' ),
-			__( 'Settings', 'modern-mailer-oauth' ),
-			self::CAPABILITY,
-			self::SLUG,
-			[ $this, 'render_settings' ]
-		);
-
-		add_submenu_page(
-			self::SLUG,
-			__( 'Backup Connection', 'modern-mailer-oauth' ),
-			__( 'Backup', 'modern-mailer-oauth' ),
-			self::CAPABILITY,
-			self::SLUG_BACKUP,
-			[ $this, 'render_backup' ]
-		);
-
-		add_submenu_page(
-			self::SLUG,
-			__( 'Mail Logs', 'modern-mailer-oauth' ),
-			$this->logs_menu_label(),
-			self::CAPABILITY,
-			self::SLUG_LOGS,
-			[ $this, 'render_logs' ]
-		);
-	}
-
-	/**
-	 * "Logs", with a count bubble when the queue is holding something.
-	 *
-	 * Queued mail is the one state an admin needs to notice without going
-	 * looking for it, and the bubble is how every other WordPress menu says
-	 * "there is something here".
-	 */
-	private function logs_menu_label(): string {
-		$stats   = $this->plugin->queue->stats();
-		$waiting = (int) $stats['pending'] + (int) $stats['failed'];
-
-		if ( 0 === $waiting ) {
-			return __( 'Logs', 'modern-mailer-oauth' );
-		}
-
-		return sprintf(
-			/* translators: %d: number of queued or abandoned messages. */
-			__( 'Logs %s', 'modern-mailer-oauth' ),
-			'<span class="awaiting-mod"><span class="pending-count">' . (int) $waiting . '</span></span>'
-		);
 	}
 
 	/**

@@ -30,6 +30,8 @@ class Plugin {
 	public Logger $logger;
 	public Health_Monitor $health;
 	public Queue $queue;
+	public Connections $connections;
+	public Router $router;
 	public Google_Consent $consent;
 	public Dispatcher $dispatcher;
 
@@ -49,6 +51,8 @@ class Plugin {
 		$this->logger     = new Logger( $this->settings );
 		$this->health     = new Health_Monitor( $this->settings );
 		$this->queue      = new Queue( $this->settings );
+		$this->connections = new Connections( $this->settings );
+		$this->router      = new Router( $this->settings, $this->connections );
 		$this->consent    = new Google_Consent( $this->settings, $this->http );
 		$this->dispatcher = new Dispatcher(
 			$this->settings,
@@ -56,7 +60,8 @@ class Plugin {
 			$this->http,
 			$this->logger,
 			$this->health,
-			$this->queue
+			$this->queue,
+			$this->router
 		);
 	}
 

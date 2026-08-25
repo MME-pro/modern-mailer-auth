@@ -53,6 +53,12 @@
 	--input: oklch(0.922 0.004 90);
 	--ring: oklch(0.55 0.23 295);
 
+	/* The switch track when off. Deliberately its own token rather than --input:
+	   that is a border colour at 92% lightness, and a white thumb sitting on it
+	   is all but invisible - the control reads as a blank pill with no state. */
+	--switch-off: oklch(0.80 0.009 90);
+	--switch-thumb: oklch(1 0 0);
+
 	/* Brand. One colour, used for focus, active nav and the chart. */
 	--brand: oklch(0.55 0.23 295);
 	--brand-foreground: oklch(0.985 0 0);
@@ -89,6 +95,8 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 14%);
 	--ring: oklch(0.62 0.21 295);
+	--switch-off: oklch(0.42 0.012 285);
+	--switch-thumb: oklch(0.98 0.002 90);
 	--brand: oklch(0.66 0.21 295);
 	--brand-subtle: oklch(0.28 0.06 295);
 	--success: oklch(0.68 0.15 155);
@@ -120,6 +128,8 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 
+	--color-switch-off: var(--switch-off);
+	--color-switch-thumb: var(--switch-thumb);
 	--color-brand: var(--brand);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-subtle: var(--brand-subtle);
