@@ -1,0 +1,86 @@
+name: Release
+
+# Tag a commit and the installable zip builds itself:
+#
+#   git tag v0.4.2 && git push origin v0.4.2
+#
+# Every site running the plugin sees that release through the built-in update
+# checker (includes/class-updater.php), so publishing the release IS the
+# deploy - there is no per-site credential in this workflow to leak or rotate.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build a release from (e.g. v0.4.2)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install admin app dependencies
+        run: npm ci
+
+      - name: Build admin app
+        run: npm run build
+
+      # The tag is the source of truth for the version, but the plugin header
+      # is what WordPress compares against. A mismatch means every site is
+      # offered an update it already has, forever - so fail loudly here.
+      - name: Check the tag matches the plugin header
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          TAG_VERSION="${TAG#v}"
+          HEADER_VERSION="$(grep -m1 -oP '^\s*\*\s*Version:\s*\K[0-9a-zA-Z.\-]+' modern-mailer-oauth.php)"
+          echo "tag=${TAG_VERSION} header=${HEADER_VERSION}"
+          if [ "$TAG_VERSION" != "$HEADER_VERSION" ]; then
+            echo "::error::Tag ${TAG_VERSION} does not match the Version header (${HEADER_VERSION}). Bump the header, or retag."
+            exit 1
+          fi
+          echo "VERSION=${TAG_VERSION}" >> "$GITHUB_ENV"
+
+      # Ship only what a site needs to run. The zip's single root folder must
+      # be the plugin slug, or WordPress installs the update alongside the old
+      # copy instead of replacing it.
+      - name: Build the installable zip
+        run: |
+          SLUG=modern-mailer-oauth
+          mkdir -p dist/"$SLUG"
+          rsync -a ./ dist/"$SLUG"/ \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'dist' \
+            --exclude 'node_modules' \
+            --exclude 'src' \
+            --exclude 'tests' \
+            --exclude 'docs' \
+            --exclude '.gitignore' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            --exclude 'postcss.config.js' \
+            --exclude '*.log'
+          (cd dist && zip -rq "$SLUG".zip "$SLUG")
+          unzip -l dist/"$SLUG".zip | head -40
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: v${{ env.VERSION }}
+          generate_release_notes: true
+          files: dist/modern-mailer-oauth.zip

@@ -72,6 +72,13 @@ class Plugin {
 			( new Admin_Page( $this ) )->register();
 		}
 
+		// The update check only has to run where WordPress actually looks for
+		// updates - the admin, and the cron job behind auto-updates. On a
+		// front-end request it would be a network call nobody reads.
+		if ( is_admin() || wp_doing_cron() ) {
+			( new Updater( $this->http ) )->register();
+		}
+
 		( new Site_Health( $this ) )->register();
 
 		// Registered unconditionally, not only in the admin: rest_api_init fires
