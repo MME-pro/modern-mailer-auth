@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.7.3
+Stable tag: 0.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,11 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.7.4 =
+* Verifying a Microsoft 365 connection now names the permission that is missing, instead of reporting whichever error Graph happened to return first. An app registration with no admin consent, or with everything granted except Mail.Send, is told exactly what to add and where to add it.
+* Verify no longer reports a clean pass when it could only check part of the connection. Where the sending mailbox itself could not be read - that needs a permission sending does not require, and this plugin does not ask for - it now says so instead of leaving it unmentioned.
+* Connecting or verifying now points out required fields that are still empty, before anything is sent to the provider. A half-filled connection used to come back as an error from the provider rather than a note on the field that was missing.
 
 = 0.7.3 =
 * Updates now appear promptly. The check remembered its answer for six hours, so a release could sit unnoticed for most of a working day; it is now fifteen minutes, and a failed check is retried after five rather than thirty.
