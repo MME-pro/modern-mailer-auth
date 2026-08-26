@@ -37,6 +37,12 @@ class Graph extends Abstract_Provider {
 	private const SCOPE      = 'https://graph.microsoft.com/.default';
 
 	/**
+	 * Any one of these makes GET /users readable, so the mailbox can be
+	 * confirmed. None of them is needed to send.
+	 */
+	private const DIRECTORY_ROLES = [ 'User.Read.All', 'User.ReadBasic.All', 'Directory.Read.All', 'Directory.ReadWrite.All' ];
+
+	/**
 	 * Graph caps a request body at 4 MB. We base64 the MIME before sending,
 	 * which costs 4/3, so the raw message must stay under ~3 MB.
 	 *
@@ -144,6 +150,10 @@ class Graph extends Abstract_Provider {
 		return $this->map_error( $response['code'], $response['body'], $sender );
 	}
 
+	/**
+	 * @return true|string|WP_Error True when everything was checked, a string
+	 *                              when it passed but something was skipped.
+	 */
 	public function verify_connection() {
 		$token = $this->access_token();
 
@@ -160,9 +170,38 @@ class Graph extends Abstract_Provider {
 			);
 		}
 
-		// Reading the mailbox confirms three things at once: the token is
-		// valid, the mailbox exists, and the access policy actually grants
-		// this app reach to it.
+		$roles = $this->granted_roles( $token );
+
+		// A consent granted a minute ago does not appear in a token minted
+		// before it, and these live for about an hour. Without this, an admin
+		// who has just fixed the permission is told it is still missing and
+		// reasonably concludes the fix did not work.
+		if ( null !== $roles && ! in_array( 'Mail.Send', $roles, true ) ) {
+			$this->invalidate_token();
+
+			$token = $this->access_token();
+
+			if ( is_wp_error( $token ) ) {
+				return $token;
+			}
+
+			$roles = $this->granted_roles( $token );
+		}
+
+		if ( null !== $roles && ! in_array( 'Mail.Send', $roles, true ) ) {
+			return $this->no_mail_send_error( $roles );
+		}
+
+		// Reading the mailbox confirms two more things: that it exists, and
+		// that the access policy actually grants this app reach to it. But
+		// /users needs User.Read.All, which sending does not - so the probe
+		// runs only where the directory is already readable. Demanding it
+		// would double the permission this plugin asks a tenant for, to check
+		// something it does not need in order to work.
+		if ( null !== $roles && ! array_intersect( self::DIRECTORY_ROLES, $roles ) ) {
+			return $this->unchecked_mailbox_notice();
+		}
+
 		$response = $this->http->request(
 			self::GRAPH_BASE . '/users/' . rawurlencode( $sender ) . '?$select=mail,userPrincipalName',
 			[
@@ -179,7 +218,81 @@ class Graph extends Abstract_Provider {
 			return true;
 		}
 
+		// Being refused the directory is not a sending fault, whatever the
+		// roles claim led us to expect - RBAC for Applications can scope the
+		// read away again. Report what could not be checked rather than
+		// failing a connection that may well send perfectly well.
+		if (
+			403 === $response['code']
+			&& 'Authorization_RequestDenied' === (string) ( $this->decode( $response['body'] )['error']['code'] ?? '' )
+		) {
+			return $this->unchecked_mailbox_notice();
+		}
+
 		return $this->map_error( $response['code'], $response['body'], $sender );
+	}
+
+	/**
+	 * The Graph application permissions this app was actually granted.
+	 *
+	 * App-only tokens carry their consented permissions in the `roles` claim,
+	 * so the most common setup failure - an app registration with no admin
+	 * consent - can be named exactly instead of being inferred from whichever
+	 * endpoint happens to refuse us first. That refusal is a 403 reading
+	 * "Insufficient privileges to complete the operation", which says nothing
+	 * about which privilege, or where to grant it.
+	 *
+	 * The claim is read, never trusted: nothing here is an authorization
+	 * decision of ours. Microsoft enforces the permissions; this only decides
+	 * what to tell the admin. The signature is therefore not checked, and an
+	 * unreadable token returns null so verification falls back to asking Graph
+	 * rather than guessing.
+	 *
+	 * @return string[]|null Granted roles, or null if the token cannot be read.
+	 */
+	private function granted_roles( string $token ): ?array {
+		$parts = explode( '.', $token );
+
+		if ( 3 !== count( $parts ) ) {
+			return null;
+		}
+
+		$payload = base64_decode( strtr( $parts[1], '-_', '+/' ) . str_repeat( '=', ( 4 - strlen( $parts[1] ) % 4 ) % 4 ), true );
+
+		if ( false === $payload ) {
+			return null;
+		}
+
+		$claims = json_decode( $payload, true );
+
+		if ( ! is_array( $claims ) || ! array_key_exists( 'roles', $claims ) ) {
+			// No roles claim at all is not an unreadable token - it is an app
+			// registration with nothing consented, which is exactly the case
+			// worth naming.
+			return is_array( $claims ) ? [] : null;
+		}
+
+		return array_values( array_filter( (array) $claims['roles'], 'is_string' ) );
+	}
+
+	/**
+	 * @param string[] $roles Whatever the app was granted instead.
+	 */
+	private function no_mail_send_error( array $roles ): WP_Error {
+		return new WP_Error(
+			'mmoa_graph_no_mail_send',
+			[] === $roles
+				? __( 'This app registration has no Microsoft Graph application permissions at all. In Entra, open the app, go to API permissions, choose Add a permission, then Microsoft Graph, then Application permissions - not Delegated - and add Mail.Send. It only takes effect once you click Grant admin consent.', 'modern-mailer-oauth' )
+				: sprintf(
+					/* translators: %s: comma-separated list of granted permissions. */
+					__( 'This app registration has admin consent for %s, but not for Mail.Send. Add Mail.Send under API permissions as an Application permission, then grant admin consent again.', 'modern-mailer-oauth' ),
+					implode( ', ', $roles )
+				)
+		);
+	}
+
+	private function unchecked_mailbox_notice(): string {
+		return __( 'Credentials are valid and Mail.Send is granted, so this connection can send. The mailbox itself was not checked - that needs the User.Read.All permission, which sending does not require and this plugin does not ask for.', 'modern-mailer-oauth' );
 	}
 
 	protected function token_cache_key(): string {

@@ -318,12 +318,17 @@ class Rest_Controller {
 
 		$result = $provider->verify_connection();
 
+		// A string is a pass with a caveat - verified, but some part of the
+		// check needed a permission the transport does not need to send, so it
+		// was skipped rather than failed. The caveat is the message.
 		return new WP_REST_Response(
 			[
-				'ok'      => true === $result,
+				'ok'      => true === $result || is_string( $result ),
 				'message' => is_wp_error( $result )
 					? $result->get_error_message()
-					: __( 'Verified. The credentials are valid and the mailbox is reachable.', 'modern-mailer-oauth' ),
+					: ( is_string( $result )
+						? $result
+						: __( 'Verified. The credentials are valid and the mailbox is reachable.', 'modern-mailer-oauth' ) ),
 				'code'    => is_wp_error( $result ) ? $result->get_error_code() : '',
 			]
 		);

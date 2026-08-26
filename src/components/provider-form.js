@@ -82,35 +82,71 @@ const RadioGroup = ( { field, value, disabled, onChange } ) => (
 	</div>
 );
 
+/**
+ * A field is inert when the field it depends on says so - authentication
+ * switched off makes the username and password meaningless.
+ *
+ * Disabled rather than hidden, deliberately: these sit in a three-column row,
+ * and removing two of the three would collapse the layout every time the
+ * toggle moved.
+ *
+ * At module scope because the same rule has to decide two things: what the form
+ * greys out, and what the required check below is entitled to demand. A field
+ * that is irrelevant right now must not be able to block a connection.
+ */
+export const isFieldDisabled = ( provider, values, field ) => {
+	if ( field.locked ) {
+		return true;
+	}
+
+	if ( ! field.depends?.field ) {
+		return false;
+	}
+
+	const controller = provider.fields.find( ( f ) => f.key === field.depends.field );
+	const current =
+		values[ field.depends.field ] !== undefined
+			? values[ field.depends.field ]
+			: controller?.value ?? controller?.default ?? '';
+
+	return String( current ) !== String( field.depends.value );
+};
+
+/**
+ * The required fields this provider still has nothing for.
+ *
+ * Every provider has always declared which fields it cannot work without, and
+ * the REST API has always published that flag - nothing read it. So a
+ * connection could be saved with a hole in it and only say so at verification
+ * time, one missing field per attempt, with the form showing no sign that
+ * anything was outstanding.
+ *
+ * A secret counts as present when the server says one is stored. The value
+ * itself never comes back to the browser, so `is_set` is the only evidence
+ * there is that a credential exists.
+ *
+ * @return {Array<Object>} The offending field definitions, in form order.
+ */
+export const missingRequired = ( provider, values ) =>
+	( provider?.fields || [] ).filter( ( field ) => {
+		if ( ! field.required || isFieldDisabled( provider, values, field ) ) {
+			return false;
+		}
+
+		if ( field.secret ) {
+			return ! field.is_set && '' === String( values[ field.key ] ?? '' ).trim();
+		}
+
+		const value = values[ field.key ] !== undefined ? values[ field.key ] : field.value;
+
+		return '' === String( value ?? '' ).trim();
+	} );
+
 const ProviderForm = ( { provider, values, onChange } ) => {
 	const valueOf = ( field ) =>
 		values[ field.key ] !== undefined ? values[ field.key ] : field.value ?? '';
 
-	/**
-	 * A field is inert when the field it depends on says so - authentication
-	 * switched off makes the username and password meaningless.
-	 *
-	 * Disabled rather than hidden, deliberately: these sit in a three-column
-	 * row, and removing two of the three would collapse the layout every time
-	 * the toggle moved.
-	 */
-	const isDisabled = ( field ) => {
-		if ( field.locked ) {
-			return true;
-		}
-
-		if ( ! field.depends?.field ) {
-			return false;
-		}
-
-		const controller = provider.fields.find( ( f ) => f.key === field.depends.field );
-		const current =
-			values[ field.depends.field ] !== undefined
-				? values[ field.depends.field ]
-				: controller?.value ?? controller?.default ?? '';
-
-		return String( current ) !== String( field.depends.value );
-	};
+	const isDisabled = ( field ) => isFieldDisabled( provider, values, field );
 
 	const handle = ( field, value ) => {
 		onChange( field.key, value );
@@ -150,6 +186,7 @@ const ProviderForm = ( { provider, values, onChange } ) => {
 							label={ field.label }
 							help={ field.help }
 							locked={ field.locked }
+							required={ field.required && ! disabled }
 							htmlFor={ field.type === 'radio' ? undefined : id }
 						>
 							{ field.type === 'radio' && (

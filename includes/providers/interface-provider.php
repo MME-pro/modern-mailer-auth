@@ -35,7 +35,12 @@ interface Provider_Interface {
 	/**
 	 * Check credentials without sending anything.
 	 *
-	 * @return true|WP_Error
+	 * A string result means verified, but not everything could be checked -
+	 * the string says what was skipped and why. It is reported as a success,
+	 * because refusing a connection over a check the transport does not need
+	 * in order to send would be worse than saying so plainly.
+	 *
+	 * @return true|string|WP_Error
 	 */
 	public function verify_connection();
 

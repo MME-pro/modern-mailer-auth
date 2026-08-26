@@ -15,7 +15,7 @@ import { useToast } from '../components/toast';
 import { Panel, Button, Badge, FormField, Spinner, Input, inputClass } from '../components/ui';
 import { cn } from '../lib/utils';
 import GoogleConnect from '../components/google-connect';
-import ProviderForm from '../components/provider-form';
+import ProviderForm, { missingRequired } from '../components/provider-form';
 import ProviderLogo from '../components/provider-logo';
 
 /**
@@ -153,7 +153,37 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 	} );
 
 	const verify = useMutation( {
-		mutationFn: () => verifyConnection( slot ),
+		// Verification runs against what is stored, never against what is on
+		// screen - the server has to build the provider from saved credentials
+		// to talk to it at all. So unsaved edits are persisted first. Without
+		// that, pressing Verify on a filled-in but never-saved connection tests
+		// the previous state, and a fresh one answers "choose a provider" while
+		// the provider is plainly selected in front of you.
+		mutationFn: async () => {
+			// Providers declare what they cannot work without, so an incomplete
+			// connection can be answered here instead of over the wire. The
+			// server checks one field at a time - it stops at the first thing
+			// missing - which turns filling in a form into a sequence of round
+			// trips. Name all of it at once.
+			const gaps = missingRequired( current, values );
+
+			if ( gaps.length ) {
+				return {
+					ok: false,
+					message: sprintf(
+						/* translators: %s: comma-separated list of field labels. */
+						__( 'Fill in %s before verifying.', 'modern-mailer-oauth' ),
+						gaps.map( ( field ) => field.label ).join( ', ' )
+					),
+				};
+			}
+
+			if ( dirty ) {
+				await save.mutateAsync();
+			}
+
+			return verifyConnection( slot );
+		},
 		// The result is kept in the page rather than shown as a toast: a
 		// verification failure names the exact misconfiguration, and that is
 		// the last thing that should vanish after three seconds.

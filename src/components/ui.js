@@ -128,9 +128,21 @@ export const ToggleRow = ( { id, checked, onChange, disabled, label, help, class
  * genuinely uneditable, and saying so is better than a disabled input with no
  * explanation.
  */
-export const FormField = ( { label, help, locked, error, htmlFor, children, className } ) => (
+export const FormField = ( { label, help, locked, required, error, htmlFor, children, className } ) => (
 	<div className={ cn( 'grid gap-2', className ) }>
-		{ label && <Label htmlFor={ htmlFor }>{ label }</Label> }
+		{ label && (
+			<Label htmlFor={ htmlFor }>
+				{ label }
+				{ required && (
+					// Marked in the label rather than only enforced on submit,
+					// so a field that will block verification looks like one
+					// before the form is filled in.
+					<span aria-hidden="true" className="text-danger">
+						*
+					</span>
+				) }
+			</Label>
+		) }
 		{ children }
 		{ error ? (
 			<p className="text-xs text-danger m-0">{ error }</p>

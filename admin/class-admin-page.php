@@ -199,6 +199,12 @@ class Admin_Page {
 			$this->redirect( 'error', $result->get_error_message() );
 		}
 
+		// A string result is a pass with a caveat, and the caveat is the only
+		// part worth reading - it says what could not be checked.
+		if ( is_string( $result ) ) {
+			$this->redirect( 'saved', $result );
+		}
+
 		$this->redirect(
 			'saved',
 			Settings::SLOT_BACKUP === $slot
