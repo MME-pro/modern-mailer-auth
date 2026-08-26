@@ -81,7 +81,7 @@ class Updater {
 	 * WordPress's "Check Again" button links to update-core.php?force-check=1,
 	 * and core responds by throwing away *its* update transient and rebuilding
 	 * it. That rebuild runs inject_update() again - which, without this, was
-	 * answered straight from our own six-hour cache.
+	 * answered straight from our own cached answer.
 	 *
 	 * The effect was that a site which last checked while an older release was
 	 * current kept reporting itself up to date, and no amount of clicking would

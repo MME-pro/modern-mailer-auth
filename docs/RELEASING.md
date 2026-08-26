@@ -115,9 +115,16 @@ That zip is now what every site will install.
 
 Nothing is pushed to a site. Each one checks GitHub on its own:
 
-- The check runs in the admin and on cron, and the answer is cached for six
-  hours — so a site can take up to six hours to notice a new release.
+- The check runs in the admin and on cron, and the answer is cached for fifteen
+  minutes — so a site notices a new release on the first admin page load after
+  that window. A check that could not reach GitHub is retried after five minutes.
+  Both windows were six hours until 0.7.3.
 - To see it immediately on a given site: **Dashboard - Updates - Check again**.
+- **The plugin has to be active.** The update checker lives inside the plugin, so
+  a deactivated copy runs no code, registers no filter, and is never offered an
+  update - no amount of waiting or clicking Check again will produce one. Only
+  wordpress.org plugins update while deactivated, because core does that check
+  centrally. Activate it first, then Check again.
 - Sites with auto-updates enabled for this plugin update themselves on the next
   cron run. Everyone else clicks **Update now** on the Plugins screen.
 
