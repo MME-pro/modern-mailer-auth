@@ -43,6 +43,13 @@ final class Config {
 		return [
 			$public_dir . '/../../.env.broker',
 			$public_dir . '/../.env.broker',
+
+			// Inside the document root. Last, and only reachable because some
+			// shared hosting will not let a subdomain's root move above
+			// public_html. It is protected by the deny rules in .htaccess
+			// rather than by being unreachable, which is weaker - a host that
+			// ignores .htaccess would serve it as text.
+			$public_dir . '/.env.broker',
 		];
 	}
 

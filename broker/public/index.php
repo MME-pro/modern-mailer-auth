@@ -9,12 +9,46 @@ declare(strict_types=1);
 
 namespace ModernMailer\Broker;
 
-require __DIR__ . '/../src/Config.php';
-require __DIR__ . '/../src/Crypto.php';
-require __DIR__ . '/../src/Http.php';
-require __DIR__ . '/../src/Providers.php';
-require __DIR__ . '/../src/Store.php';
-require __DIR__ . '/../src/Broker.php';
+/**
+ * Find src/, wherever this ended up.
+ *
+ * The tidy layout puts src/ above the document root, and that is what the
+ * documentation says to do. But plenty of shared hosting will not let you move
+ * a subdomain's root above public_html, and someone in that position will
+ * quite reasonably drop the whole thing inside it - at which point a hard
+ * `../src` fails with a fatal error naming a path that means nothing to them.
+ *
+ * So both layouts work. The one inside the document root is protected by the
+ * deny rules in .htaccess rather than by being unreachable, which is weaker,
+ * and the README says so.
+ */
+$mmoa_src = null;
+
+foreach ( [ __DIR__ . '/../src', __DIR__ . '/src' ] as $mmoa_candidate ) {
+	if ( is_readable( $mmoa_candidate . '/Broker.php' ) ) {
+		$mmoa_src = $mmoa_candidate;
+		break;
+	}
+}
+
+if ( null === $mmoa_src ) {
+	http_response_code( 500 );
+	header( 'Content-Type: application/json' );
+	echo json_encode(
+		[
+			'error'   => 'missing_files',
+			'message' => 'The setup service is installed incompletely: its src directory was not found next to or above index.php.',
+		]
+	);
+	exit;
+}
+
+require $mmoa_src . '/Config.php';
+require $mmoa_src . '/Crypto.php';
+require $mmoa_src . '/Http.php';
+require $mmoa_src . '/Providers.php';
+require $mmoa_src . '/Store.php';
+require $mmoa_src . '/Broker.php';
 
 // Nothing here is cacheable, and several responses carry credentials.
 header( 'Cache-Control: no-store, no-cache, must-revalidate' );

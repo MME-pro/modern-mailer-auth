@@ -71,10 +71,35 @@ Then load `schema.sql`. Two tables, both of things that expire within the hour.
 
 **2. Files**
 
-Upload so that `broker/public/` is the document root of your subdomain, and
-`broker/src/` sits *above* it. If your host cannot move the document root, the
-included `broker/.htaccess` denies everything outside `public/` — but moving the
-root is better.
+Either layout works. Prefer the first.
+
+*Preferred — secrets and code above the web root:*
+
+```
+/home/you/.env.broker
+/home/you/broker/public/     ← document root
+/home/you/broker/src/        ← not reachable by any URL
+```
+
+*Flat — everything inside the document root:*
+
+```
+public_html/index.php
+public_html/.htaccess
+public_html/src/
+public_html/.env.broker
+```
+
+The flat layout exists because plenty of shared hosting will not let a
+subdomain's root move above `public_html`, and someone in that position would
+otherwise be stuck. It is genuinely weaker: `src/` and `.env.broker` are then
+protected by the deny rules in `.htaccess` rather than by being unreachable, so
+a host that ignores `.htaccess` would serve your client secret as plain text.
+Use it only when the first is impossible, and check afterwards that
+`https://your-host/.env.broker` returns 403 or 404 rather than the file.
+
+`/health` reports which configuration file it actually read, so you can confirm
+the layout took effect rather than assuming it did.
 
 **3. Configuration**
 

@@ -1,7 +1,7 @@
 # Everything goes to the front controller.
 #
 # The rewrite is what makes /google/authorize and /callback/google work on
-# ordinary Apache shared hosting, where you cannot edit the vhost.
+# ordinary Apache or LiteSpeed shared hosting, where you cannot edit the vhost.
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 	RewriteCond %{REQUEST_FILENAME} !-f
@@ -9,8 +9,29 @@
 	RewriteRule ^ index.php [L]
 </IfModule>
 
-# The service handles OAuth codes and tokens. If the host ever serves this
-# over plain HTTP, the handoff in the redirect can be read in transit.
+# Belt and braces for the layout where src/ and the configuration had to be
+# placed inside the document root, because the host would not let the root move
+# above public_html. Where they live outside it, none of this is reachable
+# anyway and these rules cost nothing.
+<FilesMatch "^\.env">
+	<IfModule mod_authz_core.c>
+		Require all denied
+	</IfModule>
+	<IfModule !mod_authz_core.c>
+		Order allow,deny
+		Deny from all
+	</IfModule>
+</FilesMatch>
+
+RedirectMatch 404 ^/src/
+RedirectMatch 404 \.sql$
+RedirectMatch 404 \.md$
+
+# The service handles OAuth codes and tokens. If the host ever serves this over
+# plain HTTP, the handoff in the redirect can be read in transit.
 <IfModule mod_headers.c>
 	Header always set Strict-Transport-Security "max-age=31536000"
 </IfModule>
+
+# Directory listings would expose the layout, and there is nothing to list.
+Options -Indexes
