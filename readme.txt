@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.1
+Stable tag: 0.8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,10 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.2 =
+* Every sign-in and disconnect button works again. All of them failed with "The link you followed has expired", however fresh the page was.
+* The links are built for the admin app, which receives them as data and sets them as a link directly. They were being escaped for HTML instead, so the browser sent the escaped text verbatim and the security nonce arrived under the wrong name - which WordPress reports as an expired link, blaming the one thing that was not wrong.
 
 = 0.8.1 =
 * One-click setup is visible again. 0.8.0 shipped it hidden, because no setup service exists yet to answer it - but hiding a finished feature to avoid a bad error message was the wrong trade. Sign in with Google and Sign in with Microsoft are both on the connection screen.

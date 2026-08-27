@@ -488,14 +488,7 @@ class Admin_Page {
 		$out = [];
 
 		foreach ( [ 'connect' => 'mmoa_one_click_connect', 'disconnect' => 'mmoa_one_click_disconnect' ] as $key => $action ) {
-			$out[ $key ] = wp_nonce_url(
-				admin_url(
-					'admin-post.php?action=' . $action
-					. '&family=' . rawurlencode( $family )
-					. '&slot=' . rawurlencode( $slot )
-				),
-				$action
-			);
+			$out[ $key ] = self::signed_url( $action, [ 'family' => $family, 'slot' => $slot ] );
 		}
 
 		return $out;
@@ -529,15 +522,37 @@ class Admin_Page {
 		$out = [];
 
 		foreach ( [ 'connect' => 'mmoa_connect_google', 'disconnect' => 'mmoa_disconnect_google' ] as $key => $action ) {
-			$out[ $key ] = wp_nonce_url(
-				admin_url(
-					'admin-post.php?action=' . $action . '&slot=' . rawurlencode( $slot )
-				),
-				$action
-			);
+			$out[ $key ] = self::signed_url( $action, [ 'slot' => $slot ] );
 		}
 
 		return $out;
+	}
+
+	/**
+	 * A nonce-signed admin-post URL, safe to hand to the admin app as data.
+	 *
+	 * Deliberately not wp_nonce_url(), which finishes with esc_html() and so
+	 * returns `&amp;` between parameters. That is right for a URL printed into
+	 * markup, where the browser decodes the entities on the way back out - and
+	 * wrong for every URL here, because these are serialised into JSON and set
+	 * as an href by React, which assigns the attribute directly and decodes
+	 * nothing.
+	 *
+	 * The result was that the browser requested `…&amp;_wpnonce=…` verbatim, so
+	 * PHP parsed the parameter as `amp;_wpnonce`, the real `_wpnonce` was never
+	 * present, and check_admin_referer() answered "The link you followed has
+	 * expired" - which points at a stale nonce and sends you looking in exactly
+	 * the wrong place.
+	 *
+	 * @param array<string,string> $args Query parameters, values unencoded.
+	 */
+	private static function signed_url( string $action, array $args ): string {
+		$args['action']   = $action;
+		$args['_wpnonce'] = wp_create_nonce( $action );
+
+		// add_query_arg() expects pre-encoded input and passes values through
+		// untouched, so the encoding has to happen here.
+		return add_query_arg( array_map( 'rawurlencode', $args ), admin_url( 'admin-post.php' ) );
 	}
 
 	/**

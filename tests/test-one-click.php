@@ -270,6 +270,36 @@ $denied = $one_click->handle_callback( [ 'error' => 'access_denied', 'state' => 
 check( 'the refusal is reported', is_wp_error( $denied ) && 'mmoa_one_click_denied' === $denied->get_error_code(), is_wp_error( $denied ) ? $denied->get_error_code() : 'accepted' );
 check( 'and repeats what the provider said', is_wp_error( $denied ) && false !== strpos( $denied->get_error_message(), 'access_denied' ) );
 
+echo "\n=== 13b. The sign-in links survive being sent as data ===\n";
+// The regression this guards, which broke every sign-in button on the site:
+// wp_nonce_url() finishes with esc_html(), so it returns `&amp;` between
+// parameters. Correct for a URL printed into markup, where the browser decodes
+// the entities on the way out - wrong for these, which are serialised into JSON
+// and set as an href by React, which decodes nothing.
+//
+// The browser then requested `...&amp;_wpnonce=...` verbatim, PHP parsed the
+// parameter as `amp;_wpnonce`, the real nonce was never present, and
+// check_admin_referer() answered "The link you followed has expired" - which
+// blames a stale nonce and sends an admin looking in entirely the wrong place.
+$links = [
+	'one-click, google'  => [ ModernMailer\Admin\Admin_Page::one_click_urls( Broker::GOOGLE, Settings::SLOT_PRIMARY )['connect'], 'mmoa_one_click_connect' ],
+	'one-click, ms'      => [ ModernMailer\Admin\Admin_Page::one_click_urls( Broker::MICROSOFT, Settings::SLOT_BACKUP )['connect'], 'mmoa_one_click_connect' ],
+	'one-click, discon.' => [ ModernMailer\Admin\Admin_Page::one_click_urls( Broker::GOOGLE, Settings::SLOT_PRIMARY )['disconnect'], 'mmoa_one_click_disconnect' ],
+	'own-client, google' => [ ModernMailer\Admin\Admin_Page::google_urls( Settings::SLOT_PRIMARY )['connect'], 'mmoa_connect_google' ],
+	'own-client, discon.'=> [ ModernMailer\Admin\Admin_Page::google_urls( Settings::SLOT_BACKUP )['disconnect'], 'mmoa_disconnect_google' ],
+];
+
+foreach ( $links as $label => [ $url, $action ] ) {
+	$entities = false !== strpos( $url, '&amp;' ) || false !== strpos( $url, '&#038;' );
+
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $params );
+
+	check( "{$label}: no HTML entities in the URL", ! $entities, $url );
+	check( "{$label}: the nonce arrives under its own name", isset( $params['_wpnonce'] ), implode( ',', array_keys( $params ) ) );
+	check( "{$label}: and it verifies", isset( $params['_wpnonce'] ) && (bool) wp_verify_nonce( $params['_wpnonce'], $action ) );
+	check( "{$label}: the action arrives intact", $action === ( $params['action'] ?? '' ), $params['action'] ?? 'missing' );
+}
+
 echo "\n=== 14. Outlook is a delegated provider, distinct from Microsoft 365 ===\n";
 check( 'Outlook is registered', ModernMailer\Provider_Registry::exists( 'outlook' ) );
 check( 'Microsoft 365 is still registered separately', ModernMailer\Provider_Registry::exists( 'graph' ) );
