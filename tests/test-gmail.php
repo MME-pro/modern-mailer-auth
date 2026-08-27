@@ -112,7 +112,16 @@ if ( $send_req ) {
 
 echo "\n=== Consumer OAuth ===\n";
 $requests = [];
-$plugin->settings->update( [ 'provider' => 'gmail_oauth', 'google_client_id' => 'client-id.apps.googleusercontent.com' ] );
+// google_setup_mode is stated rather than assumed. It decides whether this
+// provider refreshes against Google directly or through the setup service,
+// so a test that left it set to one-click would send this whole section down
+// the brokered path - and the failure would land here, in a suite that never
+// mentions brokering.
+$plugin->settings->update( [
+	'provider'          => 'gmail_oauth',
+	'google_setup_mode' => 'own_client',
+	'google_client_id'  => 'client-id.apps.googleusercontent.com',
+] );
 $plugin->secrets->set( 'google_client_sec', 'client-secret' );
 $plugin->secrets->set( 'google_refresh', 'refresh-token-value' );
 $plugin->tokens->flush(); $plugin->health->reset();

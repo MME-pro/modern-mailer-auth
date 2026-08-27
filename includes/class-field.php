@@ -76,6 +76,35 @@ class Field {
 	) {}
 
 	/**
+	 * The same field, shown only while another field holds a given value.
+	 *
+	 * Exists so a merged provider can borrow the fields its underlying
+	 * transports already declare and gate them on the setup mode, instead of
+	 * those transports having to know they were merged. Fields are readonly, so
+	 * this returns a copy rather than mutating one - two providers sharing a
+	 * field key must not be able to change each other's copy.
+	 *
+	 * @param array{field:string,value:string} $depends Controlling field and value.
+	 */
+	public function with_depends( array $depends ): self {
+		return new self(
+			key: $this->key,
+			label: $this->label,
+			type: $this->type,
+			secret: $this->secret,
+			required: $this->required,
+			help: $this->help,
+			placeholder: $this->placeholder,
+			options: $this->options,
+			default: $this->default,
+			constant: $this->constant,
+			width: $this->width,
+			sets: $this->sets,
+			depends: $depends
+		);
+	}
+
+	/**
 	 * Shorthand for a required credential.
 	 */
 	public static function secret( string $key, string $label, string $help = '', string $placeholder = '' ): self {

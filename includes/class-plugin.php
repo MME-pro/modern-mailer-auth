@@ -11,7 +11,9 @@ use ModernMailer\Admin\Admin_Page;
 use ModernMailer\Admin\App_Page;
 use ModernMailer\Admin\Site_Health;
 use ModernMailer\Api\Rest_Controller;
+use ModernMailer\Auth\Broker;
 use ModernMailer\Auth\Google_Consent;
+use ModernMailer\Auth\One_Click;
 use PHPMailer\PHPMailer\PHPMailer;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,6 +22,9 @@ defined( 'ABSPATH' ) || exit;
  * Wires the plugin together and registers its hooks.
  */
 class Plugin {
+
+	/** Set once the merge migration has run, so it runs once. */
+	private const MERGED_PROVIDERS_OPTION = 'mmoa_merged_providers';
 
 	private static ?Plugin $instance = null;
 
@@ -32,7 +37,10 @@ class Plugin {
 	public Queue $queue;
 	public Connections $connections;
 	public Router $router;
+	public Site_Identity $identity;
+	public Broker $broker;
 	public Google_Consent $consent;
+	public One_Click $one_click;
 	public Dispatcher $dispatcher;
 
 	public static function instance(): Plugin {
@@ -53,7 +61,10 @@ class Plugin {
 		$this->queue      = new Queue( $this->settings );
 		$this->connections = new Connections( $this->settings );
 		$this->router      = new Router( $this->settings, $this->connections );
-		$this->consent    = new Google_Consent( $this->settings, $this->http );
+		$this->identity   = new Site_Identity();
+		$this->broker     = new Broker( $this->http, $this->identity );
+		$this->consent    = new Google_Consent( $this->settings, $this->http, $this->connections );
+		$this->one_click  = new One_Click( $this->settings, $this->broker, $this->connections, $this->tokens );
 		$this->dispatcher = new Dispatcher(
 			$this->settings,
 			$this->tokens,
@@ -183,6 +194,62 @@ class Plugin {
 		if ( ! wp_next_scheduled( Queue::CRON_HOOK ) ) {
 			wp_schedule_event( time() + ( 5 * MINUTE_IN_SECONDS ), Queue::SCHEDULE_NAME, Queue::CRON_HOOK );
 		}
+
+		$this->migrate_merged_providers();
+	}
+
+	/**
+	 * Move connections onto the merged Microsoft and Google providers.
+	 *
+	 * Those two tiles used to be four - Microsoft 365 and Outlook, Google
+	 * Workspace and Gmail - which asked an admin to choose an authentication
+	 * method before choosing a mail service. The methods survive unchanged as
+	 * the setup modes behind each tile, so this only has to restate an existing
+	 * choice in the new vocabulary: no credential is touched and no connection
+	 * changes how it sends.
+	 *
+	 * Nothing here is strictly required for a site to keep working - the old
+	 * slugs are still registered and still constructible, which is deliberate,
+	 * because an upgrade must not be able to stop mail. Without the migration a
+	 * connection would simply keep its old tile until someone edited it.
+	 */
+	private function migrate_merged_providers(): void {
+		if ( get_option( self::MERGED_PROVIDERS_OPTION ) ) {
+			return;
+		}
+
+		// Slug that was stored => [ merged slug, mode setting, mode value ].
+		// A null mode means "leave whatever is there": gmail_oauth already used
+		// google_setup_mode to record whether its token was brokered, and that
+		// answer is still the right one.
+		$map = [
+			'graph'       => [ 'microsoft', 'ms_setup_mode', Auth\One_Click::MODE_OWN_CLIENT ],
+			'outlook'     => [ 'microsoft', 'ms_setup_mode', Auth\One_Click::MODE_ONE_CLICK ],
+			'gmail_sa'    => [ 'google', 'google_setup_mode', Providers\Google::MODE_SERVICE_ACCOUNT ],
+			'gmail_oauth' => [ 'google', 'google_setup_mode', null ],
+		];
+
+		foreach ( $this->connections->all() as $connection ) {
+			$scoped = $this->settings->for_slot( (string) $connection['slot'] );
+			$stored = (string) $scoped->get( 'provider' );
+
+			if ( ! isset( $map[ $stored ] ) ) {
+				continue;
+			}
+
+			[ $merged, $mode_key, $mode ] = $map[ $stored ];
+
+			$values = [ 'provider' => $merged ];
+
+			if ( null !== $mode ) {
+				$values[ $mode_key ] = $mode;
+			}
+
+			$scoped->update( $values );
+		}
+
+		Settings::flush_cache();
+		update_option( self::MERGED_PROVIDERS_OPTION, time(), false );
 	}
 
 	/**

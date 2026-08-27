@@ -83,22 +83,20 @@ const RadioGroup = ( { field, value, disabled, onChange } ) => (
 );
 
 /**
- * A field is inert when the field it depends on says so - authentication
- * switched off makes the username and password meaningless.
+ * Whether the field this one depends on currently says it does not apply.
  *
- * Disabled rather than hidden, deliberately: these sit in a three-column row,
- * and removing two of the three would collapse the layout every time the
- * toggle moved.
+ * Such a field is hidden, not greyed out. These were disabled at first, to stop
+ * a three-column row collapsing whenever a toggle moved - but a mode selector
+ * makes that trade the wrong way round: choosing one-click setup left two dead
+ * credential boxes sitting under it, which reads as something still to fill in
+ * rather than something that no longer applies. A row that reflows is a smaller
+ * cost than a form that looks unfinished.
  *
- * At module scope because the same rule has to decide two things: what the form
- * greys out, and what the required check below is entitled to demand. A field
- * that is irrelevant right now must not be able to block a connection.
+ * `locked` is deliberately not part of this. A value pinned by a wp-config.php
+ * constant is still in force and still worth seeing, so it stays visible with
+ * the explanation attached.
  */
-export const isFieldDisabled = ( provider, values, field ) => {
-	if ( field.locked ) {
-		return true;
-	}
-
+export const isDependencyUnmet = ( provider, values, field ) => {
 	if ( ! field.depends?.field ) {
 		return false;
 	}
@@ -111,6 +109,17 @@ export const isFieldDisabled = ( provider, values, field ) => {
 
 	return String( current ) !== String( field.depends.value );
 };
+
+/**
+ * Whether a field is shown but not editable.
+ *
+ * At module scope because the same rule has to decide two things: what the form
+ * greys out, and what the required check below is entitled to demand. A field
+ * that is irrelevant right now - hidden or merely locked - must not be able to
+ * block a connection.
+ */
+export const isFieldDisabled = ( provider, values, field ) =>
+	!! field.locked || isDependencyUnmet( provider, values, field );
 
 /**
  * The required fields this provider still has nothing for.
@@ -143,6 +152,13 @@ export const missingRequired = ( provider, values ) =>
 	} );
 
 const ProviderForm = ( { provider, values, onChange } ) => {
+	// A provider can genuinely have nothing to fill in - Outlook chooses its
+	// mailbox at Microsoft's own prompt. Rendering the grid anyway leaves an
+	// empty gap above the buttons that reads as a form that failed to load.
+	if ( ! provider.fields?.length ) {
+		return null;
+	}
+
 	const valueOf = ( field ) =>
 		values[ field.key ] !== undefined ? values[ field.key ] : field.value ?? '';
 
@@ -166,6 +182,14 @@ const ProviderForm = ( { provider, values, onChange } ) => {
 	return (
 		<div className="grid gap-4 sm:grid-cols-6">
 			{ provider.fields.map( ( field ) => {
+				// A field belonging to a mode that is not selected is not
+				// shown at all. Nothing here is lost by hiding it: the value
+				// stays stored, and choosing that mode again brings it back
+				// with whatever was in it.
+				if ( isDependencyUnmet( provider, values, field ) ) {
+					return null;
+				}
+
 				const id = `mmoa-${ field.key }`;
 				const disabled = isDisabled( field );
 				const value = valueOf( field );

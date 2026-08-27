@@ -29,10 +29,14 @@ ModernMailer\Queue::install();
 $admin = get_users( [ 'role' => 'administrator', 'number' => 1 ] );
 wp_set_current_user( $admin ? $admin[0]->ID : 1 );
 
+// google_setup_mode is stated rather than assumed: this suite is entirely
+// about the own-client flow, and inheriting one-click from another test
+// would silently reroute it through the setup service.
 $plugin->settings->update( [
-	'provider'         => 'gmail_oauth',
-	'from_email'       => 'me@gmail.com',
-	'google_client_id' => '123-abc.apps.googleusercontent.com',
+	'provider'          => 'gmail_oauth',
+	'google_setup_mode' => 'own_client',
+	'from_email'        => 'me@gmail.com',
+	'google_client_id'  => '123-abc.apps.googleusercontent.com',
 	'log_enabled'      => true,
 	'queue_enabled'    => true,
 	'alert_email'      => '',
@@ -230,6 +234,56 @@ $slot = $consent->handle_callback( [ 'code' => 'C3', 'state' => $state ] );
 check( 'the callback landed on the backup slot', Settings::SLOT_BACKUP === $slot, is_wp_error( $slot ) ? $slot->get_error_message() : var_export( $slot, true ) );
 check( 'the backup grant was stored', 'BACKUP-RT' === $plugin->secrets->for_slot( Settings::SLOT_BACKUP )->get( 'google_refresh' ) );
 check( 'the primary grant was untouched', 'PRIMARY-RT' === $plugin->secrets->get( 'google_refresh' ) );
+
+echo "\n=== 13. An additional connection keeps its own grant ===\n";
+// The regression this guards: the callback resolved the slot by asking "is it
+// backup? no - then it is primary", so signing in from any of the additional
+// connections banked the refresh token over the PRIMARY one. The connection
+// being configured stayed disconnected however many times an admin tried, and
+// a working primary was overwritten with a grant minted from a different
+// OAuth client - which then failed at its next token refresh.
+$extra = $plugin->connections->add( 'Newsletter' );
+$extra = is_wp_error( $extra ) ? '' : $extra;
+
+check( 'an additional connection was created', '' !== $extra && Settings::SLOT_PRIMARY !== $extra, (string) $extra );
+
+$plugin->settings->for_slot( $extra )->update( [
+	'provider'         => 'gmail_oauth',
+	'google_client_id' => '777-extra.apps.googleusercontent.com',
+] );
+$plugin->secrets->for_slot( $extra )->set( 'google_client_sec', 'extra-secret' );
+$plugin->secrets->set( 'google_refresh', 'PRIMARY-RT' );
+Settings::flush_cache();
+
+$url   = $consent->authorization_url( $extra );
+$p     = params_of( $url );
+$state = $p['state'];
+
+check( 'it uses its own client ID', '777-extra.apps.googleusercontent.com' === ( $p['client_id'] ?? '' ), $p['client_id'] ?? 'missing' );
+
+$calls  = 0;
+$script = fn( $u, $a, $n ) => json_response( 200, [ 'access_token' => 'AT', 'refresh_token' => 'EXTRA-RT', 'expires_in' => 3599 ] );
+
+$slot = $consent->handle_callback( [ 'code' => 'C4', 'state' => $state ] );
+
+check( 'the callback landed on that connection, not the primary', $extra === $slot, is_wp_error( $slot ) ? $slot->get_error_message() : var_export( $slot, true ) );
+check( 'its grant was stored against itself', 'EXTRA-RT' === $plugin->secrets->for_slot( $extra )->get( 'google_refresh' ) );
+check( 'it now reports itself connected', $consent->is_connected( $extra ) );
+check( 'the primary grant was not overwritten', 'PRIMARY-RT' === $plugin->secrets->get( 'google_refresh' ), (string) $plugin->secrets->get( 'google_refresh' ) );
+
+echo "\n=== 14. A connection deleted mid-flow is refused, not redirected elsewhere ===\n";
+// Deleting the connection while the admin is away at Google leaves a state
+// transient naming a slot that no longer exists. Writing that grant to the
+// primary would be worse than failing.
+$url   = $consent->authorization_url( $extra );
+$state = params_of( $url )['state'];
+$plugin->connections->delete( $extra );
+Settings::flush_cache();
+
+$gone = $consent->handle_callback( [ 'code' => 'C5', 'state' => $state ] );
+
+check( 'the callback failed rather than guessing a slot', is_wp_error( $gone ) && 'mmoa_oauth_gone' === $gone->get_error_code(), is_wp_error( $gone ) ? $gone->get_error_code() : var_export( $gone, true ) );
+check( 'and the primary grant is still its own', 'PRIMARY-RT' === $plugin->secrets->get( 'google_refresh' ), (string) $plugin->secrets->get( 'google_refresh' ) );
 
 // Leave the site unconfigured, as the other suites do.
 $plugin->secrets->set( 'google_refresh', '' );

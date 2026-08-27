@@ -1,5 +1,5 @@
 <?php
-/**
+	/**
  * Microsoft Graph provider (app-only).
  *
  * @package ModernMailer
@@ -13,7 +13,7 @@ use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 
-/**
+	/**
  * Sends through Microsoft Graph using the OAuth 2.0 client credentials grant.
  *
  * This is the whole point of the plugin. The delegated authorization-code flow
@@ -58,6 +58,17 @@ class Graph extends Abstract_Provider {
 
 	public static function slug(): string {
 		return 'graph';
+	}
+
+	/**
+	 * Not listed in the chooser: reached through its merged tile instead.
+	 *
+	 * Still registered, so a connection storing this slug stays constructible -
+	 * which matters both for sites that have not run the migration yet and for
+	 * anything setting the slug directly through the mmoa_providers filter.
+	 */
+	public static function is_listed(): bool {
+		return false;
 	}
 
 	public static function describe(): array {

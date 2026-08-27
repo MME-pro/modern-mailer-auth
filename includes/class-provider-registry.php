@@ -55,7 +55,14 @@ class Provider_Registry {
 		}
 
 		$classes = [
+			// The two merged tiles, and behind them the transports they
+			// delegate to. Those stay registered but unlisted, so a stored slug
+			// remains constructible even before the migration has run.
+			Providers\Microsoft::class,
+			Providers\Google::class,
+
 			Providers\Graph::class,
+			Providers\Outlook::class,
 			Providers\Gmail_Service_Account::class,
 			Providers\Gmail_OAuth::class,
 			Providers\Sendgrid::class,
@@ -87,6 +94,19 @@ class Provider_Registry {
 			}
 
 			if ( ! in_array( Provider_Interface::class, class_implements( $class ) ?: [], true ) ) {
+				continue;
+			}
+
+			// A provider may declare itself unavailable on this site. Outlook
+			// does, when the setup service it depends on has been filtered
+			// away: listing a transport that cannot obtain a credential would
+			// let someone select it and then discover it never works.
+			//
+			// Not part of Provider_Interface, because the answer is yes for
+			// every provider that does not say otherwise, and adding a method
+			// to the contract that nine of ten implementations would define
+			// identically is a worse trade than this check.
+			if ( method_exists( $class, 'is_available' ) && ! $class::is_available() ) {
 				continue;
 			}
 
@@ -153,9 +173,19 @@ class Provider_Registry {
 	 * @return array<int,array<string,mixed>>
 	 */
 	public static function to_array( Settings $settings ): array {
-		$out = [];
+		$out     = [];
+		$current = (string) $settings->get( 'provider' );
 
 		foreach ( self::all() as $slug => $class ) {
+			// Transports behind a merged tile are not offered as choices of
+			// their own. The exception is a connection already storing one:
+			// dropping it from the catalogue would leave the chooser with
+			// nothing selected and the form empty, which reads as a connection
+			// that lost its settings.
+			if ( ! self::is_listed( $class ) && $slug !== $current ) {
+				continue;
+			}
+
 			$meta   = $class::describe();
 			$fields = [];
 
@@ -183,6 +213,18 @@ class Provider_Registry {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Whether a provider is offered in the chooser.
+	 *
+	 * Defaults to yes for anything that does not say otherwise, so a provider
+	 * registered through the mmoa_providers filter needs no knowledge of this.
+	 *
+	 * @param class-string<Provider_Interface> $class Provider class.
+	 */
+	private static function is_listed( string $class ): bool {
+		return ! method_exists( $class, 'is_listed' ) || $class::is_listed();
 	}
 
 	/**

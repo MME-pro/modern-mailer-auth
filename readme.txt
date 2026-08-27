@@ -2,9 +2,9 @@
 Contributors: builtwithmtw
 Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.4
+Stable tag: 0.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,13 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.0 =
+* Microsoft 365 and Outlook are now one Microsoft provider, and Google Workspace and Gmail one Google provider. The chooser listed authentication methods, which asked you to decide how to authenticate before deciding where to send. Each tile now asks how to connect once you have picked the service. Existing connections are migrated and keep sending exactly as before.
+* Added one-click setup for Google and Microsoft, which obtains the credential without anyone opening a cloud console. It needs a hosted setup service, which does not exist yet, so it is switched off and hidden until MMOA_BROKER_URL points at one. Nothing else is affected.
+* Added Outlook as a delegated Microsoft transport - sends as the signed-in mailbox, needs nothing registered in Azure, and works for personal accounts with no tenant. Reached through the Microsoft provider.
+* Signing in from a connection other than the primary or backup used to store the credential against the primary, overwriting a working one and leaving the intended connection reporting itself disconnected however many times you tried.
+* Credentials belonging to a setup method you are not using are now hidden rather than greyed out. Two dead boxes under a one-click choice read as something still to fill in.
 
 = 0.7.4 =
 * Verifying a Microsoft 365 connection now names the permission that is missing, instead of reporting whichever error Graph happened to return first. An app registration with no admin consent, or with everything granted except Mail.Send, is told exactly what to add and where to add it.

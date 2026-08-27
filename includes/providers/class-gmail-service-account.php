@@ -1,5 +1,5 @@
 <?php
-/**
+	/**
  * Google Workspace service account provider.
  *
  * @package ModernMailer
@@ -13,7 +13,7 @@ use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 
-/**
+	/**
  * Sends via Gmail using a service account with domain-wide delegation.
  *
  * This is the Google equivalent of app-only auth on the Microsoft side, and it
@@ -32,6 +32,17 @@ class Gmail_Service_Account extends Abstract_Gmail {
 
 	public static function slug(): string {
 		return 'gmail_sa';
+	}
+
+	/**
+	 * Not listed in the chooser: reached through its merged tile instead.
+	 *
+	 * Still registered, so a connection storing this slug stays constructible -
+	 * which matters both for sites that have not run the migration yet and for
+	 * anything setting the slug directly through the mmoa_providers filter.
+	 */
+	public static function is_listed(): bool {
+		return false;
 	}
 
 	public static function describe(): array {

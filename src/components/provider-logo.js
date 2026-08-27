@@ -54,6 +54,18 @@ const Gmail = () => (
 	</svg>
 );
 
+const Outlook = () => (
+	<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+		<rect x="9" y="4" width="13" height="16" rx="1.6" fill="#0F6CBD" />
+		<path fill="#fff" d="M11 7.4h9v1.5h-9zm0 3.9h9v1.5h-9zm0 3.9h6v1.5h-6z" opacity=".85" />
+		<rect x="2" y="5.6" width="11" height="12.8" rx="2" fill="#0364B8" />
+		<path
+			fill="#fff"
+			d="M7.5 8.3c-1.9 0-3.2 1.5-3.2 3.7s1.3 3.7 3.2 3.7 3.2-1.5 3.2-3.7-1.3-3.7-3.2-3.7zm0 1.6c1 0 1.6.8 1.6 2.1s-.6 2.1-1.6 2.1-1.6-.8-1.6-2.1.6-2.1 1.6-2.1z"
+		/>
+	</svg>
+);
+
 const SendGrid = () => (
 	<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 		<path fill="#1A82E2" d="M2 2h7.33v7.33H2z" />
@@ -116,7 +128,13 @@ const Resend = () => (
 );
 
 const MARKS = {
+	// The merged tiles, and the legacy slugs a connection may still
+	// store until the migration runs.
+	microsoft: Microsoft,
+	google: Google,
+
 	graph: Microsoft,
+	outlook: Outlook,
 	gmail_sa: Google,
 	gmail_oauth: Gmail,
 	sendgrid: SendGrid,

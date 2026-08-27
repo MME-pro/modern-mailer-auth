@@ -7,6 +7,7 @@
 
 namespace ModernMailer\Api;
 
+use ModernMailer\Auth\Broker;
 use ModernMailer\Failure;
 use ModernMailer\Plugin;
 use ModernMailer\Provider_Registry;
@@ -701,6 +702,7 @@ class Rest_Controller {
 			'provider'  => (string) $scoped->get( 'provider' ),
 			'providers' => Provider_Registry::to_array( $scoped ),
 			'oauth'     => $this->oauth_payload( $slot ),
+			'one_click' => $this->one_click_payload( $slot ),
 		];
 	}
 
@@ -735,6 +737,38 @@ class Rest_Controller {
 			'connect_url'     => $urls['connect'],
 			'disconnect_url'  => $urls['disconnect'],
 			'redirect_uri'    => \ModernMailer\Auth\Google_Consent::redirect_uri(),
+		];
+	}
+
+	/**
+	 * One-click state for each provider family this connection could use.
+	 *
+	 * Returned for every connection rather than only for one already set to a
+	 * brokered provider, for the same reason the own-client block is: the admin
+	 * needs to see the choice while setting the connection up, which is before
+	 * anything has been saved.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function one_click_payload( string $slot ): array {
+		$families = [];
+
+		foreach ( [ Broker::GOOGLE, Broker::MICROSOFT ] as $family ) {
+			$urls = \ModernMailer\Admin\Admin_Page::one_click_urls( $family, $slot );
+
+			$families[ $family ] = [
+				'connected'      => $this->plugin->one_click->is_connected( $family, $slot ),
+				'account'        => $this->plugin->one_click->account( $family, $slot ),
+				'connect_url'    => $urls['connect'],
+				'disconnect_url' => $urls['disconnect'],
+			];
+		}
+
+		return [
+			// The UI hides the whole one-click affordance when this is false,
+			// rather than offering a button that returns an error.
+			'available' => Broker::is_available(),
+			'families'  => $families,
 		];
 	}
 

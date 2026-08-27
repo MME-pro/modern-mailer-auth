@@ -15,6 +15,7 @@ import { useToast } from '../components/toast';
 import { Panel, Button, Badge, FormField, Spinner, Input, inputClass } from '../components/ui';
 import { cn } from '../lib/utils';
 import GoogleConnect from '../components/google-connect';
+import OneClickConnect from '../components/one-click-connect';
 import ProviderForm, { missingRequired } from '../components/provider-form';
 import ProviderLogo from '../components/provider-logo';
 
@@ -124,6 +125,24 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 	}, [ data ] );
 
 	const current = data?.providers.find( ( p ) => p.slug === provider );
+
+	// A setup mode as it stands in the form right now: an unsaved edit if there
+	// is one, otherwise whatever the provider declared. Read from the declared
+	// field rather than from a constant default, so the fallback follows the
+	// schema instead of duplicating it.
+	const modeOf = ( key ) =>
+		values[ key ] ??
+		current?.fields?.find( ( f ) => f.key === key )?.value ??
+		'own_client';
+
+	const googleMode = modeOf( 'google_setup_mode' );
+	const microsoftMode = modeOf( 'ms_setup_mode' );
+
+	// Which sign-in block belongs under this provider. Both merged tiles and
+	// the legacy slugs are handled, because a connection keeps its stored slug
+	// until the migration runs and must stay editable in the meantime.
+	const isGoogle = provider === 'google' || provider === 'gmail_oauth';
+	const isMicrosoft = provider === 'microsoft' || provider === 'outlook';
 
 	const save = useMutation( {
 		mutationFn: () => saveConnection( slot, { provider, ...values } ),
@@ -259,11 +278,35 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 					     one. Someone setting Gmail up needs the redirect URI and
 					     the reason they cannot sign in yet before they have ever
 					     saved - hiding the section until then hides it exactly
-					     when it is wanted. */ }
-					{ provider === 'gmail_oauth' && (
+					     when it is wanted.
+
+					     Which Gmail block appears follows the setup mode being
+					     edited rather than the stored one, so flipping the
+					     radio swaps the sign-in block straight away instead of
+					     after a save. */ }
+					{ /* A service account needs no sign-in at all, so Google
+					     shows a block only in the two modes that do. */ }
+					{ isGoogle && googleMode === 'one_click' && (
+						<OneClickConnect
+							family="google"
+							oneClick={ data.one_click }
+							dirty={ dirty || data.provider !== provider }
+						/>
+					) }
+
+					{ isGoogle && googleMode === 'own_client' && (
 						<GoogleConnect
 							oauth={ data.oauth }
-							dirty={ dirty || data.provider !== 'gmail_oauth' }
+							dirty={ dirty || data.provider !== provider }
+						/>
+					) }
+
+					{ isMicrosoft && microsoftMode === 'one_click' && (
+						<OneClickConnect
+							family="microsoft"
+							oneClick={ data.one_click }
+							dirty={ dirty || data.provider !== provider }
+							heading={ __( 'Mailbox', 'modern-mailer-oauth' ) }
 						/>
 					) }
 

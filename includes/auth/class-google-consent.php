@@ -7,6 +7,7 @@
 
 namespace ModernMailer\Auth;
 
+use ModernMailer\Connections;
 use ModernMailer\Http;
 use ModernMailer\Providers\Abstract_Gmail;
 use ModernMailer\Secrets;
@@ -40,7 +41,11 @@ class Google_Consent {
 	/** The state transient lives only as long as a person needs to click through. */
 	private const STATE_TTL = 900;
 
-	public function __construct( private Settings $settings, private Http $http ) {}
+	public function __construct(
+		private Settings $settings,
+		private Http $http,
+		private Connections $connections
+	) {}
 
 	/**
 	 * The redirect URI Google must have registered.
@@ -171,7 +176,24 @@ class Google_Consent {
 			);
 		}
 
-		$slot   = Settings::SLOT_BACKUP === $saved['slot'] ? Settings::SLOT_BACKUP : Settings::SLOT_PRIMARY;
+		// Resolve rather than assume. This read `SLOT_BACKUP === $saved['slot']
+		// ? backup : primary`, which quietly mapped every additional connection
+		// onto the primary one: an admin signing in from a third connection
+		// banked the refresh token over the primary's, and the connection they
+		// were actually configuring went on reporting itself disconnected
+		// however many times they tried.
+		//
+		// null means the connection was deleted while the admin was away at
+		// Google. Saying so beats writing the grant to whichever slot is left.
+		$slot = $this->connections->slot_for( (string) $saved['slot'] );
+
+		if ( null === $slot ) {
+			return new WP_Error(
+				'mmoa_oauth_gone',
+				__( 'That connection no longer exists, so the sign-in could not be saved. Start again from the connection you want to use.', 'modern-mailer-oauth' )
+			);
+		}
+
 		$scoped = $this->settings->for_slot( $slot );
 
 		$response = $this->http->request(
