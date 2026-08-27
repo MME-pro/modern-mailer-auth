@@ -77,10 +77,17 @@ final class Broker {
 
 		$extensions = [];
 
-		foreach ( [ 'pdo_mysql', 'curl', 'sodium' ] as $extension ) {
+		foreach ( [ 'pdo_mysql', 'curl' ] as $extension ) {
 			if ( ! extension_loaded( $extension ) ) {
 				$extensions[] = $extension;
 			}
+		}
+
+		// Either backend will do, so neither is named as required. Reporting
+		// sodium as missing on a host that has openssl would send an operator
+		// chasing an extension they do not need and often cannot enable.
+		if ( ! Crypto::is_available() ) {
+			$extensions[] = 'sodium or openssl';
 		}
 
 		try {
@@ -97,6 +104,7 @@ final class Broker {
 			[
 				'ready'              => $ready,
 				'php'                => PHP_VERSION,
+				'encryption'         => Crypto::backend(),
 				'missing_extensions' => $extensions,
 				'missing_settings'   => $missing,
 				'providers'          => $families,

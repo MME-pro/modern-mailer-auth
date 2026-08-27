@@ -49,23 +49,18 @@ class Broker {
 	/**
 	 * Where the broker lives.
 	 *
-	 * `.invalid` is reserved by RFC 2606 and can never be registered by anyone,
-	 * which is the point: this is a placeholder that is obviously a placeholder,
-	 * cannot be mistaken for a real service, and cannot be quietly taken over by
-	 * someone who notices an unregistered hostname shipped in a plugin.
-	 *
-	 * One-click is shown while this stands, so the whole flow is visible and the
-	 * setup mode is selectable - but `is_configured()` is false, and every call
-	 * fails immediately with a message saying no setup service has been set up
-	 * yet, rather than after a DNS timeout with something vague.
-	 *
-	 * Replace it, here or per site, once the service exists:
+	 * A site can point somewhere else without touching the plugin, which is what
+	 * a staging environment and the test suite both do:
 	 *
 	 *     define( 'MMOA_BROKER_URL', 'https://api.example.com/oauth/v1/' );
 	 *
-	 * See docs/BROKER.md for the four routes it has to implement.
+	 * Filtering it to '' switches one-click off entirely and leaves only the
+	 * own-client paths, which depend on no service at all.
+	 *
+	 * See docs/BROKER.md for the four routes it implements, and broker/ for the
+	 * implementation.
 	 */
-	private const DEFAULT_URL = 'https://broker.invalid/oauth/v1/';
+	private const DEFAULT_URL = 'https://api.techyza.com/';
 
 	public function __construct( private Http $http, private Site_Identity $identity ) {}
 

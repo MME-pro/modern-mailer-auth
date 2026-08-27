@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.2
+Stable tag: 0.8.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.3 =
+* One-click setup now works. The setup service it needs is live, so Sign in with Google connects a mailbox without anyone opening the Google Cloud console. Nothing to configure: the address ships with the plugin.
+* Your mail still goes directly from your site to Gmail. The setup service performs the sign-in and never sees a message.
+* Prefer to depend on nothing of ours? Choose My own OAuth client, or a service account, exactly as before. Both are untouched by this.
+* One-click for Microsoft is not available yet and says so; Microsoft 365 with your own Azure application is unaffected.
 
 = 0.8.2 =
 * Every sign-in and disconnect button works again. All of them failed with "The link you followed has expired", however fresh the page was.
