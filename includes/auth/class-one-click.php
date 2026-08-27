@@ -74,6 +74,17 @@ class One_Click {
 			);
 		}
 
+		// Caught here rather than at the far end of a redirect. This one starts
+		// by navigating the browser away, so without this check an admin would
+		// leave the site, fail to reach a host that cannot exist, and be left
+		// looking at a browser error page instead of an explanation.
+		if ( ! Broker::is_configured() ) {
+			return new WP_Error(
+				'mmoa_broker_unconfigured',
+				__( 'One-click setup has no setup service to talk to yet. Define MMOA_BROKER_URL with the address of yours, or connect using your own OAuth client, which needs no service at all.', 'modern-mailer-oauth' )
+			);
+		}
+
 		$state = wp_generate_password( 40, false, false );
 
 		set_transient(

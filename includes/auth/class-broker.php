@@ -47,24 +47,25 @@ class Broker {
 	public const MICROSOFT = 'microsoft';
 
 	/**
-	 * Where the broker lives. Empty until one exists.
+	 * Where the broker lives.
 	 *
-	 * Deliberately not pointed at a hostname that does not answer yet. Shipping
-	 * a default here would put a "Sign in with Google" button on every site that
-	 * updates, and every press of it would fail - which is worse than the button
-	 * not being there, because a control that is present and broken reads as the
-	 * plugin being broken.
+	 * `.invalid` is reserved by RFC 2606 and can never be registered by anyone,
+	 * which is the point: this is a placeholder that is obviously a placeholder,
+	 * cannot be mistaken for a real service, and cannot be quietly taken over by
+	 * someone who notices an unregistered hostname shipped in a plugin.
 	 *
-	 * Empty means `is_available()` is false, which hides one-click everywhere
-	 * and leaves the own-client paths untouched. Point this at a running broker
-	 * to switch the feature on for a site:
+	 * One-click is shown while this stands, so the whole flow is visible and the
+	 * setup mode is selectable - but `is_configured()` is false, and every call
+	 * fails immediately with a message saying no setup service has been set up
+	 * yet, rather than after a DNS timeout with something vague.
+	 *
+	 * Replace it, here or per site, once the service exists:
 	 *
 	 *     define( 'MMOA_BROKER_URL', 'https://api.example.com/oauth/v1/' );
 	 *
-	 * or set the default here once the service is live. See docs/BROKER.md for
-	 * the API it has to implement.
+	 * See docs/BROKER.md for the four routes it has to implement.
 	 */
-	private const DEFAULT_URL = '';
+	private const DEFAULT_URL = 'https://broker.invalid/oauth/v1/';
 
 	public function __construct( private Http $http, private Site_Identity $identity ) {}
 
@@ -92,6 +93,22 @@ class Broker {
 	 */
 	public static function is_available(): bool {
 		return '' !== self::base_url();
+	}
+
+	/**
+	 * Whether a real setup service has been named yet.
+	 *
+	 * Separate from is_available() on purpose. Availability decides whether the
+	 * one-click *option* is offered at all; this decides whether it can actually
+	 * do anything. While the placeholder stands the flow is visible and every
+	 * call fails at once with a message naming the real reason - which beats
+	 * both hiding a finished feature and letting someone wait out a DNS timeout
+	 * to be told something vague.
+	 */
+	public static function is_configured(): bool {
+		$host = (string) wp_parse_url( self::base_url(), PHP_URL_HOST );
+
+		return '' !== $host && ! str_ends_with( strtolower( $host ), '.invalid' );
 	}
 
 	/**
@@ -275,6 +292,13 @@ class Broker {
 			return new WP_Error(
 				'mmoa_broker_disabled',
 				__( 'One-click setup is switched off on this site. Connect using your own OAuth client instead.', 'modern-mailer-oauth' )
+			);
+		}
+
+		if ( ! self::is_configured() ) {
+			return new WP_Error(
+				'mmoa_broker_unconfigured',
+				__( 'One-click setup has no setup service to talk to yet. Define MMOA_BROKER_URL with the address of yours, or connect using your own OAuth client, which needs no service at all.', 'modern-mailer-oauth' )
 			);
 		}
 
