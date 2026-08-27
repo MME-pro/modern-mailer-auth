@@ -28,6 +28,38 @@ final class Config {
 	}
 
 	/**
+	 * Where a configuration file is looked for, best first.
+	 *
+	 * More than one, because "outside the document root" means different paths
+	 * on different hosts, and putting the file one directory off is a mistake
+	 * that otherwise presents as a blank 500. The first location is the one to
+	 * prefer and the one the documentation gives; the second is accepted
+	 * because it is the obvious guess, and broker/.htaccess denies it to the
+	 * web anyway.
+	 *
+	 * @return array<int,string>
+	 */
+	public static function candidates( string $public_dir ): array {
+		return [
+			$public_dir . '/../../.env.broker',
+			$public_dir . '/../.env.broker',
+		];
+	}
+
+	/**
+	 * Which candidate actually exists, for reporting.
+	 */
+	public static function found_in( string $public_dir ): string {
+		foreach ( self::candidates( $public_dir ) as $path ) {
+			if ( is_readable( $path ) ) {
+				return $path;
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Read configuration from the environment, and from an optional .env file.
 	 */
 	public static function load( ?string $env_file = null ): self {

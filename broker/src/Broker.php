@@ -29,8 +29,96 @@ final class Broker {
 
 	public function __construct(
 		private Config $config,
-		private Store $store
+
+		// Null when the database or the key is not usable yet. Only health()
+		// tolerates that; the front controller refuses every other route.
+		private ?Store $store,
+		private string $public_dir = ''
 	) {}
+
+	/**
+	 * Say whether this installation is ready, without saying anything secret.
+	 *
+	 * Deploying a service whose only failure mode is "500, check the log" is
+	 * miserable on shared hosting, where the log may be somewhere you cannot
+	 * easily reach. This answers the three questions that actually go wrong:
+	 * is PHP capable, does the database work, and which settings are still
+	 * empty.
+	 *
+	 * It reports key *names*, never values, and never whether a value looks
+	 * right - "GOOGLE_CLIENT_SECRET is set" is safe to say; anything about its
+	 * contents is not.
+	 */
+	public function health(): never {
+		$missing = [];
+
+		foreach ( [ 'BROKER_BASE_URL', 'BROKER_KEY', 'DB_DSN' ] as $key ) {
+			if ( '' === $this->config->get( $key ) ) {
+				$missing[] = $key;
+			}
+		}
+
+		// Per family, because one provider is a perfectly good deployment.
+		// Requiring both would report a working Google-only service as broken,
+		// and an operator who trusts that reading goes looking for a fault that
+		// is not there.
+		$families = [];
+
+		foreach ( [ Providers::GOOGLE, Providers::MICROSOFT ] as $family ) {
+			$spec = Providers::spec( $family );
+
+			$families[ $family ] = '' !== $this->config->get( $spec['client_id'] )
+				&& '' !== $this->config->get( $spec['secret'] )
+					? 'configured'
+					: 'not configured - one-click for this provider will fail';
+		}
+
+		$any_family = in_array( 'configured', $families, true );
+
+		$extensions = [];
+
+		foreach ( [ 'pdo_mysql', 'curl', 'sodium' ] as $extension ) {
+			if ( ! extension_loaded( $extension ) ) {
+				$extensions[] = $extension;
+			}
+		}
+
+		try {
+			$database = null === $this->store
+				? 'unreachable - check DB_DSN, DB_USER, DB_PASS and BROKER_KEY'
+				: ( $this->store->is_ready() ? 'ok' : 'connected, but the tables are missing - load schema.sql' );
+		} catch ( \Throwable $e ) {
+			$database = 'unreachable';
+		}
+
+		$ready = ! $missing && ! $extensions && $any_family && 'ok' === $database;
+
+		Http::json(
+			[
+				'ready'              => $ready,
+				'php'                => PHP_VERSION,
+				'missing_extensions' => $extensions,
+				'missing_settings'   => $missing,
+				'providers'          => $families,
+				'database'           => $database,
+
+				// Named because putting the file one directory off is a common
+				// mistake that otherwise looks identical to having filled in
+				// nothing at all.
+				'config_file'        => '' !== $this->public_dir
+					? ( Config::found_in( $this->public_dir ) ?: 'not found' )
+					: 'unknown',
+
+				// Echoed so a mismatch with what Google has on file is
+				// obvious here rather than as redirect_uri_mismatch later.
+				'redirect_uris'      => $missing && in_array( 'BROKER_BASE_URL', $missing, true ) ? [] : [
+					'google'    => Providers::redirect_uri( $this->config, Providers::GOOGLE ),
+					'microsoft' => Providers::redirect_uri( $this->config, Providers::MICROSOFT ),
+				],
+			],
+			$ready ? 200 : 503
+		);
+	}
 
 	/**
 	 * Begin: park what we know, then hand the browser to the provider.

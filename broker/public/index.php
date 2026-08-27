@@ -33,16 +33,23 @@ $bits = array_values( array_filter( explode( '/', $path ), static fn( $bit ) => 
 // Everything before the last two segments is mount prefix, e.g. oauth/v1.
 $tail = array_slice( $bits, -2 );
 
+$config = Config::load( Config::found_in( __DIR__ ) ?: null );
+$store  = null;
+
 try {
-	$config = Config::load( __DIR__ . '/../../.env.broker' );
-	$store  = Store::connect( $config, new Crypto( $config->key() ) );
-	$broker = new Broker( $config, $store );
+	$store = Store::connect( $config, new Crypto( $config->key() ) );
 } catch ( \Throwable $e ) {
+	// Not fatal yet. /health has to survive exactly this in order to be worth
+	// having - a service that answers "500, look in the log" when its
+	// configuration is wrong is the thing /health exists to replace. Every
+	// other route is refused below.
+	//
 	// The detail goes to the log, never to the caller: it names database hosts
 	// and configuration keys.
 	error_log( 'mmoa-broker: ' . $e->getMessage() );
-	Http::fail( 'misconfigured', 'The setup service is not configured correctly. Its administrator has been given the details.', 500 );
 }
+
+$broker = new Broker( $config, $store, __DIR__ );
 
 // Cheap, and only occasionally. Shared hosting cron is unreliable, and these
 // tables are small enough that this costs nothing worth measuring.
@@ -82,12 +89,27 @@ try {
 	// POST {mount}/{family}/claim | refresh | revoke
 	[ $first, $second ] = $tail + [ '', '' ];
 
+	// Reachable at {mount}/health, so a deployment can be checked before
+	// anybody is asked to click a sign-in button.
+	if ( 'health' === $second || 'health' === $first ) {
+		$broker->health();
+	}
+
 	if ( 'callback' === $first && Providers::is_family( $second ) ) {
 		$broker->callback( $second, $_GET );
 	}
 
 	if ( ! Providers::is_family( $first ) ) {
 		Http::fail( 'not_found', 'No such route.', 404 );
+	}
+
+	// Past health, everything needs a working database and key.
+	if ( null === $store ) {
+		Http::fail(
+			'misconfigured',
+			'The setup service is not configured correctly. Its administrator can see what is missing at /health.',
+			500
+		);
 	}
 
 	if ( 'authorize' === $second && 'GET' === $method ) {

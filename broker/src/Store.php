@@ -168,6 +168,16 @@ final class Store {
 	}
 
 	/**
+	 * Whether the schema has been loaded.
+	 *
+	 * Connecting proves the credentials work; it does not prove anyone ran
+	 * schema.sql, which is the step most often forgotten.
+	 */
+	public function is_ready(): bool {
+		return [] !== $this->pdo->query( "SHOW TABLES LIKE 'flows'" )->fetchAll();
+	}
+
+	/**
 	 * Drop anything that has aged out.
 	 *
 	 * Called on a small fraction of requests rather than from cron, because

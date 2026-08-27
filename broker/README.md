@@ -26,6 +26,39 @@ here only in the few minutes between someone approving at Google and the site
 collecting it — encrypted for that window, deleted on use. A breach here means
 some people sign in again; it does not mean every customer's mailbox.
 
+## Check it before you trust it
+
+Every deployment step below can be verified from one URL:
+
+```
+https://api.yourdomain.com/oauth/v1/health
+```
+
+```json
+{
+  "ready": true,
+  "php": "8.2.29",
+  "missing_extensions": [],
+  "missing_settings": [],
+  "providers": { "google": "configured", "microsoft": "not configured..." },
+  "database": "ok",
+  "config_file": "/home/you/.env.broker",
+  "redirect_uris": {
+    "google": "https://api.yourdomain.com/oauth/v1/callback/google",
+    "microsoft": "https://api.yourdomain.com/oauth/v1/callback/microsoft"
+  }
+}
+```
+
+It reports setting *names*, never values. `redirect_uris` is echoed so you can
+paste those exact strings into Google and Azure — a mismatch shows up here
+rather than as `redirect_uri_mismatch` an hour later. `config_file` says which
+file was actually read, because putting it one directory off looks identical to
+having filled in nothing at all.
+
+One provider is a valid deployment. Google configured and Microsoft blank still
+reports `"ready": true`; only Microsoft one-click is unavailable.
+
 ## Install
 
 **1. Database**
