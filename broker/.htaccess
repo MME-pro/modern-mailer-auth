@@ -1,0 +1,10 @@
+# Nothing above public/ is ever served.
+#
+# This matters on shared hosting, where the document root often cannot be moved
+# and src/ would otherwise sit under it. A PHP file served as text here would
+# print nothing useful, but a stray backup or editor swap file would print your
+# OAuth client secret.
+Deny from all
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>

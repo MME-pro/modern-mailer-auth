@@ -7,3 +7,8 @@ tests/*.pem
 # Node toolchain for the admin app. build/ IS committed, so the plugin can be
 # installed from the repo without anyone needing to run npm.
 node_modules/
+
+# The broker's live configuration holds the OAuth client secrets that are the
+# whole reason it exists. The example file is committed; this one never is.
+.env.broker
+broker/.env.broker

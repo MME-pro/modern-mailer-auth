@@ -1,0 +1,16 @@
+# Everything goes to the front controller.
+#
+# The rewrite is what makes /google/authorize and /callback/google work on
+# ordinary Apache shared hosting, where you cannot edit the vhost.
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^ index.php [L]
+</IfModule>
+
+# The service handles OAuth codes and tokens. If the host ever serves this
+# over plain HTTP, the handoff in the redirect can be read in transit.
+<IfModule mod_headers.c>
+	Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
