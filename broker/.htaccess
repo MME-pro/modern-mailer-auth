@@ -1,10 +1,28 @@
-# Nothing above public/ is ever served.
+# broker/ is not meant to be a document root: index.php lives in public/.
 #
-# This matters on shared hosting, where the document root often cannot be moved
-# and src/ would otherwise sit under it. A PHP file served as text here would
-# print nothing useful, but a stray backup or editor swap file would print your
-# OAuth client secret.
-Deny from all
-<IfModule mod_authz_core.c>
-	Require all denied
+# But it is an easy mistake to point a subdomain here, so rather than denying
+# everything - which turns that mistake into an unexplained 403 - this hands
+# the request to the front controller and lets it answer normally.
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^ public/index.php [L]
 </IfModule>
+
+# The secrets and the source stay unreachable either way.
+<FilesMatch "^\.env">
+	<IfModule mod_authz_core.c>
+		Require all denied
+	</IfModule>
+	<IfModule !mod_authz_core.c>
+		Order allow,deny
+		Deny from all
+	</IfModule>
+</FilesMatch>
+
+RedirectMatch 404 ^/src/
+RedirectMatch 404 \.sql$
+RedirectMatch 404 \.md$
+
+Options -Indexes

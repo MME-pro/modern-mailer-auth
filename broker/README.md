@@ -81,22 +81,24 @@ Either layout works. Prefer the first.
 /home/you/broker/src/        ← not reachable by any URL
 ```
 
-*Flat — everything inside the document root:*
+*Or point the subdomain straight at `broker/` and upload the folder whole:*
 
 ```
-public_html/index.php
-public_html/.htaccess
-public_html/src/
-public_html/.env.broker
+api.example.com  ->  /home/you/api/
+                     /home/you/api/public/index.php
+                     /home/you/api/src/
+                     /home/you/api/.env.broker
 ```
 
-The flat layout exists because plenty of shared hosting will not let a
-subdomain's root move above `public_html`, and someone in that position would
-otherwise be stuck. It is genuinely weaker: `src/` and `.env.broker` are then
-protected by the deny rules in `.htaccess` rather than by being unreachable, so
-a host that ignores `.htaccess` would serve your client secret as plain text.
-Use it only when the first is impossible, and check afterwards that
-`https://your-host/.env.broker` returns 403 or 404 rather than the file.
+This is what most shared hosting pushes you towards, because moving a
+subdomain root is often not allowed. It works: the `.htaccess` at the top of
+`broker/` hands every request to `public/index.php`, and `src/` and `.env.broker`
+are denied by their own rules.
+
+It is weaker than the first layout, because the secrets are protected by deny
+rules rather than by being unreachable. After deploying, check that
+`https://your-host/.env.broker` returns 403 or 404 rather than the file, and
+that `https://your-host/src/Config.php` does the same.
 
 `/health` reports which configuration file it actually read, so you can confirm
 the layout took effect rather than assuming it did.

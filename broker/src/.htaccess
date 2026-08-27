@@ -1,0 +1,17 @@
+# This directory holds the code that reads your OAuth client secrets. Nothing
+# in it is ever fetched by a browser.
+#
+# The deny lives here rather than one level up on purpose. A deny-all at the
+# top of broker/ protects the same files, but if anyone makes broker/ itself
+# the document root - which shared hosting encourages, because moving a
+# subdomain's root is often not allowed - that same rule denies the front
+# controller too, and every request returns 403 with nothing to explain why.
+#
+# Scoped to the directory that actually needs it, that mistake is impossible.
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+	Order allow,deny
+	Deny from all
+</IfModule>
