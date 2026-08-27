@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.0
+Stable tag: 0.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,10 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.1 =
+* One-click setup is visible again. 0.8.0 shipped it hidden, because no setup service exists yet to answer it - but hiding a finished feature to avoid a bad error message was the wrong trade. Sign in with Google and Sign in with Microsoft are both on the connection screen.
+* Pressing either without a setup service now says so plainly, and says it before leaving the site rather than after a browser error page on a host that cannot exist. Define MMOA_BROKER_URL with the address of your service to switch it on.
 
 = 0.8.0 =
 * Microsoft 365 and Outlook are now one Microsoft provider, and Google Workspace and Gmail one Google provider. The chooser listed authentication methods, which asked you to decide how to authenticate before deciding where to send. Each tile now asks how to connect once you have picked the service. Existing connections are migrated and keep sending exactly as before.
