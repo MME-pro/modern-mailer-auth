@@ -96,8 +96,17 @@ foreach ( $catalogue as $entry ) {
 	}
 }
 
-check( 'Microsoft and Google are offered', [ 'Microsoft', 'Google' ] === $ready, implode( ',', $ready ) );
-check( 'the other seven are marked coming soon', 7 === count( $soon ), implode( ',', $soon ) );
+check(
+	'the finished providers are offered',
+	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Other SMTP' ] === $ready,
+	implode( ',', $ready )
+);
+
+check(
+	'and only the unfinished ones are marked coming soon',
+	[ 'Postmark', 'Mailgun', 'SMTP2GO' ] === $soon,
+	implode( ',', $soon )
+);
 
 echo "\n=== 2. The transports stay constructible ===\n";
 // An upgrade must not be able to stop mail. A site storing a legacy slug keeps

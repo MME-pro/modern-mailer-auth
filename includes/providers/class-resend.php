@@ -45,12 +45,6 @@ class Resend extends Abstract_Api_Provider {
 			'docs'     => 'https://resend.com/docs/api-reference/emails/send-email',
 			'category' => 'api',
 			'raw_mime' => false,
-
-			// Listed but not selectable yet. Kept in the registry rather than
-			// removed, so a site already sending through it carries on doing so -
-			// withdrawing a working transport in an update would stop that site's
-			// mail, which is never an acceptable way to narrow a feature set.
-			'coming_soon' => true,
 		];
 	}
 

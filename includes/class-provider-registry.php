@@ -199,7 +199,7 @@ class Provider_Registry {
 			foreach ( $class::fields() as $field ) {
 				$fields[] = $field->secret
 					? $field->to_array(
-						null,
+						$settings->secrets()->get( $field->key ),
 						'' !== $settings->secrets()->get( $field->key ),
 						$settings->secrets()->is_constant( $field->key )
 					)

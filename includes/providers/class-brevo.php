@@ -46,12 +46,6 @@ class Brevo extends Abstract_Api_Provider {
 			'docs'     => 'https://developers.brevo.com/reference/sendtransacemail',
 			'category' => 'api',
 			'raw_mime' => false,
-
-			// Listed but not selectable yet. Kept in the registry rather than
-			// removed, so a site already sending through it carries on doing so -
-			// withdrawing a working transport in an update would stop that site's
-			// mail, which is never an acceptable way to narrow a feature set.
-			'coming_soon' => true,
 		];
 	}
 

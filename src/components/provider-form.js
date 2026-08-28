@@ -1,4 +1,6 @@
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
+import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FormField, Input, Textarea, Switch, Label, inputClass } from './ui';
 
@@ -130,9 +132,9 @@ export const isFieldDisabled = ( provider, values, field ) =>
  * time, one missing field per attempt, with the form showing no sign that
  * anything was outstanding.
  *
- * A secret counts as present when the server says one is stored. The value
- * itself never comes back to the browser, so `is_set` is the only evidence
- * there is that a credential exists.
+ * A secret counts as present if the form holds one or the server says one is
+ * stored. `is_set` still matters: a value pinned by a wp-config.php constant is
+ * in force without the form carrying it.
  *
  * @return {Array<Object>} The offending field definitions, in form order.
  */
@@ -150,6 +152,60 @@ export const missingRequired = ( provider, values ) =>
 
 		return '' === String( value ?? '' ).trim();
 	} );
+
+/**
+ * A credential field, masked, with an eye to reveal it.
+ *
+ * The stored value is in the form like any other field, so what is on screen is
+ * the real credential drawn as dots. That is what makes it checkable: a pasted
+ * key with a truncated tail looks exactly like a correct one until you can read
+ * it back, and before this the only way to find out was to send a message and
+ * read the error.
+ */
+const SecretInput = ( { id, field, value, disabled, placeholder, onChange } ) => {
+	const [ shown, setShown ] = useState( false );
+
+	// The value is in the form's own state like every other field, so there is
+	// nothing to fetch and nothing that can fail: the eye only changes how the
+	// same string is drawn.
+	const canReveal = ! disabled && '' !== String( value ?? '' );
+
+	return (
+		<div className="relative">
+			<Input
+				id={ id }
+				type={ shown ? 'text' : 'password' }
+				autoComplete="new-password"
+				spellCheck={ false }
+				disabled={ disabled }
+				placeholder={ placeholder }
+				className={ cn( canReveal && 'pr-10', shown && 'font-mono text-xs' ) }
+				value={ value }
+				onChange={ ( e ) => onChange( e.target.value ) }
+			/>
+
+			{ canReveal && (
+				<button
+					type="button"
+					onClick={ () => setShown( ( on ) => ! on ) }
+					aria-label={
+						shown
+							? __( 'Hide', 'modern-mailer-oauth' )
+							: __( 'Reveal', 'modern-mailer-oauth' )
+					}
+					title={
+						shown
+							? __( 'Hide', 'modern-mailer-oauth' )
+							: __( 'Reveal', 'modern-mailer-oauth' )
+					}
+					className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+				>
+					{ shown ? <EyeOff className="size-4" /> : <Eye className="size-4" /> }
+				</button>
+			) }
+		</div>
+	);
+};
 
 const ProviderForm = ( { provider, values, onChange } ) => {
 	// A provider can genuinely have nothing to fill in - Outlook chooses its
@@ -267,22 +323,27 @@ const ProviderForm = ( { provider, values, onChange } ) => {
 							{ ! [ 'radio', 'checkbox', 'select', 'textarea' ].includes(
 								field.type
 							) && (
-								<Input
-									id={ id }
-									type={
-										field.secret
-											? 'password'
-											: field.type === 'number'
-											? 'number'
-											: 'text'
-									}
-									inputMode={ field.type === 'number' ? 'numeric' : undefined }
-									autoComplete={ field.secret ? 'new-password' : 'off' }
-									disabled={ disabled }
-									placeholder={ placeholder }
-									value={ value }
-									onChange={ ( e ) => handle( field, e.target.value ) }
-								/>
+								field.secret ? (
+									<SecretInput
+										id={ id }
+										field={ field }
+										value={ value }
+										disabled={ disabled }
+										placeholder={ placeholder }
+										onChange={ ( v ) => handle( field, v ) }
+									/>
+								) : (
+									<Input
+										id={ id }
+										type={ field.type === 'number' ? 'number' : 'text' }
+										inputMode={ field.type === 'number' ? 'numeric' : undefined }
+										autoComplete="off"
+										disabled={ disabled }
+										placeholder={ placeholder }
+										value={ value }
+										onChange={ ( e ) => handle( field, e.target.value ) }
+									/>
+								)
 							) }
 						</FormField>
 					</div>

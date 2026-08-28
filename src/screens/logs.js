@@ -3,6 +3,7 @@ import { useState, useMemo } from '@wordpress/element';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Inbox, RotateCw, Undo2, Trash2, Search, X } from 'lucide-react';
 import { getLogs, getQueue, queueAction } from '../api/client';
+import LogDetail from '../components/log-detail';
 import { useToast } from '../components/toast';
 import { Panel, Button, Badge, Spinner, EmptyState, inputClass } from '../components/ui';
 
@@ -157,7 +158,7 @@ const QueueSection = () => {
 	);
 };
 
-const Table = ( { columns, rows } ) => (
+const Table = ( { columns, rows, onRowClick } ) => (
 	<div className="overflow-x-auto -mx-5 px-5">
 		<table className="w-full border-collapse text-[13px]">
 			<thead>
@@ -174,7 +175,27 @@ const Table = ( { columns, rows } ) => (
 			</thead>
 			<tbody>
 				{ rows.map( ( cells, i ) => (
-					<tr key={ i } className="border-b border-border last:border-0">
+					<tr
+						key={ i }
+						// A row is only interactive where the caller gave it
+						// something to do, so the queue table below is
+						// unaffected by any of this.
+						{ ...( onRowClick
+							? {
+									onClick: () => onRowClick( i ),
+									onKeyDown: ( e ) => {
+										if ( 'Enter' === e.key || ' ' === e.key ) {
+											e.preventDefault();
+											onRowClick( i );
+										}
+									},
+									tabIndex: 0,
+									role: 'button',
+									className:
+										'border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:bg-muted/50',
+							  }
+							: { className: 'border-b border-border last:border-0' } ) }
+					>
 						{ cells.map( ( cell, j ) => (
 							<td
 								key={ j }
@@ -193,6 +214,11 @@ const Table = ( { columns, rows } ) => (
 const LogSection = () => {
 	const [ filter, setFilter ] = useState( 'all' );
 	const [ search, setSearch ] = useState( '' );
+
+	// The log id whose report is open, or null. Held here rather than inside
+	// the modal so the modal is unmounted when nothing is open, and its query
+	// is never fired for an entry nobody asked about.
+	const [ detail, setDetail ] = useState( null );
 
 	const { data, isLoading } = useQuery( {
 		queryKey: [ 'logs' ],
@@ -337,8 +363,11 @@ const LogSection = () => {
 							</span>
 						),
 					] ) }
+					onRowClick={ ( i ) => setDetail( rows[ i ].id ) }
 				/>
 			) }
+
+			<LogDetail id={ detail } onClose={ () => setDetail( null ) } />
 		</Panel>
 	);
 };

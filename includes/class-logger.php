@@ -25,7 +25,7 @@ class Logger {
 	public const CRON_HOOK = 'mmoa_prune_log';
 
 	private const DB_VERSION_OPTION = 'mmoa_db_version';
-	private const DB_VERSION        = '1';
+	private const DB_VERSION        = '2';
 
 	public function __construct( private Settings $settings ) {}
 
@@ -61,6 +61,12 @@ class Logger {
 				error_code varchar(64) NOT NULL DEFAULT '',
 				error_message text NOT NULL,
 				bytes int(10) unsigned NOT NULL DEFAULT 0,
+
+				-- The diagnostic report, as JSON. Written only for a failure:
+				-- a successful send has nothing to explain, and storing a
+				-- transcript for every message would make the log larger than
+				-- the mail it describes.
+				diagnostics longtext NULL,
 				PRIMARY KEY  (id),
 				KEY created_at (created_at),
 				KEY status (status)
@@ -85,7 +91,7 @@ class Logger {
 	 *
 	 * @param true|WP_Error $result Outcome.
 	 */
-	public function record( Provider_Interface $provider, PHPMailer $mailer, int $bytes, $result ): void {
+	public function record( Provider_Interface $provider, PHPMailer $mailer, int $bytes, $result, string $slot = Settings::SLOT_PRIMARY ): void {
 		if ( ! $this->settings->get( 'log_enabled' ) ) {
 			return;
 		}
@@ -96,6 +102,25 @@ class Logger {
 			static fn( array $addr ): string => $addr[0],
 			array_merge( $mailer->getToAddresses(), $mailer->getCcAddresses(), $mailer->getBccAddresses() )
 		);
+
+		// Only for failures. A successful send has nothing to explain, and a
+		// transcript per message would make the log larger than the mail it
+		// describes.
+		$diagnostics = null;
+
+		if ( is_wp_error( $result ) ) {
+			$diagnostics = wp_json_encode(
+				Diagnostics::collect(
+					$this->settings,
+					$provider::slug(),
+					$slot,
+					$result,
+					// Asked for rather than required: only a protocol with a
+					// conversation has one to report.
+					method_exists( $provider, 'transcript' ) ? (string) $provider->transcript() : ''
+				)
+			);
+		}
 
 		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			self::table(),
@@ -108,9 +133,25 @@ class Logger {
 				'error_code'    => is_wp_error( $result ) ? $result->get_error_code() : '',
 				'error_message' => is_wp_error( $result ) ? $result->get_error_message() : '',
 				'bytes'         => $bytes,
+				'diagnostics'   => $diagnostics,
 			],
-			[ '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d' ]
+			[ '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' ]
 		);
+	}
+
+	/**
+	 * One entry, with its diagnostic report.
+	 */
+	public function entry( int $id ): ?object {
+		global $wpdb;
+
+		$table = self::table();
+
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id )
+		);
+
+		return $row ?: null;
 	}
 
 	/**

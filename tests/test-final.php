@@ -101,6 +101,79 @@ echo "\n=== Site Health ===\n";
 $sh = ( new ModernMailer\Admin\Site_Health( $plugin ) )->run_test();
 check( 'reports unconfigured as a recommendation', 'recommended' === $sh['status'], $sh['status'] );
 
+echo "\n=== A stored credential can be read back ===\n";
+// The field shows the saved value masked, with an eye to reveal it, so the
+// value has to reach the browser. Withholding it left an administrator unable
+// to check what had been saved - a key pasted with a truncated tail looks
+// exactly like a correct one, and the only way to find out was to send a
+// message and read the error.
+$plugin->settings->update( [ 'provider' => 'brevo' ] );
+$plugin->secrets->set( 'brevo_api_key', 'xkeysib-SECRET-VALUE-1234' );
+ModernMailer\Settings::flush_cache();
+
+$catalogue = ModernMailer\Provider_Registry::to_array( $plugin->settings );
+$brevo     = null;
+
+foreach ( $catalogue as $entry ) {
+	if ( 'brevo' === $entry['slug'] ) {
+		$brevo = $entry;
+	}
+}
+
+$api_key = null;
+
+foreach ( $brevo['fields'] ?? [] as $f ) {
+	if ( 'brevo_api_key' === $f['key'] ) {
+		$api_key = $f;
+	}
+}
+
+check( 'the field is published', null !== $api_key );
+check( 'it is still marked secret, so the form masks it', true === ( $api_key['secret'] ?? false ) );
+check( 'it reports that one is stored', true === ( $api_key['is_set'] ?? false ) );
+check( 'and it carries the stored value', 'xkeysib-SECRET-VALUE-1234' === ( $api_key['value'] ?? '' ), wp_json_encode( $api_key['value'] ?? null ) );
+
+// Each connection keeps its own, which is the whole basis of having more than
+// one - if the slots ever aliased, revealing the backup would show the primary.
+$plugin->secrets->for_slot( 'backup' )->set( 'brevo_api_key', 'xkeysib-BACKUP-9999' );
+ModernMailer\Settings::flush_cache();
+
+$backup_key = null;
+
+foreach ( ModernMailer\Provider_Registry::to_array( $plugin->settings->for_slot( 'backup' ) ) as $entry ) {
+	if ( 'brevo' !== $entry['slug'] ) {
+		continue;
+	}
+	foreach ( $entry['fields'] as $f ) {
+		if ( 'brevo_api_key' === $f['key'] ) {
+			$backup_key = $f['value'];
+		}
+	}
+}
+
+check( 'the backup carries its own key', 'xkeysib-BACKUP-9999' === $backup_key, wp_json_encode( $backup_key ) );
+check( 'and the primary still carries its own', 'xkeysib-SECRET-VALUE-1234' === $plugin->secrets->get( 'brevo_api_key' ) );
+
+$plugin->secrets->set( 'brevo_api_key', '' );
+$plugin->secrets->for_slot( 'backup' )->set( 'brevo_api_key', '' );
+ModernMailer\Settings::flush_cache();
+
+$empty = null;
+
+foreach ( ModernMailer\Provider_Registry::to_array( $plugin->settings ) as $entry ) {
+	if ( 'brevo' !== $entry['slug'] ) {
+		continue;
+	}
+	foreach ( $entry['fields'] as $f ) {
+		if ( 'brevo_api_key' === $f['key'] ) {
+			$empty = $f;
+		}
+	}
+}
+
+check( 'an unset credential reports nothing stored', false === ( $empty['is_set'] ?? true ) );
+check( 'and carries an empty value', '' === ( $empty['value'] ?? 'x' ) );
+
 echo "\n=== Restoring a clean state on this site ===\n";
 $plugin->settings->update( [ 'provider' => '', 'ms_tenant_id' => '', 'ms_client_id' => '', 'ms_sender' => '',
 	'google_sa_email' => '', 'google_sender' => '', 'google_client_id' => '', 'from_email' => '', 'from_name' => '' ] );

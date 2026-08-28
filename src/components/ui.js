@@ -29,6 +29,17 @@ export { Skeleton } from './ui/skeleton';
 export { Alert, AlertTitle, AlertDescription } from './ui/alert';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 export {
+	Dialog,
+	DialogTrigger,
+	DialogClose,
+	DialogContent,
+	DialogHeader,
+	DialogBody,
+	DialogFooter,
+	DialogTitle,
+	DialogDescription,
+} from './ui/dialog';
+export {
 	Table,
 	TableHeader,
 	TableBody,

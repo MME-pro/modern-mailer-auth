@@ -69,8 +69,13 @@ const ProviderPicker = ( { providers, selected, onSelect } ) => (
 						{ provider.label }
 					</span>
 
+					{ /* Taken out of the flow, so it changes nothing about the
+					     tile's height. In the flow it made every coming-soon
+					     tile taller, and because the row stretches them all to
+					     match, every finished tile grew a band of empty space
+					     under its name for a label it does not have. */ }
 					{ soon && (
-						<span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+						<span className="absolute inset-x-0 bottom-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
 							{ __( 'Coming soon', 'modern-mailer-oauth' ) }
 						</span>
 					) }
@@ -137,10 +142,11 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 		const chosen = data.providers.find( ( p ) => p.slug === data.provider );
 		const seed = {};
 
+		// Secrets included. The server sends the stored value now, so the field
+		// can show it masked and reveal it - which is the only way to check that
+		// what was pasted is what was saved.
 		( chosen?.fields || [] ).forEach( ( field ) => {
-			if ( ! field.secret ) {
-				seed[ field.key ] = field.value ?? '';
-			}
+			seed[ field.key ] = field.value ?? '';
 		} );
 
 		setValues( seed );
@@ -170,20 +176,11 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 	const save = useMutation( {
 		mutationFn: () => saveConnection( slot, { provider, ...values } ),
 		onSuccess: () => {
-			// Secrets are write-only. Clearing them from local state after a
-			// save keeps the field honest: what is stored can no longer be read
-			// back, so it must not keep looking like an editable value.
-			setValues( ( previous ) => {
-				const next = { ...previous };
-
-				( current?.fields || [] ).forEach( ( field ) => {
-					if ( field.secret ) {
-						delete next[ field.key ];
-					}
-				} );
-
-				return next;
-			} );
+			// Secrets are no longer cleared here. They used to be, because what
+			// was stored could not be read back and a field still showing the
+			// typed value would have been lying about where it came from. The
+			// server sends them now, and the refetch below replaces the form with
+			// what was actually saved.
 
 			setVerifyResult( null );
 			setDirty( false );
@@ -274,8 +271,7 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 				>
 					<ProviderForm
 						provider={ current }
-						values={ values }
-						onChange={ ( key, value ) =>
+						values={ values }						onChange={ ( key, value ) =>
 							{
 								setDirty( true );
 								setValues( ( state ) => ( { ...state, [ key ]: value } ) );

@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.5
+Stable tag: 0.8.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,15 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.6 =
+* Click any row in the send log to see the full story of that attempt: WordPress and PHP versions, the connection settings that were in force, the server environment, the error, and - for SMTP - the entire conversation with the mail server. There is a button to copy the lot as text.
+* Credentials never appear in a report. A stored password is listed as set, never shown, and the SMTP transcript is captured at a level where PHPMailer masks the login exchange itself.
+* Reports are kept for failures only, so the log does not grow larger than the mail it describes. Entries recorded before this release have none.
+* Sending a test message no longer falls back to the backup connection, and is no longer queued. A test exists to say whether the primary works, and both of those could report success while it was broken.
+* SendGrid, Resend, Brevo and Other SMTP are available again. Postmark, Mailgun and SMTP2GO remain marked as coming soon.
+* API keys are shown in the connection form, masked, with a button to reveal them - so a key that was pasted with a character missing can be spotted without sending a message to find out.
+* Fixed the band of empty space that appeared under every provider tile.
 
 = 0.8.5 =
 * The connection chooser is now in a set order: Microsoft, Google, SendGrid, Resend, Brevo, Postmark, Mailgun, SMTP2GO, Other SMTP.

@@ -54,6 +54,28 @@ class Smtp extends Abstract_Provider {
 
 	private const TIMEOUT = 20;
 
+	/**
+	 * The protocol conversation from the most recent attempt.
+	 *
+	 * Kept per attempt rather than accumulated: a log entry describes one send,
+	 * and a transcript carrying an earlier message's exchange would be actively
+	 * misleading about which recipient was rejected.
+	 */
+	private string $transcript = '';
+
+	/**
+	 * What was said on the wire, for the log.
+	 *
+	 * Not on Provider_Interface. Only a protocol with a conversation has one to
+	 * report, and the three API providers have nothing to say here that the
+	 * HTTP status does not already say - so the logger asks for this when a
+	 * provider offers it rather than every provider implementing an empty
+	 * method to satisfy a contract.
+	 */
+	public function transcript(): string {
+		return $this->transcript;
+	}
+
 	public function get_label(): string {
 		return __( 'SMTP', 'modern-mailer-oauth' );
 	}
@@ -73,12 +95,6 @@ class Smtp extends Abstract_Provider {
 			'docs'     => 'https://datatracker.ietf.org/doc/html/rfc5321',
 			'category' => 'smtp',
 			'raw_mime' => true,
-
-			// Listed but not selectable yet. Kept in the registry rather than
-			// removed, so a site already sending through it carries on doing so -
-			// withdrawing a working transport in an update would stop that site's
-			// mail, which is never an acceptable way to narrow a feature set.
-			'coming_soon' => true,
 		];
 	}
 
@@ -293,9 +309,24 @@ class Smtp extends Abstract_Provider {
 		$smtp = new Smtp_Client();
 		$smtp->setTimeout( self::TIMEOUT );
 
-		// PHPMailer's SMTP writes its own debug output to stdout, which in a
-		// web request means straight into the page. Off, always.
-		$smtp->do_debug = Smtp_Client::DEBUG_OFF;
+		// PHPMailer's SMTP writes its debug output to stdout by default, which
+		// in a web request means straight into the page. Pointed at a buffer
+		// instead, so the conversation can be attached to a failed send - the
+		// server's own replies are the only thing that explains most SMTP
+		// failures, and without them an admin is left guessing at a message
+		// like "Recipient address rejected".
+		//
+		// DEBUG_SERVER, deliberately not higher. At DEBUG_LOWLEVEL and above
+		// PHPMailer prints the raw AUTH exchange; below it, the credential is
+		// replaced with "[credentials hidden]" by PHPMailer itself.
+		$this->transcript = '';
+		$smtp->do_debug   = Smtp_Client::DEBUG_SERVER;
+
+		$smtp->Debugoutput = function ( $line, $level ): void {
+			unset( $level );
+
+			$this->transcript .= rtrim( (string) $line ) . "\n";
+		};
 
 		// Implicit TLS wraps the socket from the first byte, so the scheme is
 		// part of the address rather than a later command.

@@ -157,7 +157,20 @@ class Field {
 			'options'     => $this->options,
 			'locked'      => $locked,
 			'is_set'      => $this->secret ? $is_set : ( '' !== (string) $value ),
-			'value'       => $this->secret ? '' : $value,
+
+			// Secrets included, so a stored credential can be shown masked and
+			// revealed on demand. That is a change from "never send a secret,
+			// not even masked", and the reason is that the old behaviour left
+			// an administrator unable to check what had been saved - a pasted
+			// key with a truncated tail looked identical to a correct one, and
+			// the only way to find out was to send mail and read the error.
+			//
+			// What it costs: anything that can read this admin screen can read
+			// the credential, which is one XSS in wp-admin away rather than
+			// two steps. The screen already requires manage_options, and a
+			// capability that can install plugins can obtain the value anyway,
+			// so the exposure this adds is real but narrow.
+			'value'       => $value,
 
 			// Layout and behaviour, declared here so the form stays generated.
 			// The alternative is a hand-written panel per provider, which is

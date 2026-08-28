@@ -287,14 +287,18 @@ class Admin_Page {
 
 		add_action( 'wp_mail_failed', $capture );
 
-		$sent = wp_mail(
-			$to,
-			sprintf(
-				/* translators: %s: site name. */
-				__( 'Modern Mailer test from %s', 'modern-mailer-oauth' ),
-				get_bloginfo( 'name' )
-			),
-			__( "This is a test message.\n\nIf you are reading it, the API connection is working.", 'modern-mailer-oauth' )
+		// Same rules as the app's Send test: no routing, no backup, no queue,
+		// so the answer is the primary connection's own.
+		$sent = $this->plugin->dispatcher->without_fallbacks(
+			fn() => wp_mail(
+				$to,
+				sprintf(
+					/* translators: %s: site name. */
+					__( 'Modern Mailer test from %s', 'modern-mailer-oauth' ),
+					get_bloginfo( 'name' )
+				),
+				__( "This is a test message.\n\nIf you are reading it, the API connection is working.", 'modern-mailer-oauth' )
+			)
 		);
 
 		remove_action( 'wp_mail_failed', $capture );

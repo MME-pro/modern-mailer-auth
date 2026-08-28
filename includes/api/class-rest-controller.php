@@ -31,9 +31,18 @@ defined( 'ABSPATH' ) || exit;
  * provider asked for is dropped rather than stored - the front end cannot widen
  * what is persisted by posting extra keys.
  *
- * And no credential is ever sent to the browser. Reads report whether a secret
- * is set, never what it is. A masked value would still have to leave the server
- * to be masked, and an admin screen is exactly where an XSS would go looking.
+ * Credentials are sent to the browser, which they were not at first, and the
+ * change is worth explaining. Withholding them left an administrator unable to
+ * check what had been saved: a key pasted with a truncated tail looks exactly
+ * like a correct one, and the only way to find out was to send a message and
+ * read the error. The field now shows the stored value masked, with an eye to
+ * reveal it - which requires the value to be here.
+ *
+ * The cost is that anything able to read this screen can read the credential.
+ * These routes already require manage_options, and that capability can install
+ * a plugin and take the value regardless, so the exposure is narrower than it
+ * first appears - but it is real, and it is the reason the screen is the only
+ * place this happens.
  */
 class Rest_Controller {
 
@@ -124,6 +133,16 @@ class Rest_Controller {
 			[
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_logs' ],
+				'permission_callback' => $auth,
+			]
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/logs/(?P<id>[0-9]+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_log_entry' ],
 				'permission_callback' => $auth,
 			]
 		);
@@ -354,14 +373,21 @@ class Rest_Controller {
 
 		add_action( 'wp_mail_failed', $capture );
 
-		$sent = wp_mail(
-			$to,
-			sprintf(
-				/* translators: %s: site name. */
-				__( 'Modern Mailer test from %s', 'modern-mailer-oauth' ),
-				get_bloginfo( 'name' )
-			),
-			__( "This is a test message.\n\nIf you are reading it, the connection is working.", 'modern-mailer-oauth' )
+		// Sent with the safety nets off: no routing, no backup, no queue. A
+		// test exists to say whether the primary connection works, and every
+		// one of those would let it answer yes when the primary had failed -
+		// which is the very situation somebody presses this button to find out
+		// about.
+		$sent = $this->plugin->dispatcher->without_fallbacks(
+			fn() => wp_mail(
+				$to,
+				sprintf(
+					/* translators: %s: site name. */
+					__( 'Modern Mailer test from %s', 'modern-mailer-oauth' ),
+					get_bloginfo( 'name' )
+				),
+				__( "This is a test message.\n\nIf you are reading it, the connection is working.", 'modern-mailer-oauth' )
+			)
 		);
 
 		remove_action( 'wp_mail_failed', $capture );
@@ -384,6 +410,37 @@ class Rest_Controller {
 				'entries' => array_map( [ $this, 'log_row' ], $this->plugin->logger->recent( $limit ) ),
 				'enabled' => (bool) $this->plugin->settings->get( 'log_enabled' ),
 			]
+		);
+	}
+
+	/**
+	 * One log entry with its diagnostic report.
+	 *
+	 * Its own route rather than a field on the list, because the report runs
+	 * to kilobytes - a page of fifty failures would carry a megabyte of
+	 * transcript nobody has asked to read yet.
+	 */
+	public function get_log_entry( WP_REST_Request $request ): WP_REST_Response {
+		$row = $this->plugin->logger->entry( (int) $request->get_param( 'id' ) );
+
+		if ( null === $row ) {
+			return new WP_REST_Response( [ 'message' => __( 'No such log entry.', 'modern-mailer-oauth' ) ], 404 );
+		}
+
+		$report = json_decode( (string) ( $row->diagnostics ?? '' ), true );
+
+		return new WP_REST_Response(
+			array_merge(
+				$this->log_row( $row ),
+				[
+					'code'        => (string) $row->error_code,
+
+					// Null rather than an empty shape when there is none: a
+					// successful send has nothing to report, and the modal says
+					// so instead of drawing empty sections.
+					'diagnostics' => is_array( $report ) ? $report : null,
+				]
+			)
 		);
 	}
 

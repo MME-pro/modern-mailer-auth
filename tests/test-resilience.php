@@ -243,6 +243,40 @@ check( 'the fallback was announced', 1 === $used_backup, "fired {$used_backup}x"
 check( 'nothing was queued, because nothing was lost', 0 === $plugin->queue->stats()['pending'] );
 check( 'health is clean, because the site did deliver', ! $plugin->health->is_failing() );
 
+echo "\n=== 7b. A test message is never rescued by anything ===\n";
+// Send test exists to answer one question: does the primary work? Every
+// mechanism that makes ordinary sending resilient makes that unanswerable - a
+// test that fell through to the backup reported success while the primary was
+// broken, which is the exact situation somebody presses the button to find out
+// about, and one that got queued reported success for a message never sent.
+//
+// The arrangement is identical to section 7, where the backup did rescue it.
+reset_state( $plugin );
+$hit    = [ 'graph' => 0, 'gmail' => 0 ];
+$calls  = 0;
+$before = $used_backup;
+
+$sent = $plugin->dispatcher->without_fallbacks(
+	fn() => wp_mail( 'a@example.com', 'test message', 'body' )
+);
+
+check( 'the test reports failure, not the backup\'s success', true !== $sent, var_export( $sent, true ) );
+check( 'the primary was tried', $hit['graph'] > 0 );
+check( 'the backup was never asked', 0 === $hit['gmail'], "backup called {$hit['gmail']}x" );
+check( 'no fallback was announced', $before === $used_backup );
+check( 'and nothing was queued behind it', 0 === $plugin->queue->stats()['pending'], (string) $plugin->queue->stats()['pending'] );
+
+echo "\n=== 7c. Ordinary sending still has its safety nets ===\n";
+// The flag must not leak past the callback: the same arrangement that was
+// deliberately not rescued above must be rescued now.
+reset_state( $plugin );
+$hit    = [ 'graph' => 0, 'gmail' => 0 ];
+$calls  = 0;
+$normal = wp_mail( 'a@example.com', 'ordinary message', 'body' );
+
+check( 'an ordinary send still reaches the backup', true === $normal, var_export( $normal, true ) );
+check( 'and the backup delivered it', $hit['gmail'] > 0 );
+
 echo "\n=== 8. Both connections down: queued, not lost ===\n";
 reset_state( $plugin );
 $calls  = 0;

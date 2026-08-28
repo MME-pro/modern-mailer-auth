@@ -41,6 +41,12 @@ class Dispatcher {
 	 */
 	private bool $draining = false;
 
+	/**
+	 * Set while a test message is being sent, so it cannot be rescued by
+	 * anything and reports the primary connection's own answer.
+	 */
+	private bool $testing = false;
+
 	public function __construct(
 		private Settings $settings,
 		private Token_Store $tokens,
@@ -89,6 +95,33 @@ class Dispatcher {
 	}
 
 	/**
+	 * Run a send with every safety net switched off.
+	 *
+	 * A test message exists to answer one question: does the primary
+	 * connection work? Everything that makes ordinary sending resilient makes
+	 * that question unanswerable. A test that fell through to the backup
+	 * reported success while the primary was broken - which is the exact
+	 * situation somebody presses Send test to find out about - and one that got
+	 * queued reported success for a message that had not been sent at all.
+	 *
+	 * So for the duration of the callback: no routing, no backup, no queue.
+	 * What comes back is the primary connection's own answer.
+	 *
+	 * @template T
+	 * @param callable():T $send
+	 * @return T
+	 */
+	public function without_fallbacks( callable $send ) {
+		$this->testing = true;
+
+		try {
+			return $send();
+		} finally {
+			$this->testing = false;
+		}
+	}
+
+	/**
 	 * Send a built MIME message, escalating through backup and queue.
 	 *
 	 * @return true|WP_Error
@@ -102,7 +135,13 @@ class Dispatcher {
 		// choice was already made and recorded. Re-routing on retry would be
 		// wrong: the rules may have changed since, and a message half-delivered
 		// through one connection should not silently move to another.
-		$slot = $forced_slot ?? $this->route( $raw_mime, $mailer );
+		//
+		// A test is always the primary connection, whatever the routing rules
+		// say. "Send test" sits under the primary and claims to exercise it, so
+		// letting a rule divert it would answer a question nobody asked.
+		$slot = $this->testing
+			? Settings::SLOT_PRIMARY
+			: ( $forced_slot ?? $this->route( $raw_mime, $mailer ) );
 
 		$result = $this->attempt( $slot, $raw_mime, $mailer );
 
@@ -115,7 +154,8 @@ class Dispatcher {
 		// A routed message falls back to the backup like any other, unless the
 		// backup is the connection that just failed.
 		if (
-			Settings::SLOT_BACKUP !== $slot
+			! $this->testing
+			&& Settings::SLOT_BACKUP !== $slot
 			&& Failure::should_try_backup( $result )
 			&& null !== $this->provider( Settings::SLOT_BACKUP )
 		) {
@@ -148,7 +188,7 @@ class Dispatcher {
 
 		// Last resort: keep the message so a later request can try again. Only
 		// worth doing for a failure that could plausibly resolve on its own.
-		if ( ! $this->draining && Failure::is_retryable( $result ) ) {
+		if ( ! $this->draining && ! $this->testing && Failure::is_retryable( $result ) ) {
 			$queued = $this->queue->enqueue(
 				$raw_mime,
 				$this->recipients( $mailer ),
@@ -245,7 +285,10 @@ class Dispatcher {
 		// Every attempt is logged, including one the backup went on to rescue -
 		// the log is the record of what actually happened on the wire. Health
 		// is decided once, by dispatch(), from the final outcome.
-		$this->logger->record( $provider, $mailer, $bytes, $result );
+		// The slot goes with it, so a failure's report names which connection's
+		// settings it was describing. Without that, a site with a primary and a
+		// backup on the same provider produces two identical-looking reports.
+		$this->logger->record( $provider, $mailer, $bytes, $result, $slot );
 
 		return $result;
 	}

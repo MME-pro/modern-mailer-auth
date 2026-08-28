@@ -27,6 +27,14 @@ export const getBootstrap = () => request( '/bootstrap' );
 export const getSettings = () => request( '/settings' );
 export const getDashboard = () => request( '/dashboard' );
 export const getLogs = ( limit = 50 ) => request( `/logs?limit=${ limit }` );
+
+/**
+ * One entry with its diagnostic report.
+ *
+ * Its own request, because a report runs to kilobytes and a page of fifty
+ * failures would otherwise carry a megabyte nobody has asked to read.
+ */
+export const getLogEntry = ( id ) => request( `/logs/${ id }` );
 export const getQueue = () => request( '/queue' );
 export const getConnection = ( slot ) => request( `/connections/${ slot }` );
 
