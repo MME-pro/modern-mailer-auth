@@ -173,6 +173,28 @@ class Outlook extends Abstract_Provider {
 		$data    = $this->decode( $response['body'] );
 		$address = (string) ( $data['mail'] ?? $data['userPrincipalName'] ?? '' );
 
+		$from = trim( (string) $this->settings->get( 'from_email' ) );
+
+		// Caught here rather than at the first send. This connection can only
+		// send as the mailbox that signed in, so a From address pointing
+		// anywhere else is a message that will be refused - and refused with a
+		// 403, which reads like a permissions problem and sends people to their
+		// administrator instead of to the one field they need to change.
+		//
+		// Reported as a failure, not a warning: nothing sent through this
+		// connection will work until it is fixed.
+		if ( '' !== $address && '' !== $from && 0 !== strcasecmp( $address, $from ) ) {
+			return new WP_Error(
+				'mmoa_outlook_from_mismatch',
+				sprintf(
+					/* translators: 1: configured From address, 2: connected mailbox. */
+					__( 'Connected to %2$s, but the From address is %1$s. This connection can only send as the mailbox that signed in, so Microsoft will refuse every message. Set the From address to %2$s, or use Microsoft 365 with an Azure application, which can send as any address in the tenant.', 'modern-mailer-oauth' ),
+					$from,
+					$address
+				)
+			);
+		}
+
 		// Say what could not be checked rather than implying more than was
 		// tested. Reading the profile proves the credential is live and the
 		// mailbox exists; it does not prove Microsoft will accept a message,
@@ -220,17 +242,39 @@ class Outlook extends Abstract_Provider {
 			);
 		}
 
-		if ( 'ErrorAccessDenied' === $code || 403 === $status ) {
+		// Before the general 403 below, not after it. ErrorSendAsDenied IS a
+		// 403, so ordering these the other way round made the specific case
+		// unreachable and reported the commonest setup mistake in this whole
+		// provider - a From address that is not the connected mailbox - as
+		// "an administrator may have restricted it", which sends somebody to
+		// argue with their IT department about a setting they control
+		// themselves.
+		$account = trim( (string) $this->settings->get( 'ms_account' ) );
+		$from    = trim( (string) $this->settings->get( 'from_email' ) );
+		$mismatch = '' !== $account && '' !== $from && 0 !== strcasecmp( $account, $from );
+
+		if ( 'ErrorSendAsDenied' === $code || $mismatch ) {
 			return new WP_Error(
-				'mmoa_outlook_forbidden',
-				__( 'The signed-in account is not allowed to send mail. If this is a work or school account, an administrator may have restricted it.', 'modern-mailer-oauth' )
+				'mmoa_outlook_send_as',
+				'' !== $account && '' !== $from
+					? sprintf(
+						/* translators: 1: From address, 2: connected mailbox. */
+						__( 'This connection sends as the mailbox that signed in, and the From address does not match it: mail is being sent from %1$s but the connected account is %2$s. Set the From address to %2$s, or use Microsoft 365 with an Azure application, which can send as any address in the tenant.', 'modern-mailer-oauth' ),
+						$from,
+						$account
+					)
+					: __( 'The From address does not belong to the signed-in mailbox, and this connection can only send as itself. Set the From address to the connected account, or use Microsoft 365 with an application registration to send as another address.', 'modern-mailer-oauth' )
 			);
 		}
 
-		if ( 'ErrorSendAsDenied' === $code ) {
+		if ( 'ErrorAccessDenied' === $code || 403 === $status ) {
 			return new WP_Error(
-				'mmoa_outlook_send_as',
-				__( 'The From address does not belong to the signed-in mailbox, and this connection can only send as itself. Set the From address to the connected account, or use Microsoft 365 with an application registration to send as another address.', 'modern-mailer-oauth' )
+				'mmoa_outlook_forbidden',
+				sprintf(
+					/* translators: %s: the reason Microsoft gave. */
+					__( 'Microsoft refused to send as the signed-in account: %s Check that the mailbox has an Exchange Online licence, and that a work or school administrator has not restricted it.', 'modern-mailer-oauth' ),
+					'' !== $message ? rtrim( $message, '.' ) . '.' : __( 'no reason given.', 'modern-mailer-oauth' )
+				)
 			);
 		}
 

@@ -300,6 +300,77 @@ foreach ( $links as $label => [ $url, $action ] ) {
 	check( "{$label}: the action arrives intact", $action === ( $params['action'] ?? '' ), $params['action'] ?? 'missing' );
 }
 
+echo "\n=== 13c. A From address that is not the connected mailbox is named ===\n";
+// The regression this guards: Outlook can only send as the mailbox that signed
+// in, and Microsoft refuses anything else with a 403. The generic 403 branch
+// sat ABOVE the ErrorSendAsDenied branch, so the specific case was unreachable
+// and the commonest mistake in this provider was reported as "an administrator
+// may have restricted it" - which sends somebody to argue with their IT
+// department about a setting they control themselves.
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'provider' => 'outlook' ] );
+$plugin->secrets->for_slot( Settings::SLOT_BACKUP )->set( 'ms_refresh', 'MS-RT' );
+$plugin->settings->update( [ 'from_email' => 'hello@example.com' ] );
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'ms_account' => 'someone@outlook.com' ] );
+Settings::flush_cache();
+$plugin->tokens->flush();
+
+$class   = ModernMailer\Provider_Registry::class_for( 'outlook' );
+$outlook = new $class( $plugin->settings->for_slot( Settings::SLOT_BACKUP ), $plugin->tokens, $plugin->http );
+
+$calls  = 0;
+$script = function ( $url, $args, $n ) {
+	if ( false !== strpos( $url, '/microsoft/refresh' ) ) {
+		return json_response( 200, [ 'access_token' => 'MS-AT', 'expires_in' => 3600 ] );
+	}
+
+	// What Graph actually answers when the From address is not the mailbox.
+	return json_response( 403, [ 'error' => [ 'code' => 'ErrorSendAsDenied', 'message' => 'Access is denied.' ] ] );
+};
+
+$mailer = new PHPMailer\PHPMailer\PHPMailer( true );
+$mailer->setFrom( 'hello@example.com' );
+$mailer->addAddress( 'someone@example.com' );
+$mailer->Subject = 'x';
+$mailer->Body    = 'y';
+$mailer->preSend();
+
+$sent = $outlook->send( $mailer->getSentMIMEMessage(), $mailer );
+
+check( 'sending is refused', is_wp_error( $sent ), 'accepted' );
+check( 'and it is the send-as case, not a vague permissions one', is_wp_error( $sent ) && 'mmoa_outlook_send_as' === $sent->get_error_code(), is_wp_error( $sent ) ? $sent->get_error_code() : '' );
+check( 'the message names the From address', is_wp_error( $sent ) && false !== strpos( $sent->get_error_message(), 'hello@example.com' ) );
+check( 'and the connected mailbox', is_wp_error( $sent ) && false !== strpos( $sent->get_error_message(), 'someone@outlook.com' ) );
+check( 'and does not blame an administrator', is_wp_error( $sent ) && false === stripos( $sent->get_error_message(), 'administrator may have restricted' ), is_wp_error( $sent ) ? $sent->get_error_message() : '' );
+
+echo "\n=== 13d. Verify catches it before anyone sends ===\n";
+$calls  = 0;
+$script = function ( $url, $args, $n ) {
+	if ( false !== strpos( $url, '/microsoft/refresh' ) ) {
+		return json_response( 200, [ 'access_token' => 'MS-AT', 'expires_in' => 3600 ] );
+	}
+
+	return json_response( 200, [ 'mail' => 'someone@outlook.com' ] );
+};
+$plugin->tokens->flush();
+
+$verified = $outlook->verify_connection();
+
+check( 'verification fails rather than reporting success', is_wp_error( $verified ), is_string( $verified ) ? $verified : 'true' );
+check( 'and names both addresses', is_wp_error( $verified ) && false !== strpos( $verified->get_error_message(), 'hello@example.com' ) && false !== strpos( $verified->get_error_message(), 'someone@outlook.com' ) );
+
+// Matching addresses verify cleanly.
+$plugin->settings->update( [ 'from_email' => 'someone@outlook.com' ] );
+Settings::flush_cache();
+$plugin->tokens->flush();
+
+$ok = $outlook->verify_connection();
+check( 'a matching From address verifies', ! is_wp_error( $ok ), is_wp_error( $ok ) ? $ok->get_error_message() : '' );
+
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'provider' => '', 'ms_account' => '' ] );
+$plugin->secrets->for_slot( Settings::SLOT_BACKUP )->set( 'ms_refresh', '' );
+$plugin->settings->update( [ 'from_email' => '' ] );
+Settings::flush_cache();
+
 echo "\n=== 14. Outlook is a delegated provider, distinct from Microsoft 365 ===\n";
 check( 'Outlook is registered', ModernMailer\Provider_Registry::exists( 'outlook' ) );
 check( 'Microsoft 365 is still registered separately', ModernMailer\Provider_Registry::exists( 'graph' ) );

@@ -32,25 +32,48 @@ const ProviderPicker = ( { providers, selected, onSelect } ) => (
 		{ providers.map( ( provider ) => {
 			const active = selected === provider.slug;
 
+			// Shown, but not yet choosable. Never applied to whatever this
+			// connection already uses: a site sending through one of these
+			// must be able to open its settings, and greying out the tile it
+			// is standing on would read as the connection being broken.
+			const soon = !! provider.coming_soon && ! active;
+
 			return (
 				<button
 					key={ provider.slug }
 					type="button"
-					title={ provider.summary }
+					title={ soon ? __( 'Coming soon', 'modern-mailer-oauth' ) : provider.summary }
 					aria-pressed={ active }
-					onClick={ () => onSelect( provider.slug ) }
+					aria-disabled={ soon }
+					disabled={ soon }
+					onClick={ () => ! soon && onSelect( provider.slug ) }
 					className={ cn(
-						'group relative flex w-[132px] cursor-pointer flex-col items-center gap-2.5 rounded-xl border p-4 text-center transition-all',
-						active
-							? 'border-brand bg-brand-subtle ring-1 ring-brand'
-							: 'border-border bg-card hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-sm'
+						'group relative flex w-[132px] flex-col items-center gap-2.5 rounded-xl border p-4 text-center transition-all',
+						soon && 'cursor-not-allowed border-border bg-muted/40',
+						! soon && 'cursor-pointer',
+						active && 'border-brand bg-brand-subtle ring-1 ring-brand',
+						! active && ! soon && 'border-border bg-card hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-sm'
 					) }
 				>
-					<ProviderLogo slug={ provider.slug } className="size-8" />
+					<ProviderLogo
+						slug={ provider.slug }
+						className={ cn( 'size-8', soon && 'opacity-40 grayscale' ) }
+					/>
 
-					<span className="text-[13px] leading-tight font-medium">
+					<span
+						className={ cn(
+							'text-[13px] leading-tight font-medium',
+							soon && 'text-muted-foreground'
+						) }
+					>
 						{ provider.label }
 					</span>
+
+					{ soon && (
+						<span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+							{ __( 'Coming soon', 'modern-mailer-oauth' ) }
+						</span>
+					) }
 
 					{ active && (
 						<span className="absolute top-2 right-2 inline-flex size-4 items-center justify-center rounded-full bg-brand text-brand-foreground">

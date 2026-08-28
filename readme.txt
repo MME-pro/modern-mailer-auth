@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.3
+Stable tag: 0.8.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.4 =
+* The connection chooser now offers Microsoft and Google. The rest are shown as coming soon while they are finished.
+* A connection already sending through one of those is untouched: it keeps working, keeps its settings, and stays editable. Nothing that was delivering mail stops delivering it.
+* Fixed a misleading error on Outlook. Sending with a From address that is not the mailbox you signed in with was reported as "an administrator may have restricted it", which is the wrong place to look. It now names both addresses and tells you which one to change.
+* Verify catches that mismatch too, so it surfaces before the first message fails rather than after.
 
 = 0.8.3 =
 * One-click setup now works. The setup service it needs is live, so Sign in with Google connects a mailbox without anyone opening the Google Cloud console. Nothing to configure: the address ships with the plugin.

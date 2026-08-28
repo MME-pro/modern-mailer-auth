@@ -57,6 +57,12 @@ class Mailgun extends Abstract_Provider {
 			'docs'     => 'https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Messages/',
 			'category' => 'api',
 			'raw_mime' => true,
+
+			// Listed but not selectable yet. Kept in the registry rather than
+			// removed, so a site already sending through it carries on doing so -
+			// withdrawing a working transport in an update would stop that site's
+			// mail, which is never an acceptable way to narrow a feature set.
+			'coming_soon' => true,
 		];
 	}
 

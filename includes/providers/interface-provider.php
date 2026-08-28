@@ -75,7 +75,12 @@ interface Provider_Interface {
 	/**
 	 * Everything the provider chooser needs to render an entry.
 	 *
-	 * @return array{label:string,summary:string,docs:string,category:string,raw_mime:bool}
+	 * `coming_soon` is optional and defaults to false. A provider that sets it
+	 * is shown in the chooser but cannot be picked - the transport still works,
+	 * and a connection already using it stays selectable and editable, because
+	 * withdrawing a working transport in an update would stop that site's mail.
+	 *
+	 * @return array{label:string,summary:string,docs:string,category:string,raw_mime:bool,coming_soon?:bool}
 	 */
 	public static function describe(): array;
 }
