@@ -61,17 +61,24 @@ class Provider_Registry {
 			Providers\Microsoft::class,
 			Providers\Google::class,
 
+			// The order here is the order of the chooser, so it is a display
+			// decision rather than an implementation one: the two finished
+			// providers first, then the rest in the order they are being
+			// worked through.
+			Providers\Sendgrid::class,
+			Providers\Resend::class,
+			Providers\Brevo::class,
+			Providers\Postmark::class,
+			Providers\Mailgun::class,
+			Providers\Smtp2go::class,
+			Providers\Smtp::class,
+
+			// Unlisted, so their position never shows. They sit last so that
+			// reordering the tiles above cannot accidentally disturb them.
 			Providers\Graph::class,
 			Providers\Outlook::class,
 			Providers\Gmail_Service_Account::class,
 			Providers\Gmail_OAuth::class,
-			Providers\Sendgrid::class,
-			Providers\Postmark::class,
-			Providers\Mailgun::class,
-			Providers\Brevo::class,
-			Providers\Smtp2go::class,
-			Providers\Resend::class,
-			Providers\Smtp::class,
 		];
 
 		/**

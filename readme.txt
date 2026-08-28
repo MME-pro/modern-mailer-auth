@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.4
+Stable tag: 0.8.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,9 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.8.5 =
+* The connection chooser is now in a set order: Microsoft, Google, SendGrid, Resend, Brevo, Postmark, Mailgun, SMTP2GO, Other SMTP.
 
 = 0.8.4 =
 * The connection chooser now offers Microsoft and Google. The rest are shown as coming soon while they are finished.

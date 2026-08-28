@@ -68,6 +68,37 @@ foreach ( [ 'graph', 'outlook', 'gmail_sa', 'gmail_oauth' ] as $hidden ) {
 
 check( 'the unmerged providers are untouched', in_array( 'sendgrid', $slugs, true ) && in_array( 'smtp', $slugs, true ) );
 
+echo "\n=== 1b. The chooser is in the order it was asked to be in ===\n";
+// Asserted rather than left to the registry's declaration order, because that
+// list is edited whenever a provider is added and nothing else would notice it
+// had moved. The order is a display decision someone made deliberately.
+$order = array_column( Provider_Registry::to_array( $plugin->settings ), 'label' );
+
+check(
+	'the tiles are in the intended order',
+	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Postmark', 'Mailgun', 'SMTP2GO', 'Other SMTP' ] === $order,
+	implode( ' - ', $order )
+);
+
+check( 'the two finished providers come first', [ 'Microsoft', 'Google' ] === array_slice( $order, 0, 2 ) );
+check( 'and the generic SMTP fallback comes last', 'Other SMTP' === end( $order ) );
+
+echo "\n=== 1c. Only the finished providers are selectable ===\n";
+$catalogue = Provider_Registry::to_array( $plugin->settings );
+$soon      = [];
+$ready     = [];
+
+foreach ( $catalogue as $entry ) {
+	if ( ! empty( $entry['coming_soon'] ) ) {
+		$soon[] = $entry['label'];
+	} else {
+		$ready[] = $entry['label'];
+	}
+}
+
+check( 'Microsoft and Google are offered', [ 'Microsoft', 'Google' ] === $ready, implode( ',', $ready ) );
+check( 'the other seven are marked coming soon', 7 === count( $soon ), implode( ',', $soon ) );
+
 echo "\n=== 2. The transports stay constructible ===\n";
 // An upgrade must not be able to stop mail. A site storing a legacy slug keeps
 // sending whether or not the migration has run.
