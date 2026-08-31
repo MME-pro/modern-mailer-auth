@@ -137,7 +137,15 @@ class App_Page {
 			$asset['version']
 		);
 
-		wp_set_script_translations( 'mmoa-app', 'modern-mailer-oauth' );
+		// The third argument is not optional in practice. Without it WordPress
+		// looks only in wp-content/languages/plugins/, so a translation shipped
+		// with the plugin is never found and the admin app stays in English
+		// while every PHP string around it is translated.
+		wp_set_script_translations(
+			'mmoa-app',
+			'modern-mailer-oauth',
+			PLUGIN_DIR . 'languages'
+		);
 
 		wp_localize_script(
 			'mmoa-app',

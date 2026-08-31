@@ -47,6 +47,10 @@ export const saveConnection = ( slot, data ) =>
 export const verifyConnection = ( slot ) =>
 	request( `/connections/${ slot }/verify`, { method: 'POST' } );
 
+/** Clear a connection: its provider, credentials and any grant it holds. */
+export const disconnectConnection = ( slot ) =>
+	request( `/connections/${ slot }/disconnect`, { method: 'POST' } );
+
 export const sendTestEmail = ( to ) =>
 	request( '/test-email', { method: 'POST', data: { to } } );
 

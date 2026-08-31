@@ -26,6 +26,9 @@ class Plugin {
 	/** Set once the merge migration has run, so it runs once. */
 	private const MERGED_PROVIDERS_OPTION = 'mmoa_merged_providers';
 
+	/** Set once the From address has been copied onto each connection. */
+	private const PER_CONNECTION_FROM_OPTION = 'mmoa_per_connection_from';
+
 	private static ?Plugin $instance = null;
 
 	public Secrets $secrets;
@@ -132,7 +135,11 @@ class Plugin {
 
 		$GLOBALS['phpmailer'] = $catcher;
 
-		if ( $this->settings->get( 'force_from' ) ) {
+		// Seeded from the primary connection, which is what an unrouted message
+		// uses. If routing or a backup hands the message to a different
+		// connection, Dispatcher::apply_from() rewrites it before sending -
+		// this filter runs long before which connection sends is decided.
+		if ( $this->settings->for_slot( Settings::SLOT_PRIMARY )->get( 'force_from' ) ) {
 			add_filter( 'wp_mail_from', [ $this, 'filter_from_email' ], 100 );
 			add_filter( 'wp_mail_from_name', [ $this, 'filter_from_name' ], 100 );
 		}
@@ -146,13 +153,13 @@ class Plugin {
 	 * hardcodes its own From does not quietly break delivery.
 	 */
 	public function filter_from_email( string $from ): string {
-		$configured = (string) $this->settings->get( 'from_email' );
+		$configured = (string) $this->settings->for_slot( Settings::SLOT_PRIMARY )->get( 'from_email' );
 
 		return '' !== $configured ? $configured : $from;
 	}
 
 	public function filter_from_name( string $name ): string {
-		$configured = (string) $this->settings->get( 'from_name' );
+		$configured = (string) $this->settings->for_slot( Settings::SLOT_PRIMARY )->get( 'from_name' );
 
 		return '' !== $configured ? $configured : $name;
 	}
@@ -196,6 +203,56 @@ class Plugin {
 		}
 
 		$this->migrate_merged_providers();
+		$this->migrate_per_connection_from();
+	}
+
+	/**
+	 * Give every connection the From address that used to be site-wide.
+	 *
+	 * The primary needs nothing done: the site-wide value was stored under the
+	 * bare key, which is exactly where the primary slot reads its own from, so
+	 * it already has it. Every other connection would otherwise wake up with an
+	 * empty From and refuse to send.
+	 *
+	 * Only fills a blank. A connection that already has its own address set it
+	 * deliberately, and overwriting that would be worse than doing nothing.
+	 */
+	private function migrate_per_connection_from(): void {
+		if ( get_option( self::PER_CONNECTION_FROM_OPTION ) ) {
+			return;
+		}
+
+		$primary = $this->settings->for_slot( Settings::SLOT_PRIMARY );
+		$email   = (string) $primary->get( 'from_email' );
+		$name    = (string) $primary->get( 'from_name' );
+
+		if ( '' !== $email ) {
+			foreach ( $this->connections->all() as $connection ) {
+				$slot = (string) $connection['slot'];
+
+				if ( Settings::SLOT_PRIMARY === $slot ) {
+					continue;
+				}
+
+				$scoped = $this->settings->for_slot( $slot );
+				$values = [];
+
+				if ( '' === (string) $scoped->get( 'from_email' ) ) {
+					$values['from_email'] = $email;
+				}
+
+				if ( '' === (string) $scoped->get( 'from_name' ) ) {
+					$values['from_name'] = $name;
+				}
+
+				if ( $values ) {
+					$scoped->update( $values );
+				}
+			}
+		}
+
+		Settings::flush_cache();
+		update_option( self::PER_CONNECTION_FROM_OPTION, time(), false );
 	}
 
 	/**

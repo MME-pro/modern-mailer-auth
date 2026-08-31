@@ -1,11 +1,12 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, ShieldCheck, Send, AlertTriangle, Plus, Trash2 } from 'lucide-react';
+import { Check, ShieldCheck, Send, AlertTriangle, Plus, Trash2, Unplug } from 'lucide-react';
 import {
 	getConnection,
 	saveConnection,
 	verifyConnection,
+	disconnectConnection,
 	sendTestEmail,
 	listConnections,
 	addConnection,
@@ -191,6 +192,20 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 		onError: ( error ) => toast( error.message, 'bad' ),
 	} );
 
+	const disconnect = useMutation( {
+		mutationFn: () => disconnectConnection( slot ),
+		onSuccess: ( result ) => {
+			setProvider( '' );
+			setValues( {} );
+			setVerifyResult( null );
+			setDirty( false );
+			queryClient.invalidateQueries( { queryKey: [ 'connection', slot ] } );
+			queryClient.invalidateQueries( { queryKey: [ 'bootstrap' ] } );
+			toast( result.message );
+		},
+		onError: ( error ) => toast( error.message, 'bad' ),
+	} );
+
 	const verify = useMutation( {
 		// Verification runs against what is stored, never against what is on
 		// screen - the server has to build the provider from saved credentials
@@ -291,6 +306,33 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 							<ShieldCheck size={ 14 } />
 							{ __( 'Verify', 'modern-mailer-oauth' ) }
 						</Button>
+
+						{ /* Offered only once there is something to disconnect,
+						     and pushed to the far right so it is never the
+						     button somebody reaches for on the way to Save. */ }
+						{ data.provider && (
+							<Button
+								variant="outline"
+								className="ml-auto border-danger/30 text-danger hover:bg-danger/10 hover:text-danger"
+								busy={ disconnect.isPending }
+								onClick={ () => {
+									// eslint-disable-next-line no-alert
+									if (
+										window.confirm(
+											__(
+												'This clears the provider and every credential on this connection, and withdraws any account it is signed in to. Mail routed here will stop until it is set up again. Continue?',
+												'modern-mailer-oauth'
+											)
+										)
+									) {
+										disconnect.mutate();
+									}
+								} }
+							>
+								<Unplug size={ 14 } />
+								{ __( 'Disconnect', 'modern-mailer-oauth' ) }
+							</Button>
+						) }
 					</div>
 
 					{ /* Keyed on the provider currently selected, not the saved

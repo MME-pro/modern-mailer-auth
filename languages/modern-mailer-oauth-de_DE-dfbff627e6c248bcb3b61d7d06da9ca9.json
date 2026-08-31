@@ -1,0 +1,521 @@
+{
+	"translation-revision-date": "2026-08-31T07:40:04.645Z",
+	"generator": "tools/i18n.mjs",
+	"domain": "messages",
+	"locale_data": {
+		"messages": {
+			"": {
+				"domain": "messages",
+				"lang": "de_DE",
+				"plural-forms": "nplurals=2; plural=(n != 1);"
+			},
+			"One-click setup is switched off on this site. Connect using your own OAuth client instead.": [
+				"Die Ein-Klick-Einrichtung ist auf dieser Website deaktiviert. Verbinden Sie sich stattdessen mit Ihrem eigenen OAuth-Client."
+			],
+			"Subject": [
+				"Betreff"
+			],
+			"Google": [
+				"Google"
+			],
+			"Microsoft": [
+				"Microsoft"
+			],
+			"Server": [
+				"Server"
+			],
+			"Settings saved.": [
+				"Einstellungen gespeichert."
+			],
+			"Account": [
+				"Konto"
+			],
+			"Connected. A refresh token is stored for this connection.": [
+				"Verbunden. Für diese Verbindung ist ein Refresh-Token gespeichert."
+			],
+			"Sign in with Google": [
+				"Mit Google anmelden"
+			],
+			"Stored. Leave blank to keep it.": [
+				"Gespeichert. Leer lassen, um ihn beizubehalten."
+			],
+			"Modern Mailer": [
+				"Modern Mailer"
+			],
+			"Settings": [
+				"Einstellungen"
+			],
+			"Redirect URI": [
+				"Weiterleitungs-URI"
+			],
+			"Retry queue": [
+				"Wiederholungswarteschlange"
+			],
+			"These ran out of retries. Fix the cause, then return them to the queue.": [
+				"Bei diesen sind die Wiederholungen aufgebraucht. Beheben Sie die Ursache und stellen Sie sie dann zurück in die Warteschlange."
+			],
+			"Retry now": [
+				"Jetzt wiederholen"
+			],
+			"This permanently deletes every queued message, including any still waiting to be delivered. Continue?": [
+				"Dies löscht endgültig jede Nachricht in der Warteschlange, auch solche, die noch auf Zustellung warten. Fortfahren?"
+			],
+			"Queued": [
+				"In Warteschlange"
+			],
+			"To": [
+				"An"
+			],
+			"Tries": [
+				"Versuche"
+			],
+			"Next attempt": [
+				"Nächster Versuch"
+			],
+			"Last error": [
+				"Letzter Fehler"
+			],
+			"Abandoned": [
+				"Aufgegeben"
+			],
+			"Send log": [
+				"Sendeprotokoll"
+			],
+			"When": [
+				"Wann"
+			],
+			"Connection": [
+				"Verbindung"
+			],
+			"Result": [
+				"Ergebnis"
+			],
+			"Sent": [
+				"Gesendet"
+			],
+			"Hold on to messages that failed for a temporary reason and retry them": [
+				"Nachrichten aufbewahren, die aus einem vorübergehenden Grund fehlgeschlagen sind, und erneut versuchen"
+			],
+			"Logging and alerts": [
+				"Protokollierung und Benachrichtigungen"
+			],
+			"Record the outcome of every send": [
+				"Das Ergebnis jedes Versands aufzeichnen"
+			],
+			"Envelope details and errors only. Message bodies are never stored.": [
+				"Nur Umschlagdaten und Fehler. Nachrichteninhalte werden niemals gespeichert."
+			],
+			"Keep entries for (days)": [
+				"Einträge aufbewahren (Tage)"
+			],
+			"Alert after N failures": [
+				"Benachrichtigen nach N Fehlern"
+			],
+			"Alert address": [
+				"Benachrichtigungsadresse"
+			],
+			"Copy redirect URI": [
+				"Weiterleitungs-URI kopieren"
+			],
+			"Add this exact value to your OAuth client in the Google Cloud console. Google matches it character for character, and refuses anything but HTTPS except on localhost.": [
+				"Tragen Sie genau diesen Wert bei Ihrem OAuth-Client in der Google-Cloud-Konsole ein. Google vergleicht ihn Zeichen für Zeichen und akzeptiert außer auf localhost ausschließlich HTTPS."
+			],
+			"This revokes the grant at Google and forgets it here. Sending through this connection will stop until you sign in again. Continue?": [
+				"Dies widerruft die Freigabe bei Google und vergisst sie hier. Der Versand über diese Verbindung endet, bis Sie sich erneut anmelden. Fortfahren?"
+			],
+			"Disconnect": [
+				"Trennen"
+			],
+			"Enter the client ID and secret above and save them before signing in.": [
+				"Geben Sie oben Client-ID und Secret ein und speichern Sie sie, bevor Sie sich anmelden."
+			],
+			"You have unsaved changes. Signing in leaves this page and they will be lost.": [
+				"Sie haben ungespeicherte Änderungen. Die Anmeldung verlässt diese Seite und die Änderungen gehen verloren."
+			],
+			"The prompt asks only for permission to send mail, using your own OAuth client. This plugin never requests read access to the mailbox, and no third party sees the tokens.": [
+				"Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden, und nutzt dabei Ihren eigenen OAuth-Client. Dieses Plugin fordert niemals Lesezugriff auf das Postfach an, und kein Dritter sieht die Token."
+			],
+			"Versions": [
+				"Versionen"
+			],
+			"Params": [
+				"Parameter"
+			],
+			"Error": [
+				"Fehler"
+			],
+			"SMTP Debug": [
+				"SMTP-Protokoll"
+			],
+			"Send details": [
+				"Details zum Versand"
+			],
+			"Loading…": [
+				"Wird geladen …"
+			],
+			"Failed": [
+				"Fehlgeschlagen"
+			],
+			"This message was accepted by the provider, so there is no diagnostic report. Reports are kept for failures only.": [
+				"Diese Nachricht wurde vom Anbieter angenommen, es gibt daher keinen Diagnosebericht. Berichte werden nur bei Fehlern aufbewahrt."
+			],
+			"No diagnostic report was recorded for this failure. Entries from before this feature existed have none.": [
+				"Für diesen Fehler wurde kein Diagnosebericht aufgezeichnet. Einträge aus der Zeit vor dieser Funktion haben keinen."
+			],
+			"The conversation with the mail server. Credentials are replaced before this is stored.": [
+				"Der Dialog mit dem Mailserver. Zugangsdaten werden ersetzt, bevor dies gespeichert wird."
+			],
+			"Copied": [
+				"Kopiert"
+			],
+			"Copy report": [
+				"Bericht kopieren"
+			],
+			"Close": [
+				"Schließen"
+			],
+			"Sign in with Microsoft": [
+				"Mit Microsoft anmelden"
+			],
+			"Dashboard": [
+				"Übersicht"
+			],
+			"Connections": [
+				"Verbindungen"
+			],
+			"Routing": [
+				"Weiterleitung"
+			],
+			"Email Logs": [
+				"E-Mail-Protokolle"
+			],
+			"No provider configured": [
+				"Kein Anbieter konfiguriert"
+			],
+			"WordPress is using the server mail function.": [
+				"WordPress verwendet die Mail-Funktion des Servers."
+			],
+			"Not delivering": [
+				"Keine Zustellung"
+			],
+			"Mail was lost": [
+				"E-Mails sind verloren gegangen"
+			],
+			"Some messages exhausted every retry.": [
+				"Bei einigen Nachrichten sind alle Wiederholungen aufgebraucht."
+			],
+			"Queued for retry": [
+				"Wartet auf erneuten Versuch"
+			],
+			"Nothing is lost, but sending is not healthy.": [
+				"Es ist nichts verloren, aber der Versand ist nicht gesund."
+			],
+			"Sending normally": [
+				"Versand läuft normal"
+			],
+			"Switch to light": [
+				"Zu Hell wechseln"
+			],
+			"Switch to dark": [
+				"Zu Dunkel wechseln"
+			],
+			"Authenticated delivery": [
+				"Authentifizierte Zustellung"
+			],
+			"The prompt asks only for permission to send mail. Your messages go directly from this site to Gmail - the setup service performs the sign-in and never sees an email.": [
+				"Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden. Ihre Nachrichten gehen direkt von dieser Website an Gmail – der Einrichtungsdienst führt nur die Anmeldung durch und sieht niemals eine E-Mail."
+			],
+			"The prompt asks only for permission to send mail as you. Your messages go directly from this site to Microsoft - the setup service performs the sign-in and never sees an email.": [
+				"Die Abfrage bittet nur um die Berechtigung, in Ihrem Namen E-Mails zu senden. Ihre Nachrichten gehen direkt von dieser Website an Microsoft – der Einrichtungsdienst führt nur die Anmeldung durch und sieht niemals eine E-Mail."
+			],
+			"Connected as %s.": [
+				"Verbunden als %s."
+			],
+			"Connected.": [
+				"Verbunden."
+			],
+			"This revokes the grant and forgets it here. Sending through this connection will stop until you sign in again. Continue?": [
+				"Dies widerruft die Freigabe und vergisst sie hier. Der Versand über diese Verbindung endet, bis Sie sich erneut anmelden. Fortfahren?"
+			],
+			"Nothing to register with %s and no credentials to copy. If you would rather this site depend on nothing of ours, use your own OAuth client instead.": [
+				"Nichts bei %s zu registrieren und keine Zugangsdaten zu kopieren. Wenn diese Website lieber von nichts abhängen soll, was uns gehört, verwenden Sie stattdessen Ihren eigenen OAuth-Client."
+			],
+			"Copy": [
+				"Kopieren"
+			],
+			"Copy to clipboard": [
+				"In die Zwischenablage kopieren"
+			],
+			"Enabled": [
+				"Aktiviert"
+			],
+			"Coming soon": [
+				"Demnächst"
+			],
+			"Every message is attempted here first, unless a routing rule sends it elsewhere.": [
+				"Jede Nachricht wird zuerst hier versucht, sofern keine Weiterleitungsregel sie anderswohin schickt."
+			],
+			"Tried immediately when the connection that was chosen fails. Use a different provider - two connections sharing one identity endpoint go down together.": [
+				"Wird sofort versucht, wenn die gewählte Verbindung ausfällt. Verwenden Sie einen anderen Anbieter – zwei Verbindungen, die sich einen Identitätsendpunkt teilen, fallen gemeinsam aus."
+			],
+			"Used only for messages a routing rule sends here. Set those up under Routing.": [
+				"Wird nur für Nachrichten verwendet, die eine Weiterleitungsregel hierher schickt. Diese richten Sie unter „Weiterleitung“ ein."
+			],
+			"Connection saved.": [
+				"Verbindung gespeichert."
+			],
+			"Fill in %s before verifying.": [
+				"Füllen Sie %s aus, bevor Sie prüfen."
+			],
+			"Documentation": [
+				"Dokumentation"
+			],
+			"Save connection": [
+				"Verbindung speichern"
+			],
+			"Verify": [
+				"Prüfen"
+			],
+			"This clears the provider and every credential on this connection, and withdraws any account it is signed in to. Mail routed here will stop until it is set up again. Continue?": [
+				"Dies löscht den Anbieter und sämtliche Zugangsdaten dieser Verbindung und meldet jedes verbundene Konto ab. Hierher geleitete E-Mails werden nicht mehr zugestellt, bis die Verbindung neu eingerichtet ist. Fortfahren?"
+			],
+			"Mailbox": [
+				"Postfach"
+			],
+			"Send a test message": [
+				"Testnachricht senden"
+			],
+			"Goes out over the primary connection. There is deliberately no test through the backup, because the backup is only reached when the primary fails.": [
+				"Geht über die primäre Verbindung hinaus. Es gibt bewusst keinen Test über die Ersatzverbindung, weil diese nur erreicht wird, wenn die primäre ausfällt."
+			],
+			"Recipient": [
+				"Empfänger"
+			],
+			"Send test": [
+				"Test senden"
+			],
+			"Connection added. Choose a provider for it.": [
+				"Verbindung hinzugefügt. Wählen Sie einen Anbieter dafür."
+			],
+			"Not configured": [
+				"Nicht konfiguriert"
+			],
+			"Remove %s": [
+				"%s entfernen"
+			],
+			"Remove %s and its stored credentials? Any routing rule using it will be deleted too.": [
+				"%s und die gespeicherten Zugangsdaten entfernen? Jede Weiterleitungsregel, die sie verwendet, wird ebenfalls gelöscht."
+			],
+			"Connection name": [
+				"Name der Verbindung"
+			],
+			"Add": [
+				"Hinzufügen"
+			],
+			"Cancel": [
+				"Abbrechen"
+			],
+			"Connection limit reached": [
+				"Verbindungsgrenze erreicht"
+			],
+			"Add connection": [
+				"Verbindung hinzufügen"
+			],
+			"No sending activity yet": [
+				"Noch keine Sendeaktivität"
+			],
+			"Fourteen days of deliveries and failures will chart here once WordPress starts sending.": [
+				"Vierzehn Tage Zustellungen und Fehler erscheinen hier als Diagramm, sobald WordPress zu senden beginnt."
+			],
+			"Messages sent and failed per day over the last fourteen days": [
+				"Gesendete und fehlgeschlagene Nachrichten pro Tag über die letzten vierzehn Tage"
+			],
+			"Delivered": [
+				"Zugestellt"
+			],
+			"Delivered · last 14 days": [
+				"Zugestellt · letzte 14 Tage"
+			],
+			"%d failed over the same period. Every failure is recorded with the reason the provider gave.": [
+				"%d im selben Zeitraum fehlgeschlagen. Jeder Fehler wird mit der vom Anbieter genannten Ursache festgehalten."
+			],
+			"No provider is configured yet, so WordPress is using the server mail function — which most hosts either block or deliver to spam.": [
+				"Es ist noch kein Anbieter konfiguriert, WordPress verwendet daher die Mail-Funktion des Servers – die die meisten Hoster entweder blockieren oder in den Spam zustellen."
+			],
+			"Never delivered": [
+				"Nie zugestellt"
+			],
+			"Sending activity": [
+				"Sendeaktivität"
+			],
+			"Failures are stacked on top of deliveries, so a bad day reads as a dark cap rather than a missing bar.": [
+				"Fehler werden auf die Zustellungen gestapelt, ein schlechter Tag zeigt sich also als dunkle Kappe statt als fehlender Balken."
+			],
+			"Recent activity": [
+				"Letzte Aktivität"
+			],
+			"View all": [
+				"Alle anzeigen"
+			],
+			"Nothing sent yet": [
+				"Noch nichts gesendet"
+			],
+			"Once WordPress sends its first message it will appear here, with whatever the provider said about it.": [
+				"Sobald WordPress die erste Nachricht sendet, erscheint sie hier, samt allem, was der Anbieter dazu gesagt hat."
+			],
+			"(no subject)": [
+				"(kein Betreff)"
+			],
+			"Messages that failed for a temporary reason, waiting to be retried. Attempts back off from five minutes and stop after about two days.": [
+				"Nachrichten, die aus einem vorübergehenden Grund fehlgeschlagen sind und auf einen erneuten Versuch warten. Die Abstände beginnen bei fünf Minuten und enden nach etwa zwei Tagen."
+			],
+			"Switched off. A send that fails for a temporary reason is reported and discarded rather than retried.": [
+				"Deaktiviert. Ein Versand, der aus einem vorübergehenden Grund scheitert, wird gemeldet und verworfen statt wiederholt."
+			],
+			"Return abandoned": [
+				"Aufgegebene zurückstellen"
+			],
+			"Discard all": [
+				"Alle verwerfen"
+			],
+			"Nothing waiting": [
+				"Nichts in Wartestellung"
+			],
+			"Every message has been delivered or reported.": [
+				"Jede Nachricht wurde zugestellt oder gemeldet."
+			],
+			"%d never delivered.": [
+				"%d nie zugestellt."
+			],
+			"Logging is switched off": [
+				"Die Protokollierung ist deaktiviert"
+			],
+			"Turn it on under Settings.": [
+				"Aktivieren Sie sie unter „Einstellungen“."
+			],
+			"Envelope details and errors only - message bodies are never stored here.": [
+				"Nur Umschlagdaten und Fehler – Nachrichteninhalte werden hier niemals gespeichert."
+			],
+			"Search": [
+				"Suchen"
+			],
+			"All": [
+				"Alle"
+			],
+			"Nothing matches": [
+				"Keine Treffer"
+			],
+			"Nothing recorded yet": [
+				"Noch nichts aufgezeichnet"
+			],
+			"Try a different search or filter.": [
+				"Versuchen Sie eine andere Suche oder einen anderen Filter."
+			],
+			"Once WordPress sends its first message it will appear here.": [
+				"Sobald WordPress die erste Nachricht sendet, erscheint sie hier."
+			],
+			"Field": [
+				"Feld"
+			],
+			"Operator": [
+				"Operator"
+			],
+			"Value": [
+				"Wert"
+			],
+			"Value to match": [
+				"Zu vergleichender Wert"
+			],
+			"and": [
+				"und"
+			],
+			"Remove condition": [
+				"Bedingung entfernen"
+			],
+			"Send with": [
+				"Senden über"
+			],
+			"— Select a connection —": [
+				"— Verbindung auswählen —"
+			],
+			" (not configured)": [
+				" (nicht konfiguriert)"
+			],
+			"if the following conditions are met…": [
+				"wenn die folgenden Bedingungen erfüllt sind …"
+			],
+			"Move up": [
+				"Nach oben"
+			],
+			"Move down": [
+				"Nach unten"
+			],
+			"Remove rule": [
+				"Regel entfernen"
+			],
+			"This connection has no provider set, so nothing can be sent through it. Messages matching this rule fall back to the primary connection until it is configured.": [
+				"Für diese Verbindung ist kein Anbieter gesetzt, es kann also nichts darüber gesendet werden. Nachrichten, die auf diese Regel passen, weichen auf die primäre Verbindung aus, bis sie konfiguriert ist."
+			],
+			"or": [
+				"oder"
+			],
+			"And": [
+				"Und"
+			],
+			"Add new group": [
+				"Neue Gruppe hinzufügen"
+			],
+			"Routing saved.": [
+				"Weiterleitung gespeichert."
+			],
+			"Smart routing": [
+				"Intelligente Weiterleitung"
+			],
+			"Send some email through a different connection based on what it is. Anything that matches no rule goes out through the primary connection.": [
+				"Bestimmte E-Mails je nach Inhalt über eine andere Verbindung senden. Alles, was auf keine Regel passt, geht über die primäre Verbindung hinaus."
+			],
+			"Save routing": [
+				"Weiterleitung speichern"
+			],
+			"Enable smart routing": [
+				"Intelligente Weiterleitung aktivieren"
+			],
+			"While this is off the rules below are kept but ignored, and every message goes through the primary connection.": [
+				"Solange dies aus ist, bleiben die Regeln unten erhalten, werden aber ignoriert, und jede Nachricht geht über die primäre Verbindung."
+			],
+			"No rules yet": [
+				"Noch keine Regeln"
+			],
+			"Add rule": [
+				"Regel hinzufügen"
+			],
+			"A rule sends matching email through a connection of your choosing - receipts through a transactional sender, a newsletter through somewhere else.": [
+				"Eine Regel sendet passende E-Mails über eine Verbindung Ihrer Wahl – Belege über einen Transaktionsversender, einen Newsletter über einen anderen Weg."
+			],
+			"Rules are checked from the top down and the first match wins, so put the most specific rules first. Anything matching none of them uses the primary connection.": [
+				"Regeln werden von oben nach unten geprüft und der erste Treffer gewinnt – stellen Sie die spezifischsten Regeln also nach vorn. Alles, was auf keine passt, verwendet die primäre Verbindung."
+			],
+			"Your primary connection is used for every message that matches none of the rules above.": [
+				"Ihre primäre Verbindung wird für jede Nachricht verwendet, die auf keine der Regeln oben passt."
+			],
+			"Reliability": [
+				"Zuverlässigkeit"
+			],
+			"Strongly recommended. The failure that actually loses mail is a brief network or DNS fault at your host, which clears in minutes - far longer than a single page request can wait. A queued message is stored complete, body included, until it is delivered; delivered ones are removed immediately, abandoned ones after seven days.": [
+				"Dringend empfohlen. Der Fehler, der tatsächlich E-Mails verliert, ist eine kurze Netzwerk- oder DNS-Störung bei Ihrem Hoster, die sich nach Minuten löst – weit länger, als ein einzelner Seitenaufruf warten kann. Eine Nachricht in der Warteschlange wird vollständig gespeichert, Inhalt inbegriffen, bis sie zugestellt ist; zugestellte werden sofort entfernt, aufgegebene nach sieben Tagen."
+			],
+			"Almost no WordPress code checks what wp_mail() returned, so an alert is usually the only way anyone finds out sending has stopped.": [
+				"So gut wie kein WordPress-Code prüft, was wp_mail() zurückgegeben hat – eine Benachrichtigung ist deshalb meist die einzige Möglichkeit, überhaupt zu bemerken, dass der Versand steht."
+			],
+			"Consecutive failures.": [
+				"Aufeinanderfolgende Fehler."
+			],
+			"Sent with the server mail function, not the API - the API is what has failed.": [
+				"Wird mit der Mail-Funktion des Servers gesendet, nicht über die API – denn genau die API ist ausgefallen."
+			],
+			"Save settings": [
+				"Einstellungen speichern"
+			]
+		}
+	}
+}

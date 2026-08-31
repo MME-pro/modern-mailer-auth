@@ -44,6 +44,19 @@ class Settings {
 	private const CONNECTION_SCHEMA = [
 		'provider'          => [ self::PROVIDER_NONE, 'MMOA_PROVIDER', 'provider' ],
 
+		// The From address belongs to the connection, not to the site. Two
+		// connections normally authenticate as different mailboxes, and every
+		// provider here either refuses or silently rewrites a From address the
+		// authenticated identity is not allowed to use - so one site-wide value
+		// meant a backup on a second provider could only work by coincidence.
+		//
+		// The primary slot stores these under the bare key, which is where the
+		// site-wide value already lived, so moving them here leaves the primary
+		// connection reading exactly what it read before.
+		'from_email'        => [ '', 'MMOA_FROM_EMAIL', 'email' ],
+		'from_name'         => [ '', 'MMOA_FROM_NAME', 'text' ],
+		'force_from'        => [ true, null, 'bool' ],
+
 		'ms_tenant_id'      => [ '', 'MMOA_MS_TENANT_ID', 'text' ],
 		'ms_client_id'      => [ '', 'MMOA_MS_CLIENT_ID', 'text' ],
 		'ms_sender'         => [ '', 'MMOA_MS_SENDER', 'email' ],
@@ -78,9 +91,6 @@ class Settings {
 	 * sending from, which is what makes providers slot-agnostic.
 	 */
 	private const GLOBAL_SCHEMA = [
-		'from_email'      => [ '', 'MMOA_FROM_EMAIL', 'email' ],
-		'from_name'       => [ '', 'MMOA_FROM_NAME', 'text' ],
-		'force_from'      => [ true, null, 'bool' ],
 
 		'log_enabled'     => [ true, null, 'bool' ],
 		'log_retention'   => [ 30, null, 'int' ],

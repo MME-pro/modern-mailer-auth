@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Modern Mailer - OAuth SMTP for Microsoft 365 and Gmail
  * Description:       Sends WordPress email through the Microsoft Graph and Gmail APIs using OAuth 2.0. App-only and service-account authentication mean there is no refresh token to expire and no periodic reauthorization. A backup connection and a retry queue mean a transient fault delays an email rather than losing it.
- * Version:           0.8.6
+ * Version:           0.9.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            builtwithmtw
@@ -18,7 +18,7 @@ namespace ModernMailer;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION     = '0.8.6';
+const VERSION     = '0.9.0';
 const PLUGIN_FILE = __FILE__;
 
 define( 'ModernMailer\PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -77,5 +77,25 @@ spl_autoload_register(
 
 register_activation_hook( __FILE__, [ Plugin::class, 'activate' ] );
 register_deactivation_hook( __FILE__, [ Plugin::class, 'deactivate' ] );
+
+/**
+ * Load translations.
+ *
+ * On `init` rather than at file scope: WordPress decides the locale from the
+ * site setting and the user's own profile preference, and neither is settled
+ * until then. Loading earlier gives every admin the site language even when
+ * they have chosen a different one for themselves - which is the whole point
+ * of that preference.
+ *
+ * WordPress 4.6 and newer looks in wp-content/languages/plugins/ first, so a
+ * translation installed from the directory wins over the one shipped here, and
+ * an update cannot overwrite what a translator has corrected.
+ */
+add_action(
+	'init',
+	static function (): void {
+		load_plugin_textdomain( 'modern-mailer-oauth', false, dirname( plugin_basename( PLUGIN_FILE ) ) . '/languages' );
+	}
+);
 
 Plugin::instance()->boot();

@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { Eye, EyeOff } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FormField, Input, Textarea, Switch, Label, inputClass } from './ui';
 
@@ -154,53 +154,68 @@ export const missingRequired = ( provider, values ) =>
 	} );
 
 /**
- * A credential field, masked, with an eye to reveal it.
+ * A credential field, masked, with a copy button.
  *
- * The stored value is in the form like any other field, so what is on screen is
- * the real credential drawn as dots. That is what makes it checkable: a pasted
- * key with a truncated tail looks exactly like a correct one until you can read
- * it back, and before this the only way to find out was to send a message and
- * read the error.
+ * A saved credential is never drawn in plain text. Copying is what checking
+ * one is actually for - pasting it beside the value in the provider's own
+ * console - and it does that without putting the secret on a screen that may
+ * be shared, screenshotted, or looked over.
+ *
+ * What is being typed right now is left visible in the field it came from,
+ * because hiding it would stop anyone spotting a typo in the thing they are
+ * currently typing.
  */
 const SecretInput = ( { id, field, value, disabled, placeholder, onChange } ) => {
-	const [ shown, setShown ] = useState( false );
+	const [ copied, setCopied ] = useState( false );
+	const [ dirty, setDirty ] = useState( false );
 
-	// The value is in the form's own state like every other field, so there is
-	// nothing to fetch and nothing that can fail: the eye only changes how the
-	// same string is drawn.
-	const canReveal = ! disabled && '' !== String( value ?? '' );
+	// A saved credential is never drawn in plain text. It can be copied, which
+	// is what checking one is actually for - pasting it back beside the value
+	// in the provider's own console - and copying puts it on the clipboard
+	// without putting it on a screen somebody may be sharing.
+	//
+	// What is being typed right now is a different matter: it is already
+	// visible in the keystrokes, and hiding it would stop anyone seeing a typo
+	// in the thing they are typing.
+	const stored = ! dirty && '' !== String( value ?? '' );
+
+	const copy = async () => {
+		try {
+			await navigator.clipboard.writeText( String( value ) );
+			setCopied( true );
+			setTimeout( () => setCopied( false ), 2000 );
+		} catch {
+			// Clipboard access can be refused - over plain HTTP, or by policy.
+			// Nothing is lost; the value is unchanged and still saved.
+		}
+	};
 
 	return (
 		<div className="relative">
 			<Input
 				id={ id }
-				type={ shown ? 'text' : 'password' }
+				type="password"
 				autoComplete="new-password"
 				spellCheck={ false }
 				disabled={ disabled }
 				placeholder={ placeholder }
-				className={ cn( canReveal && 'pr-10', shown && 'font-mono text-xs' ) }
+				className={ cn( stored && ! disabled && 'pr-10' ) }
 				value={ value }
-				onChange={ ( e ) => onChange( e.target.value ) }
+				onChange={ ( e ) => {
+					setDirty( true );
+					onChange( e.target.value );
+				} }
 			/>
 
-			{ canReveal && (
+			{ stored && ! disabled && (
 				<button
 					type="button"
-					onClick={ () => setShown( ( on ) => ! on ) }
-					aria-label={
-						shown
-							? __( 'Hide', 'modern-mailer-oauth' )
-							: __( 'Reveal', 'modern-mailer-oauth' )
-					}
-					title={
-						shown
-							? __( 'Hide', 'modern-mailer-oauth' )
-							: __( 'Reveal', 'modern-mailer-oauth' )
-					}
+					onClick={ copy }
+					aria-label={ __( 'Copy', 'modern-mailer-oauth' ) }
+					title={ __( 'Copy to clipboard', 'modern-mailer-oauth' ) }
 					className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
 				>
-					{ shown ? <EyeOff className="size-4" /> : <Eye className="size-4" /> }
+					{ copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" /> }
 				</button>
 			) }
 		</div>

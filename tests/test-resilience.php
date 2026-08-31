@@ -315,11 +315,29 @@ check(
 	'graph' === $plugin->settings->get( 'provider' )
 		&& 'gmail_sa' === $plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->get( 'provider' )
 );
+// The From address is per connection, not site-wide. Two connections almost
+// always authenticate as different mailboxes, and every provider here refuses
+// or rewrites a From address the authenticated identity may not use - so a
+// shared value meant the backup could only work by coincidence.
+$plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->update( [ 'from_email' => 'backup@contoso.com' ] );
+ModernMailer\Settings::flush_cache();
+
 check(
-	'site-wide settings read the same through either slot',
-	$plugin->settings->get( 'from_email' )
-		=== $plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->get( 'from_email' )
+	'the From address is independent per connection',
+	'noreply@contoso.com' === $plugin->settings->get( 'from_email' )
+		&& 'backup@contoso.com' === $plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->get( 'from_email' ),
+	$plugin->settings->get( 'from_email' ) . ' / ' . $plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->get( 'from_email' )
 );
+
+// Genuinely site-wide settings still read the same through any slot.
+check(
+	'site-wide settings still read the same through either slot',
+	$plugin->settings->get( 'log_enabled' )
+		=== $plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->get( 'log_enabled' )
+);
+
+$plugin->settings->for_slot( ModernMailer\Settings::SLOT_BACKUP )->update( [ 'from_email' => '' ] );
+ModernMailer\Settings::flush_cache();
 
 // Leave the site unconfigured, as the other suites do.
 $plugin->queue->purge();

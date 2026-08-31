@@ -103,6 +103,16 @@ class Rest_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/connections/(?P<slot>[A-Za-z0-9_-]+)/disconnect',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'disconnect_connection' ],
+				'permission_callback' => $auth,
+			]
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/connections/(?P<slot>[A-Za-z0-9_-]+)/verify',
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -263,7 +273,7 @@ class Rest_Controller {
 
 	public function update_settings( WP_REST_Request $request ): WP_REST_Response {
 		$body   = (array) $request->get_json_params();
-		$allow  = [ 'from_email', 'from_name', 'force_from', 'log_enabled', 'log_retention', 'alert_threshold', 'alert_email', 'queue_enabled' ];
+		$allow  = [ 'log_enabled', 'log_retention', 'alert_threshold', 'alert_email', 'queue_enabled' ];
 		$values = array_intersect_key( $body, array_flip( $allow ) );
 
 		$this->plugin->settings->update( $values );
@@ -291,7 +301,7 @@ class Rest_Controller {
 		$class  = Provider_Registry::class_for( $provider );
 
 		if ( null !== $class ) {
-			foreach ( $class::fields() as $field ) {
+			foreach ( Provider_Registry::fields_for( $provider ) as $field ) {
 				if ( ! array_key_exists( $field->key, $body ) ) {
 					continue;
 				}
@@ -321,6 +331,56 @@ class Rest_Controller {
 		$this->plugin->dispatcher->reset_providers();
 
 		return new WP_REST_Response( $this->connection_payload( $slot ) );
+	}
+
+	/**
+	 * Reset one connection to unconfigured.
+	 *
+	 * Clears the provider, every credential in that slot, and any brokered or
+	 * hand-made grant it holds. Deliberately thorough: the reason to press
+	 * this is usually that the credentials are wrong or the account is being
+	 * changed, and leaving half of them behind is how a connection ends up in
+	 * a state nobody can explain.
+	 *
+	 * The connection itself survives - only what it was configured with goes.
+	 * Removing the connection is a separate action, because a routing rule may
+	 * point at it and losing that silently would be worse.
+	 */
+	public function disconnect_connection( WP_REST_Request $request ): WP_REST_Response {
+		$slot   = $this->slot( $request );
+		$scoped = $this->plugin->settings->for_slot( $slot );
+
+		// Revoked at the provider where we can, not merely forgotten here. A
+		// grant left live at Google is one an admin cannot see and cannot
+		// withdraw from this screen.
+		foreach ( [ Broker::GOOGLE, Broker::MICROSOFT ] as $family ) {
+			if ( $this->plugin->one_click->is_connected( $family, $slot ) ) {
+				$this->plugin->one_click->disconnect( $family, $slot );
+			}
+		}
+
+		if ( $this->plugin->consent->is_connected( $slot ) ) {
+			$this->plugin->consent->disconnect( $slot );
+		}
+
+		foreach ( Provider_Registry::all_fields() as $key => $field ) {
+			if ( $field->secret ) {
+				$scoped->secrets()->set( $key, '' );
+			}
+		}
+
+		$scoped->update( [ 'provider' => '' ] );
+
+		Settings::flush_cache();
+		$this->plugin->tokens->flush();
+		$this->plugin->dispatcher->reset_providers();
+
+		return new WP_REST_Response(
+			[
+				'ok'      => true,
+				'message' => __( 'Disconnected. The provider and its credentials have been cleared.', 'modern-mailer-oauth' ),
+			]
+		);
 	}
 
 	public function verify_connection( WP_REST_Request $request ): WP_REST_Response {
@@ -732,7 +792,7 @@ class Rest_Controller {
 	 */
 	private function settings_payload(): array {
 		$settings = $this->plugin->settings;
-		$keys     = [ 'from_email', 'from_name', 'force_from', 'log_enabled', 'log_retention', 'alert_threshold', 'alert_email', 'queue_enabled' ];
+		$keys     = [ 'log_enabled', 'log_retention', 'alert_threshold', 'alert_email', 'queue_enabled' ];
 
 		$out    = [];
 		$locked = [];

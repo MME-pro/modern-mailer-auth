@@ -40,62 +40,6 @@ const Settings = () => {
 
 	return (
 		<div className="grid gap-5">
-			<Panel
-				title={ __( 'Sender', 'modern-mailer-oauth' ) }
-				description={ __(
-					'Applies to every connection. The address must be one the connected identity is permitted to send as.',
-					'modern-mailer-oauth'
-				) }
-			>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<FormField
-						label={ __( 'From address', 'modern-mailer-oauth' ) }
-						locked={ locked.from_email }
-						htmlFor="mmoa-from-email"
-					>
-						<input
-							id="mmoa-from-email"
-							type="email"
-							disabled={ locked.from_email }
-							className={ inputClass }
-							value={ values.from_email || '' }
-							onChange={ ( e ) => set( 'from_email', e.target.value ) }
-						/>
-					</FormField>
-
-					<FormField
-						label={ __( 'From name', 'modern-mailer-oauth' ) }
-						locked={ locked.from_name }
-						htmlFor="mmoa-from-name"
-					>
-						<input
-							id="mmoa-from-name"
-							type="text"
-							disabled={ locked.from_name }
-							className={ inputClass }
-							value={ values.from_name || '' }
-							onChange={ ( e ) => set( 'from_name', e.target.value ) }
-						/>
-					</FormField>
-
-					<div className="sm:col-span-2">
-						<ToggleRow
-							id="mmoa-force-from"
-							checked={ values.force_from }
-							onChange={ ( v ) => set( 'force_from', v ) }
-							label={ __(
-								'Override the From address set by other plugins',
-								'modern-mailer-oauth'
-							) }
-							help={ __(
-								'Recommended. Both APIs reject or silently rewrite a From address the authenticated identity may not use.',
-								'modern-mailer-oauth'
-							) }
-						/>
-					</div>
-				</div>
-			</Panel>
-
 			<Panel title={ __( 'Reliability', 'modern-mailer-oauth' ) }>
 				<div className="grid gap-4">
 					<ToggleRow

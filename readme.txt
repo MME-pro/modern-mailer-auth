@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.8.6
+Stable tag: 0.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,14 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.9.0 =
+* German translation, complete. The plugin follows your WordPress language, including each user's own profile setting, and reads as part of the admin rather than something bolted onto it.
+* The From address and From name now belong to each connection instead of the whole site. Two connections normally authenticate as different mailboxes, and every provider here refuses or rewrites a From address the authenticated identity may not use - so one shared value meant a backup could only work by coincidence. Your existing address is copied to every connection on update; nothing to redo.
+* Saved credentials are no longer shown in plain text. There is a copy button instead, so a key can be checked against the provider's own console without appearing on a screen that might be shared.
+* Every connection now has a Disconnect button. It clears the provider and its credentials, and withdraws any account the connection is signed in to rather than merely forgetting it.
+
+* Upgrade note: if you set MMOA_FROM_EMAIL or MMOA_FROM_NAME in wp-config.php, those constants now pin the primary connection. Additional connections take their own address from the settings screen.
 
 = 0.8.6 =
 * Click any row in the send log to see the full story of that attempt: WordPress and PHP versions, the connection settings that were in force, the server environment, the error, and - for SMTP - the entire conversation with the mail server. There is a button to copy the lot as text.

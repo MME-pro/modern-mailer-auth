@@ -309,8 +309,13 @@ echo "\n=== 13c. A From address that is not the connected mailbox is named ===\n
 // department about a setting they control themselves.
 $plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'provider' => 'outlook' ] );
 $plugin->secrets->for_slot( Settings::SLOT_BACKUP )->set( 'ms_refresh', 'MS-RT' );
-$plugin->settings->update( [ 'from_email' => 'hello@example.com' ] );
-$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'ms_account' => 'someone@outlook.com' ] );
+// Set on the connection being tested, because the From address is per
+// connection now - a value on the primary says nothing about what the backup
+// will send as.
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [
+	'from_email' => 'hello@example.com',
+	'ms_account' => 'someone@outlook.com',
+] );
 Settings::flush_cache();
 $plugin->tokens->flush();
 
@@ -359,7 +364,7 @@ check( 'verification fails rather than reporting success', is_wp_error( $verifie
 check( 'and names both addresses', is_wp_error( $verified ) && false !== strpos( $verified->get_error_message(), 'hello@example.com' ) && false !== strpos( $verified->get_error_message(), 'someone@outlook.com' ) );
 
 // Matching addresses verify cleanly.
-$plugin->settings->update( [ 'from_email' => 'someone@outlook.com' ] );
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'from_email' => 'someone@outlook.com' ] );
 Settings::flush_cache();
 $plugin->tokens->flush();
 
@@ -368,7 +373,7 @@ check( 'a matching From address verifies', ! is_wp_error( $ok ), is_wp_error( $o
 
 $plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'provider' => '', 'ms_account' => '' ] );
 $plugin->secrets->for_slot( Settings::SLOT_BACKUP )->set( 'ms_refresh', '' );
-$plugin->settings->update( [ 'from_email' => '' ] );
+$plugin->settings->for_slot( Settings::SLOT_BACKUP )->update( [ 'from_email' => '' ] );
 Settings::flush_cache();
 
 echo "\n=== 14. Outlook is a delegated provider, distinct from Microsoft 365 ===\n";

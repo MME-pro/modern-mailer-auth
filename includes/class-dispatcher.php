@@ -229,6 +229,57 @@ class Dispatcher {
 	}
 
 	/**
+	 * Put this connection's From address on the message, rebuilding it if so.
+	 *
+	 * Returns the new MIME, or null when nothing needed changing - which is the
+	 * common case, and worth keeping cheap: rebuilding means re-encoding every
+	 * attachment.
+	 *
+	 * `force_from` is honoured per connection. Off, whatever the caller set is
+	 * left alone, because a site that has deliberately let a plugin choose its
+	 * own sender should not have that quietly overridden by the connection that
+	 * happened to pick the message up.
+	 *
+	 * @return string|null
+	 */
+	private function apply_from( string $slot, PHPMailer $mailer ): ?string {
+		$scoped = $this->settings->for_slot( $slot );
+
+		if ( ! $scoped->get( 'force_from' ) ) {
+			return null;
+		}
+
+		$email = trim( (string) $scoped->get( 'from_email' ) );
+
+		if ( '' === $email ) {
+			return null;
+		}
+
+		$name = trim( (string) $scoped->get( 'from_name' ) );
+
+		if ( 0 === strcasecmp( $email, (string) $mailer->From ) && $name === (string) $mailer->FromName ) {
+			return null;
+		}
+
+		try {
+			// Third argument false: PHPMailer would otherwise reset Sender to
+			// match, and Sender is the envelope address some hosts rewrite.
+			$mailer->setFrom( $email, $name, false );
+
+			if ( ! $mailer->preSend() ) {
+				return null;
+			}
+
+			return $mailer->getSentMIMEMessage();
+		} catch ( \Throwable $e ) {
+			// A rebuild that fails leaves the original message intact and the
+			// send goes ahead with the sender it already had. Refusing to send
+			// over a From address would turn a cosmetic mismatch into lost mail.
+			return null;
+		}
+	}
+
+	/**
 	 * Ask the router which connection this message prefers.
 	 *
 	 * Building a Message is not free, so it happens only when routing is
@@ -265,6 +316,21 @@ class Dispatcher {
 				'mmoa_no_provider',
 				__( 'No mail provider is configured.', 'modern-mailer-oauth' )
 			);
+		}
+
+		// The From address belongs to the connection, and which connection is
+		// sending is only known here - routing chose it, or the backup took
+		// over. wp_mail() built the message long before either happened, so if
+		// this connection wants a different sender the message is rebuilt with
+		// it.
+		//
+		// This is what makes a backup on a second provider work at all: it
+		// authenticates as a different mailbox, and sending as the primary's
+		// address would be refused by every provider here.
+		$rebuilt = $this->apply_from( $slot, $mailer );
+
+		if ( null !== $rebuilt ) {
+			$raw_mime = $rebuilt;
 		}
 
 		$bytes  = strlen( $raw_mime );

@@ -152,6 +152,57 @@ class Provider_Registry {
 	}
 
 	/**
+	 * The fields every connection has, whichever provider it uses.
+	 *
+	 * Published through the same schema as a provider's own, so the generated
+	 * form renders them, the REST write path accepts them, and a provider added
+	 * by another plugin gets them without knowing they exist.
+	 *
+	 * They come first because they are what a person fills in first: the
+	 * address mail should appear to come from, before how it is sent.
+	 *
+	 * @return array<int,Field>
+	 */
+	public static function common_fields(): array {
+		return [
+			new Field(
+				key: 'from_email',
+				label: __( 'From address', 'modern-mailer-oauth' ),
+				type: Field::EMAIL,
+				required: true,
+				help: __( 'Must be a mailbox this connection is allowed to send as. Providers refuse, or silently rewrite, anything else.', 'modern-mailer-oauth' ),
+				constant: 'FROM_EMAIL',
+				width: Field::HALF
+			),
+			new Field(
+				key: 'from_name',
+				label: __( 'From name', 'modern-mailer-oauth' ),
+				help: __( 'Shown as the sender. Left empty, WordPress uses the site name.', 'modern-mailer-oauth' ),
+				constant: 'FROM_NAME',
+				width: Field::HALF
+			),
+			new Field(
+				key: 'force_from',
+				label: __( 'Override what other plugins set', 'modern-mailer-oauth' ),
+				type: Field::CHECKBOX,
+				default: true,
+				help: __( 'On, the address above is used even when a plugin sets its own. A plugin hardcoding a From address the connection may not send as is one of the commonest causes of mail that silently stops.', 'modern-mailer-oauth' )
+			),
+		];
+	}
+
+	/**
+	 * Everything one provider publishes: the common fields, then its own.
+	 *
+	 * @return array<int,Field>
+	 */
+	public static function fields_for( string $slug ): array {
+		$class = self::class_for( $slug );
+
+		return array_merge( self::common_fields(), null === $class ? [] : $class::fields() );
+	}
+
+	/**
 	 * Every field any provider declares, keyed by field key.
 	 *
 	 * Settings and Secrets need this to know which storage keys exist and which
@@ -163,6 +214,10 @@ class Provider_Registry {
 	 */
 	public static function all_fields(): array {
 		$out = [];
+
+		foreach ( self::common_fields() as $field ) {
+			$out[ $field->key ] = $field;
+		}
 
 		foreach ( self::all() as $class ) {
 			foreach ( $class::fields() as $field ) {
@@ -196,7 +251,7 @@ class Provider_Registry {
 			$meta   = $class::describe();
 			$fields = [];
 
-			foreach ( $class::fields() as $field ) {
+			foreach ( self::fields_for( $slug ) as $field ) {
 				$fields[] = $field->secret
 					? $field->to_array(
 						$settings->secrets()->get( $field->key ),
