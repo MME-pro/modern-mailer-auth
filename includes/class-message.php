@@ -115,8 +115,26 @@ class Message {
 		return array_merge( $this->to, $this->cc, $this->bcc );
 	}
 
+	/**
+	 * Whether Body holds HTML.
+	 *
+	 * Not simply `text/html === ContentType`, because by the time a Message
+	 * exists that comparison is wrong for the commonest HTML email there is.
+	 * preSend() overwrites ContentType with multipart/alternative whenever a
+	 * text alternative is present, and a Message is only ever built from a
+	 * mailer that has already run preSend() - so an HTML message with an
+	 * AltBody, which is what core, WooCommerce and most form plugins send,
+	 * arrived here looking like a plain-text one. The structured-API providers
+	 * then put the raw markup in their text field and the recipient saw tags.
+	 *
+	 * multipart/alternative counts as HTML because PHPMailer builds it that
+	 * way: in that mode Body is emitted as the text/html part and AltBody as
+	 * the text/plain one, whatever ContentType said beforehand.
+	 */
 	public function is_html(): bool {
-		return 'text/html' === $this->mailer->ContentType;
+		$type = strtolower( trim( (string) strtok( (string) $this->mailer->ContentType, ';' ) ) );
+
+		return 'text/html' === $type || 'multipart/alternative' === $type;
 	}
 
 	/**

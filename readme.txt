@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.9.0
+Stable tag: 0.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,10 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.9.1 =
+* HTML email now arrives as HTML. A message whose body is HTML but that never said so was delivered with its tags showing - which is most theme functions, form plugins and hand-built templates, because WordPress sends plain text unless a Content-Type header is added. Such a message is now sent as HTML, with a readable plain-text version alongside it for the clients that want one.
+* Fixed HTML email going out as plain text through SendGrid, Resend, Brevo, Postmark and SMTP2GO. This hit ordinary, correctly formed HTML mail - anything WooCommerce, WordPress itself or a form plugin sends - and the recipient saw the raw markup. The Microsoft, Google and SMTP connections were never affected.
 
 = 0.9.0 =
 * German translation, complete. The plugin follows your WordPress language, including each user's own profile setting, and reads as part of the admin rather than something bolted onto it.
