@@ -50,8 +50,8 @@ class App_Page {
 	 */
 	public function add_menu(): void {
 		add_menu_page(
-			__( 'Modern Mailer', 'modern-mailer-oauth' ),
-			__( 'Modern Mailer', 'modern-mailer-oauth' ),
+			__( 'MME-Mail to SMTP', 'modern-mailer-oauth' ),
+			__( 'MME-Mail to SMTP', 'modern-mailer-oauth' ),
 			self::CAPABILITY,
 			self::SLUG,
 			[ $this, 'render' ],
@@ -89,7 +89,7 @@ class App_Page {
 			'<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><code>%s</code></p></div>',
 			esc_html__( 'Another plugin has taken over email sending.', 'modern-mailer-oauth' ),
 			esc_html__(
-				'It defined wp_mail() before WordPress could, so Modern Mailer is configured but not sending anything. Deactivate one of the two.',
+				'It defined wp_mail() before WordPress could, so MME-Mail to SMTP is configured but not sending anything. Deactivate one of the two.',
 				'modern-mailer-oauth'
 			),
 			esc_html( str_replace( WP_PLUGIN_DIR . '/', '', $file ) )
@@ -117,15 +117,18 @@ class App_Page {
 			true
 		);
 
-		// Fraunces for display, Inter Tight for everything else. Registered as a
-		// dependency of the app stylesheet so the faces are requested before the
-		// rules that use them, rather than after the first paint.
+		// Inter, and only Inter - it is what mme-pro.de uses for everything, so a
+		// second display face here would be this screen inventing a brand the
+		// brand does not have. The headings separate on size and tracking instead,
+		// which is why the weights run up to 700.
 		//
-		// display=swap on purpose: a private-bank serif is worth waiting a
-		// moment for, but not worth showing an admin a blank screen for.
+		// Registered as a dependency of the app stylesheet so the faces are
+		// requested before the rules that use them rather than after the first
+		// paint, and display=swap so a slow font never shows an admin a blank
+		// screen.
 		wp_enqueue_style(
 			'mmoa-fonts',
-			'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap',
+			'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
 			[],
 			null
 		);
@@ -176,13 +179,13 @@ class App_Page {
 		// This gives them somewhere to go above the app instead.
 		?>
 		<div class="wrap" style="margin:0;padding:0">
-			<h1 class="screen-reader-text"><?php esc_html_e( 'Modern Mailer', 'modern-mailer-oauth' ); ?></h1>
+			<h1 class="screen-reader-text"><?php esc_html_e( 'MME-Mail to SMTP', 'modern-mailer-oauth' ); ?></h1>
 			<hr class="wp-header-end" style="display:none" />
 
 			<div id="mmoa-app-root">
 				<noscript>
 					<p style="padding:2rem">
-						<?php esc_html_e( 'Modern Mailer needs JavaScript to show its settings.', 'modern-mailer-oauth' ); ?>
+						<?php esc_html_e( 'MME-Mail to SMTP needs JavaScript to show its settings.', 'modern-mailer-oauth' ); ?>
 					</p>
 				</noscript>
 			</div>

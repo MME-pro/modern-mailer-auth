@@ -174,7 +174,7 @@ class Updater {
 		}
 
 		return (object) [
-			'name'          => 'Modern Mailer - OAuth SMTP for Microsoft 365 and Gmail',
+			'name'          => 'MME-Mail to SMTP',
 			'slug'          => self::SLUG,
 			'version'       => $release['version'],
 			'author'        => '<a href="https://github.com/' . self::REPO . '">builtwithmtw</a>',

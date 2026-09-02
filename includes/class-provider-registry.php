@@ -71,6 +71,11 @@ class Provider_Registry {
 			Providers\Postmark::class,
 			Providers\Mailgun::class,
 			Providers\Smtp2go::class,
+
+			// Zoho sits above Other SMTP because it is a named service rather
+			// than the catch-all, and below the API tiles because it is still an
+			// SMTP conversation, with everything that implies for diagnosis.
+			Providers\Zoho::class,
 			Providers\Smtp::class,
 
 			// Unlisted, so their position never shows. They sit last so that

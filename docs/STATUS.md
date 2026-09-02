@@ -14,7 +14,7 @@ Microsoft or Google endpoint — see [Built but not verified](#built-but-not-wor
 
 ## Admin layout
 
-A top-level **Modern Mailer** menu with three screens:
+A top-level **MME-Mail to SMTP** menu with three screens:
 
 | Screen | Slug | Holds |
 |---|---|---|

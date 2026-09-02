@@ -128,5 +128,22 @@
   "Disconnect Google account": "Google-Konto trennen",
   "Sign in with Google": "Mit Google anmelden",
   "Set in wp-config.php, so it cannot be edited here.": "In wp-config.php festgelegt und daher hier nicht bearbeitbar.",
-  "defined in wp-config.php": "in wp-config.php definiert"
+  "defined in wp-config.php": "in wp-config.php definiert",
+  "Zoho Mail": "Zoho Mail",
+  "A Zoho mailbox, over Zoho's own SMTP servers. Needs an application-specific password rather than the account password, and the region the account was created in - Zoho runs a separate estate per data centre and they do not accept each other's logins.": "Ein Zoho-Postfach über Zohos eigene SMTP-Server. Erforderlich sind ein anwendungsspezifisches Passwort statt des Kontopassworts sowie die Region, in der das Konto angelegt wurde – Zoho betreibt je Rechenzentrum eine eigene Umgebung, und die Anmeldungen gelten dort nicht wechselseitig.",
+  "The data centre the account belongs to. It is the domain you sign in on - zoho.eu, zoho.in, and so on.": "Das Rechenzentrum, zu dem das Konto gehört. Es ist die Domain, auf der Sie sich anmelden – zoho.eu, zoho.in und so weiter.",
+  "United States (zoho.com)": "Vereinigte Staaten (zoho.com)",
+  "Europe (zoho.eu)": "Europa (zoho.eu)",
+  "India (zoho.in)": "Indien (zoho.in)",
+  "Australia (zoho.com.au)": "Australien (zoho.com.au)",
+  "Japan (zoho.jp)": "Japan (zoho.jp)",
+  "Canada (zohocloud.ca)": "Kanada (zohocloud.ca)",
+  "Saudi Arabia (zoho.sa)": "Saudi-Arabien (zoho.sa)",
+  "Zoho address": "Zoho-Adresse",
+  "The full mailbox address you sign in with.": "Die vollständige Postfachadresse, mit der Sie sich anmelden.",
+  "App password": "App-Passwort",
+  "Generate one under Security, App Passwords in your Zoho account. The account password is refused once two-factor authentication is on.": "Erzeugen Sie eines unter „Sicherheit“, „App-Passwörter“ in Ihrem Zoho-Konto. Das Kontopasswort wird abgelehnt, sobald die Zwei-Faktor-Authentifizierung aktiv ist.",
+  "SSL uses port 465 and TLS uses port 587. Both work at Zoho - switch only if your host blocks the port.": "SSL nutzt Port 465, TLS Port 587. Beides funktioniert bei Zoho – wechseln Sie nur, wenn Ihr Hoster den Port blockiert.",
+  "SSL (port 465)": "SSL (Port 465)",
+  "TLS (port 587)": "TLS (Port 587)"
 }

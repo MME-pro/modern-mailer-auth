@@ -1,4 +1,4 @@
-# Modern Mailer
+# MME-Mail to SMTP
 
 A WordPress plugin that sends mail through the **Microsoft Graph** and **Gmail** APIs
 using OAuth 2.0 — no mailbox password, and nothing that quietly expires.
@@ -87,7 +87,7 @@ Adding a transport means implementing three methods, not re-solving MIME.
 
 ## Setup
 
-Everything lives under a top-level **Modern Mailer** menu: **Settings** (site options and
+Everything lives under a top-level **MME-Mail to SMTP** menu: **Settings** (site options and
 the primary connection), **Backup** (the fallback connection), **Logs** (the retry queue
 and the send log).
 
@@ -125,7 +125,7 @@ application, so the tokens are only ever seen by your site.
    `https://yoursite.com/wp-admin/admin-post.php?action=mmoa_google_callback`
 3. Publish the consent screen to **In production**. Left in Testing, Google expires the
    refresh token every seven days and sending stops without warning.
-4. Paste the client ID and secret into Modern Mailer, **save**, then press *Sign in with
+4. Paste the client ID and secret into MME-Mail to SMTP, **save**, then press *Sign in with
    Google*.
 
 Google refuses non-HTTPS redirect URIs except for `localhost`, so this cannot be completed

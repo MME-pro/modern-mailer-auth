@@ -114,5 +114,8 @@
   "Almost no WordPress code checks what wp_mail() returned, so an alert is usually the only way anyone finds out sending has stopped.": "So gut wie kein WordPress-Code prüft, was wp_mail() zurückgegeben hat – eine Benachrichtigung ist deshalb meist die einzige Möglichkeit, überhaupt zu bemerken, dass der Versand steht.",
   "Consecutive failures.": "Aufeinanderfolgende Fehler.",
   "Sent with the server mail function, not the API - the API is what has failed.": "Wird mit der Mail-Funktion des Servers gesendet, nicht über die API – denn genau die API ist ausgefallen.",
-  "Save settings": "Einstellungen speichern"
+  "Save settings": "Einstellungen speichern",
+  "Version %s": "Version %s",
+  "GPL-2.0-or-later": "GPL-2.0-or-later",
+  "Built and maintained by <a>MME-pro</a>": "Entwickelt und gepflegt von <a>MME-pro</a>"
 }

@@ -75,7 +75,7 @@ const RadioGroup = ( { field, value, disabled, onChange } ) => (
 							checked ? 'border-brand' : 'border-input'
 						) }
 					>
-						{ checked && <span className="size-1.5 rounded-full bg-brand" /> }
+						{ checked && <span className="size-1.5 rounded-full bg-brand-deep" /> }
 					</span>
 					{ optionLabel }
 				</label>

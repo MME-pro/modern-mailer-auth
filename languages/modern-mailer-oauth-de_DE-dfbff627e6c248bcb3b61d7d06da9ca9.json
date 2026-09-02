@@ -1,5 +1,5 @@
 {
-	"translation-revision-date": "2026-08-31T07:40:04.645Z",
+	"translation-revision-date": "2026-09-02T07:52:58.131Z",
 	"generator": "tools/i18n.mjs",
 	"domain": "messages",
 	"locale_data": {
@@ -39,8 +39,8 @@
 			"Stored. Leave blank to keep it.": [
 				"Gespeichert. Leer lassen, um ihn beizubehalten."
 			],
-			"Modern Mailer": [
-				"Modern Mailer"
+			"MME-Mail to SMTP": [
+				"MME-Mail to SMTP"
 			],
 			"Settings": [
 				"Einstellungen"
@@ -113,6 +113,15 @@
 			],
 			"Alert address": [
 				"Benachrichtigungsadresse"
+			],
+			"Version %s": [
+				"Version %s"
+			],
+			"GPL-2.0-or-later": [
+				"GPL-2.0-or-later"
+			],
+			"Built and maintained by <a>MME-pro</a>": [
+				"Entwickelt und gepflegt von <a>MME-pro</a>"
 			],
 			"Copy redirect URI": [
 				"Weiterleitungs-URI kopieren"

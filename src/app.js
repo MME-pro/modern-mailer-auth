@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { getBootstrap } from './api/client';
 import Nav from './components/nav';
+import Footer from './components/footer';
 import { Spinner } from './components/ui';
 import { ToastProvider, useToast } from './components/toast';
 import Dashboard from './screens/dashboard';
@@ -69,7 +70,7 @@ const Shell = () => {
 				     screens - while the log table and the provider grid were exactly
 				     the things that wanted the room. Line length is still held where
 				     it actually matters: on the paragraphs, per component. */ }
-				<main className="w-full px-6 py-8 sm:px-8">
+				<main className="w-full flex-1 px-6 py-8 sm:px-8">
 				{ isLoading ? (
 					<Spinner />
 				) : (
@@ -86,6 +87,8 @@ const Shell = () => {
 					</Routes>
 				) }
 			</main>
+
+			<Footer />
 		</div>
 	);
 };

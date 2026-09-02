@@ -264,6 +264,35 @@ class Smtp extends Abstract_Provider {
 	}
 
 	/**
+	 * Where to connect, and how.
+	 *
+	 * Four one-line readers rather than four reads inline in connect(), because
+	 * a provider for one named service knows its own server and should not have
+	 * to ask an administrator to type it in. Overriding these is the whole of
+	 * what a branded SMTP preset - Zoho, say - has to do: the conversation,
+	 * the error mapping and the transcript are already right.
+	 *
+	 * The credentials stay where they are. A username and a password are the
+	 * two things a preset cannot know, so they are read from the same fields
+	 * whichever subclass is driving.
+	 */
+	protected function host(): string {
+		return trim( (string) $this->settings->get( 'smtp_host' ) );
+	}
+
+	protected function port(): int {
+		return (int) $this->settings->get( 'smtp_port' );
+	}
+
+	protected function encryption(): string {
+		return (string) $this->settings->get( 'smtp_encryption' );
+	}
+
+	protected function authenticates(): bool {
+		return 'no' !== (string) $this->settings->get( 'smtp_auth' );
+	}
+
+	/**
 	 * Connect, secure the link, and authenticate.
 	 *
 	 * @return Smtp_Client|WP_Error
@@ -272,9 +301,9 @@ class Smtp extends Abstract_Provider {
 		require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
 		require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
 
-		$host       = trim( (string) $this->settings->get( 'smtp_host' ) );
-		$port       = (int) $this->settings->get( 'smtp_port' );
-		$encryption = (string) $this->settings->get( 'smtp_encryption' );
+		$host       = $this->host();
+		$port       = $this->port();
+		$encryption = $this->encryption();
 		$username   = trim( (string) $this->settings->get( 'smtp_username' ) );
 		$password   = $this->settings->secrets()->get( 'smtp_password' );
 
@@ -293,7 +322,7 @@ class Smtp extends Abstract_Provider {
 		// Checked before dialling, because a configuration contradiction is free
 		// to catch and an unreachable host would otherwise mask it behind a
 		// connection error that names the wrong problem.
-		$authenticate = 'no' !== (string) $this->settings->get( 'smtp_auth' );
+		$authenticate = $this->authenticates();
 
 		if ( $authenticate && '' === $username ) {
 			return new WP_Error(

@@ -26,7 +26,7 @@ msgid "Enter a valid recipient address."
 msgstr ""
 
 #: includes/api/class-rest-controller.php:446 admin/class-admin-page.php:297
-msgid "Modern Mailer test from %s"
+msgid "MME-Mail to SMTP test from %s"
 msgstr ""
 
 #: includes/api/class-rest-controller.php:449
@@ -244,34 +244,34 @@ msgid "The request to the mail API could not be completed."
 msgstr ""
 
 #: includes/class-plugin.php:182
-msgid "Every five minutes (Modern Mailer retry queue)"
+msgid "Every five minutes (MME-Mail to SMTP retry queue)"
 msgstr ""
 
-#: includes/class-provider-registry.php:145
+#: includes/class-provider-registry.php:150
 msgid "Not configured (WordPress default)"
 msgstr ""
 
-#: includes/class-provider-registry.php:170 includes/class-router.php:338 admin/views/settings.php:30
+#: includes/class-provider-registry.php:175 includes/class-router.php:338 admin/views/settings.php:30
 msgid "From address"
 msgstr ""
 
-#: includes/class-provider-registry.php:173
+#: includes/class-provider-registry.php:178
 msgid "Must be a mailbox this connection is allowed to send as. Providers refuse, or silently rewrite, anything else."
 msgstr ""
 
-#: includes/class-provider-registry.php:179 admin/views/settings.php:31
+#: includes/class-provider-registry.php:184 admin/views/settings.php:31
 msgid "From name"
 msgstr ""
 
-#: includes/class-provider-registry.php:180
+#: includes/class-provider-registry.php:185
 msgid "Shown as the sender. Left empty, WordPress uses the site name."
 msgstr ""
 
-#: includes/class-provider-registry.php:186
+#: includes/class-provider-registry.php:191
 msgid "Override what other plugins set"
 msgstr ""
 
-#: includes/class-provider-registry.php:189
+#: includes/class-provider-registry.php:194
 msgid "On, the address above is used even when a plugin sets its own. A plugin hardcoding a From address the connection may not send as is one of the commonest causes of mail that silently stops."
 msgstr ""
 
@@ -647,7 +647,7 @@ msgstr ""
 msgid "The verified domain in Mailgun, for example mg.yourdomain.com."
 msgstr ""
 
-#: includes/providers/class-mailgun.php:84
+#: includes/providers/class-mailgun.php:84 includes/providers/class-zoho.php:101
 msgid "Region"
 msgstr ""
 
@@ -863,7 +863,7 @@ msgstr ""
 msgid "With two-factor authentication this is an app password, not the account password."
 msgstr ""
 
-#: includes/providers/class-smtp.php:144
+#: includes/providers/class-smtp.php:144 includes/providers/class-zoho.php:152
 msgid "Encryption"
 msgstr ""
 
@@ -919,27 +919,27 @@ msgstr ""
 msgid "The server rejected the message."
 msgstr ""
 
-#: includes/providers/class-smtp.php:284
+#: includes/providers/class-smtp.php:313
 msgid "No SMTP server is configured."
 msgstr ""
 
-#: includes/providers/class-smtp.php:301
+#: includes/providers/class-smtp.php:330
 msgid "Authentication is switched on but no SMTP username is set."
 msgstr ""
 
-#: includes/providers/class-smtp.php:340
+#: includes/providers/class-smtp.php:369
 msgid "Could not connect to %1$s on port %2$d. %3$s"
 msgstr ""
 
-#: includes/providers/class-smtp.php:364
+#: includes/providers/class-smtp.php:393
 msgid "The server refused to start TLS. If it only offers implicit TLS, choose that and use port 465. %s"
 msgstr ""
 
-#: includes/providers/class-smtp.php:389
+#: includes/providers/class-smtp.php:418
 msgid "The server rejected the username or password. If the account has two-factor authentication, you need an app password rather than the account password. %s"
 msgstr ""
 
-#: includes/providers/class-smtp.php:463
+#: includes/providers/class-smtp.php:492
 msgid "SMTP authenticates with a username and password and mints no tokens."
 msgstr ""
 
@@ -953,6 +953,74 @@ msgstr ""
 
 #: includes/providers/class-smtp2go.php:61
 msgid "From Settings, API Keys in SMTP2GO. It needs the Email Send permission."
+msgstr ""
+
+#: includes/providers/class-zoho.php:69 includes/providers/class-zoho.php:82
+msgid "Zoho Mail"
+msgstr ""
+
+#: includes/providers/class-zoho.php:83
+msgid "A Zoho mailbox, over Zoho's own SMTP servers. Needs an application-specific password rather than the account password, and the region the account was created in - Zoho runs a separate estate per data centre and they do not accept each other's logins."
+msgstr ""
+
+#: includes/providers/class-zoho.php:104
+msgid "The data centre the account belongs to. It is the domain you sign in on - zoho.eu, zoho.in, and so on."
+msgstr ""
+
+#: includes/providers/class-zoho.php:106
+msgid "United States (zoho.com)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:107
+msgid "Europe (zoho.eu)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:108
+msgid "India (zoho.in)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:109
+msgid "Australia (zoho.com.au)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:110
+msgid "Japan (zoho.jp)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:111
+msgid "Canada (zohocloud.ca)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:112
+msgid "Saudi Arabia (zoho.sa)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:123
+msgid "Zoho address"
+msgstr ""
+
+#: includes/providers/class-zoho.php:126
+msgid "The full mailbox address you sign in with."
+msgstr ""
+
+#: includes/providers/class-zoho.php:132
+msgid "App password"
+msgstr ""
+
+#: includes/providers/class-zoho.php:136
+msgid "Generate one under Security, App Passwords in your Zoho account. The account password is refused once two-factor authentication is on."
+msgstr ""
+
+#: includes/providers/class-zoho.php:155
+msgid "SSL uses port 465 and TLS uses port 587. Both work at Zoho - switch only if your host blocks the port."
+msgstr ""
+
+#: includes/providers/class-zoho.php:157
+msgid "SSL (port 465)"
+msgstr ""
+
+#: includes/providers/class-zoho.php:158
+msgid "TLS (port 587)"
 msgstr ""
 
 #: admin/class-admin-page.php:107
@@ -1067,8 +1135,8 @@ msgstr ""
 msgid "Libsodium is unavailable, so this will be stored unencrypted. Put it in wp-config.php instead."
 msgstr ""
 
-#: admin/class-app-page.php:53 admin/class-app-page.php:54 admin/class-app-page.php:179 admin/views/settings.php:17 src/components/nav.js:242
-msgid "Modern Mailer"
+#: admin/class-app-page.php:53 admin/class-app-page.php:54 admin/class-app-page.php:182 admin/views/settings.php:17 src/components/footer.js:28 src/components/nav.js:242
+msgid "MME-Mail to SMTP"
 msgstr ""
 
 #: admin/class-app-page.php:90
@@ -1076,15 +1144,15 @@ msgid "Another plugin has taken over email sending."
 msgstr ""
 
 #: admin/class-app-page.php:91
-msgid "It defined wp_mail() before WordPress could, so Modern Mailer is configured but not sending anything. Deactivate one of the two."
+msgid "It defined wp_mail() before WordPress could, so MME-Mail to SMTP is configured but not sending anything. Deactivate one of the two."
 msgstr ""
 
-#: admin/class-app-page.php:185
-msgid "Modern Mailer needs JavaScript to show its settings."
+#: admin/class-app-page.php:188
+msgid "MME-Mail to SMTP needs JavaScript to show its settings."
 msgstr ""
 
 #: admin/class-site-health.php:35
-msgid "Modern Mailer updates"
+msgid "MME-Mail to SMTP updates"
 msgstr ""
 
 #: admin/class-site-health.php:40
@@ -1152,11 +1220,11 @@ msgid "Update checks are not getting through"
 msgstr ""
 
 #: admin/class-site-health.php:183
-msgid "This site could not reach the GitHub API to ask whether a newer version of Modern Mailer exists, so it will not offer updates for it. Usually that means outbound HTTPS requests are blocked, a security plugin is filtering them, or the API is rate limiting this server. The plugin keeps working; it simply cannot tell you when a fix is available. It checks %s."
+msgid "This site could not reach the GitHub API to ask whether a newer version of MME-Mail to SMTP exists, so it will not offer updates for it. Usually that means outbound HTTPS requests are blocked, a security plugin is filtering them, or the API is rate limiting this server. The plugin keeps working; it simply cannot tell you when a fix is available. It checks %s."
 msgstr ""
 
 #: admin/class-site-health.php:193
-msgid "A newer version of Modern Mailer is available"
+msgid "A newer version of MME-Mail to SMTP is available"
 msgstr ""
 
 #: admin/class-site-health.php:196
@@ -1505,6 +1573,18 @@ msgstr ""
 
 #: admin/views/settings.php:125
 msgid "Logs"
+msgstr ""
+
+#: src/components/footer.js:33
+msgid "Version %s"
+msgstr ""
+
+#: src/components/footer.js:37
+msgid "GPL-2.0-or-later"
+msgstr ""
+
+#: src/components/footer.js:46
+msgid "Built and maintained by <a>MME-pro</a>"
 msgstr ""
 
 #: src/components/google-connect.js:44

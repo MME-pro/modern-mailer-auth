@@ -14,7 +14,7 @@ const alertVariants = cva(
 		variants: {
 			variant: {
 				default: 'bg-card text-card-foreground',
-				info: 'border-brand/25 bg-brand-subtle text-foreground [&>svg]:text-brand',
+				info: 'border-brand/25 bg-brand-subtle text-foreground [&>svg]:text-brand-deep',
 				success:
 					'border-success/25 bg-success-subtle text-foreground [&>svg]:text-success',
 				warning:

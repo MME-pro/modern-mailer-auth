@@ -76,7 +76,7 @@ $order = array_column( Provider_Registry::to_array( $plugin->settings ), 'label'
 
 check(
 	'the tiles are in the intended order',
-	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Postmark', 'Mailgun', 'SMTP2GO', 'Other SMTP' ] === $order,
+	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Postmark', 'Mailgun', 'SMTP2GO', 'Zoho Mail', 'Other SMTP' ] === $order,
 	implode( ' - ', $order )
 );
 
@@ -98,7 +98,7 @@ foreach ( $catalogue as $entry ) {
 
 check(
 	'the finished providers are offered',
-	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Other SMTP' ] === $ready,
+	[ 'Microsoft', 'Google', 'SendGrid', 'Resend', 'Brevo', 'Zoho Mail', 'Other SMTP' ] === $ready,
 	implode( ',', $ready )
 );
 

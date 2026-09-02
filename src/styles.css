@@ -21,18 +21,29 @@
  *
  * The token *contract* is shadcn's - --background, --foreground, --primary,
  * --muted and so on - so any shadcn component drops in unmodified. The values
- * are not shadcn's, and are not another dark SaaS palette either.
+ * are MME-pro's, read out of the Elementor global palette on mme-pro.de rather
+ * than sampled by eye: #121212, #6AA475, #DAFAE4, #313131, #AEAEAE, #F20000.
  *
- * The direction is a private bank's own collateral: heavy paper stock, ink
- * chrome, brass fittings. Light-first, deliberately - making the workspace
- * paper and the navigation ink says more about the product than a fourth dark
- * dashboard would, and it sits better inside wp-admin's own light chrome.
+ * The site is dark-first - near-black ground, muted sage accent, mint-tinted
+ * text. That inverts here, and deliberately. wp-admin's own chrome is light,
+ * and a screen that fights it reads as a foreign object bolted into the
+ * dashboard. So daylight is the default and the near-black becomes the
+ * *chrome*: the header band is the site's own ground colour, the workspace
+ * below it is paper. Dark mode is where the palette gets to be itself.
  *
- * Three coloured tokens, and only one is decorative. Brass carries the
- * personality. Oxblood and malachite are semantic: they appear on failure and
- * delivery and nowhere else. The moment an accent becomes decoration the
- * palette stops meaning anything - which matters here, because the three states
- * this interface must communicate instantly are delivered, waiting and lost.
+ * Sage carries the personality and appears where the site puts it - active
+ * state, focus, links, the primary data series.
+ *
+ * Two things the palette forces, both contrast:
+ *
+ * Sage is a mid-tone. On white it manages 2.9:1 - fine for a fill or a rule,
+ * nowhere near enough for text. So any accent *word* uses --brand-deep, the
+ * same hue taken down to 5.1:1, and the bright value stays on graphics.
+ *
+ * And the semantic trio does not move. With a green brand, a green "delivered"
+ * badge stops reading as a state and starts reading as decoration - so success
+ * keeps its deeper emerald, far enough from sage to separate at a glance and
+ * still the green everyone already understands.
  */
 
 @custom-variant dark (&:is(.dark *));
@@ -40,48 +51,52 @@
 :root {
 	--radius: 10px;
 
-	/* Cool canvas. Slightly blue rather than slightly yellow. */
-	--background: #f6f7f9;
-	--foreground: #101828;
+	/* Paper, pulled a shade toward the site's off-white rather than pure. */
+	--background: #f7f9f7;
+	--foreground: #121212;
 
 	--card: #ffffff;
-	--card-foreground: #101828;
+	--card-foreground: #121212;
 
 	--popover: #ffffff;
-	--popover-foreground: #101828;
+	--popover-foreground: #121212;
 
-	/* Near-black slate, so buttons carry weight without spending the accent on
-	   every action on screen. */
-	--primary: #101828;
-	--primary-foreground: #ffffff;
+	/* The site's own near-black, so a primary button carries the same weight of
+	   ink the site uses for its own. */
+	--primary: #121212;
+	--primary-foreground: #fcfcfc;
 
-	--secondary: #f2f4f7;
-	--secondary-foreground: #101828;
+	--secondary: #eef1ee;
+	--secondary-foreground: #121212;
 
-	--muted: #f2f4f7;
-	--muted-foreground: #667085;
+	--muted: #eef1ee;
+	/* Not the site's #AEAEAE: on paper that is 2.2:1 and simply unreadable.
+	   This is the same neutral taken to 4.8:1, which is the least it can be
+	   and still be text. */
+	--muted-foreground: #6c716d;
 
-	--accent: #f2f4f7;
-	--accent-foreground: #101828;
+	--accent: #eef1ee;
+	--accent-foreground: #121212;
 
-	--border: #e4e7ec;
-	--input: #d0d5dd;
-	--ring: #4f46e5;
+	--border: #e2e7e3;
+	--input: #cdd4ce;
+	--ring: #6aa475;
 
-	/* The accent. Indigo, for active state, focus, links and the primary data
-	   series - and nothing else. */
-	--brand: #4f46e5;
-	--brand-foreground: #ffffff;
-	--brand-subtle: #eef0ff;
-	--brand-deep: #4338ca;
+	/* The accent, straight off the site. Fills, rules, focus and the primary
+	   data series - never a word on a light ground. */
+	--brand: #6aa475;
+	--brand-foreground: #121212;
+	--brand-subtle: #dafae4;
+	/* The same sage, dark enough to be read. This is what links use. */
+	--brand-deep: #3f7a50;
 
-	/* Chrome. Deep navy-slate, cool enough to belong to the same family as the
-	   canvas rather than reading as a separate design. */
-	--ink: #0f172a;
-	--ink-raised: #1b2436;
-	--ink-line: #2a3549;
-	--ink-foreground: #e8ecf4;
-	--ink-muted: #94a3b8;
+	/* Chrome. The site's ground colour and its own text tint, so the header
+	   band is a piece of mme-pro.de sitting inside wp-admin. */
+	--ink: #121212;
+	--ink-raised: #1c1c1c;
+	--ink-line: #313131;
+	--ink-foreground: #dafae4;
+	--ink-muted: #aeaeae;
 
 	/* Semantic only. Never borders, never headings, never decoration. */
 	--success: #067647;
@@ -94,74 +109,81 @@
 	--destructive: #d92d20;
 	--destructive-foreground: #ffffff;
 
-	--switch-off: #cbd2dd;
+	--switch-off: #cdd4ce;
 	--switch-thumb: #ffffff;
 
-	--chart-1: #4f46e5;
-	--chart-2: #f04438;
+	/* Series one is the brand. Series two is the site's own red, which appears
+	   against failure and nowhere else. */
+	--chart-1: #6aa475;
+	--chart-2: #f20000;
 
-	--font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+	/* The site is Inter throughout, so display and sans are the same face here.
+	   Headings separate on size and tracking rather than on a second family the
+	   brand does not actually use. */
+	--font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 	--font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 /*
- * Dark: the same room at night, not the light theme turned inside out.
+ * Dark: the site as it actually is.
  *
- * Three things drive it, and each is a correction of the obvious approach.
+ * The easy direction, because mme-pro.de is already a dark design - #121212
+ * ground, #DAFAE4 text, sage on top. The light theme above is the translation;
+ * this is the original.
+ *
+ * Two things still have to be corrected rather than copied.
  *
  * Elevation is built from lightness, not shadow. A shadow cast on near-black is
- * invisible, so every surface has to separate by its own value - roughly six
- * points per step, which is what makes a card read as sitting on the canvas
- * rather than painted onto it.
+ * invisible, so every surface separates by its own value - roughly six points
+ * per step, which is what makes a card read as sitting on the canvas rather
+ * than painted onto it. The chrome stays a step *above* the canvas for the same
+ * reason: keeping it darker, the literal inversion, made the band vanish.
  *
- * The chrome inverts its relationship to the canvas. On paper the header is
- * darker than the page; at night it is *lighter*, like a lit bar in a dark
- * room. Keeping it darker - the literal inversion - made the band vanish.
- *
- * And brass finally gets to carry text. On paper it manages about 3:1 and is
- * restricted to graphics; against near-black the same hue clears 8:1, so the
- * accent that had to stay decorative in daylight can speak here.
+ * And sage lifts. #6AA475 has just enough contrast on white to be a fill and
+ * not enough on near-black to be anything at all, so the accent moves to the
+ * site's brighter green - which clears 9:1 here and can finally carry text.
  */
 .dark {
-	--background: #0b1120;
-	--foreground: #e8ecf4;
+	--background: #121212;
+	--foreground: #dafae4;
 
-	--card: #131c2e;
-	--card-foreground: #e8ecf4;
+	--card: #1b1b1b;
+	--card-foreground: #dafae4;
 
-	--popover: #18223a;
-	--popover-foreground: #e8ecf4;
+	--popover: #232323;
+	--popover-foreground: #dafae4;
 
-	--primary: #e8ecf4;
-	--primary-foreground: #0b1120;
+	--primary: #dafae4;
+	--primary-foreground: #121212;
 
-	--secondary: #1c2740;
-	--secondary-foreground: #e8ecf4;
+	--secondary: #262626;
+	--secondary-foreground: #dafae4;
 
-	--muted: #1c2740;
-	--muted-foreground: #94a3b8;
+	--muted: #262626;
+	/* The site's own grey, which needs no correction at night. */
+	--muted-foreground: #aeaeae;
 
-	--accent: #1c2740;
-	--accent-foreground: #e8ecf4;
+	--accent: #262626;
+	--accent-foreground: #dafae4;
 
 	/* Structure has to stay visible or the layout dissolves into one dark field. */
-	--border: #2a3651;
-	--input: #35435f;
-	--ring: #818cf8;
+	--border: #313131;
+	--input: #3d3d3d;
+	--ring: #86cd94;
 
-	/* Indigo lifts at night; the daylight value is too dense on a dark ground. */
-	--brand: #818cf8;
-	--brand-foreground: #0b1120;
-	--brand-subtle: #1e2344;
+	--brand: #86cd94;
+	--brand-foreground: #121212;
+	--brand-subtle: #17281c;
 	/* Inverted on purpose: in daylight "deep" means darker for contrast against
-	   white, at night it must be lighter or every accent link goes unreadable. */
-	--brand-deep: #a5b0ff;
+	   white, at night it must be lighter or every accent link goes unreadable.
+	   Short of the mint, so a link still separates from body text. */
+	--brand-deep: #a9e3b6;
 
-	--ink: #131c2e;
-	--ink-raised: #1a2438;
-	--ink-line: #2a3651;
-	--ink-foreground: #e8ecf4;
-	--ink-muted: #94a3b8;
+	--ink: #1b1b1b;
+	--ink-raised: #232323;
+	--ink-line: #313131;
+	--ink-foreground: #dafae4;
+	--ink-muted: #aeaeae;
 
 	--success: #47cd89;
 	--success-subtle: #0d2b1e;
@@ -172,12 +194,12 @@
 
 	--destructive: #f97066;
 	/* The destructive fill is light here, so its label must be dark. */
-	--destructive-foreground: #0b1120;
+	--destructive-foreground: #121212;
 
-	--switch-off: #3d4a66;
-	--switch-thumb: #e8ecf4;
+	--switch-off: #3d3d3d;
+	--switch-thumb: #dafae4;
 
-	--chart-1: #818cf8;
+	--chart-1: #86cd94;
 	--chart-2: #f97066;
 }
 
@@ -252,6 +274,12 @@
 	background: var(--background);
 	margin-left: -20px;
 	min-height: calc(100vh - 32px);
+	/* Column, so the credits sit on the bottom edge rather than wherever the
+	   content happened to stop. On the settings screen that difference is most
+	   of the viewport, and a bordered footer floating mid-page reads as content
+	   that failed to load. */
+	display: flex;
+	flex-direction: column;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	/* Every figure here sits in a column that has to align - metrics, table

@@ -72,7 +72,7 @@ class Diagnostics {
 			'WordPress'    => get_bloginfo( 'version' ),
 			'Multisite'    => is_multisite() ? 'Yes' : 'No',
 			'PHP'          => PHP_VERSION,
-			'Modern Mailer' => VERSION,
+			'MME-Mail to SMTP' => VERSION,
 		];
 	}
 

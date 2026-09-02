@@ -14,7 +14,7 @@ use ModernMailer\Settings;
 defined( 'ABSPATH' ) || exit;
 ?>
 <div class="wrap">
-	<h1><?php esc_html_e( 'Modern Mailer', 'modern-mailer-oauth' ); ?></h1>
+	<h1><?php esc_html_e( 'MME-Mail to SMTP', 'modern-mailer-oauth' ); ?></h1>
 
 	<?php $this->render_notice(); ?>
 

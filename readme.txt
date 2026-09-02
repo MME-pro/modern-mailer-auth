@@ -1,10 +1,10 @@
-=== Modern Mailer - OAuth SMTP for Microsoft 365 and Gmail ===
+=== MME-Mail to SMTP ===
 Contributors: builtwithmtw
 Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.9.1
+Stable tag: 0.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.10.0 =
+* The plugin is now called MME-Mail to SMTP. Only the name changes - your connections, credentials and logs are untouched, and the entry in the Plugins list simply reads differently after the update.
+* Added Zoho Mail as a connection. Choose the region your Zoho account belongs to, enter the address and an app password, and the server and port are set for you. The region matters: Zoho runs a separate mail system per data centre, and an account created on zoho.eu cannot sign in to the American server - which fails looking exactly like a wrong password.
+* New look, taken from the MME-pro house colours. Same screens in the same places; the header band, buttons, tabs and charts now carry the brand rather than a generic blue.
+* The screens now credit MME-pro in a footer, with the version and licence beside it - which is also the quickest thing to screenshot when reporting a problem.
 
 = 0.9.1 =
 * HTML email now arrives as HTML. A message whose body is HTML but that never said so was delivered with its tags showing - which is most theme functions, form plugins and hand-built templates, because WordPress sends plain text unless a Content-Type header is added. Such a message is now sent as HTML, with a readable plain-text version alongside it for the clients that want one.
@@ -160,7 +166,7 @@ About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a mess
 * Colour now means one thing each: brass is the only decorative accent, and oxblood and malachite appear on failure and delivery and nowhere else.
 
 = 0.5.2 =
-* The Modern Mailer menu no longer has submenus. It opens straight onto the app, which carries its own tabs - Dashboard, Connections, Routing, Email Logs and Settings - so there is one navigation to follow rather than two that had to agree with each other.
+* The MME-Mail to SMTP menu no longer has submenus. It opens straight onto the app, which carries its own tabs - Dashboard, Connections, Routing, Email Logs and Settings - so there is one navigation to follow rather than two that had to agree with each other.
 
 = 0.5.1 =
 * Fixed the on/off switches. The thumb was almost the same colour as the track when a switch was off, so the control read as a blank pill that gave no sign of its state - or that it was a control at all. The off track now has its own colour, the thumb carries a shadow, and the switch is larger and easier to hit.
@@ -193,7 +199,7 @@ About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a mess
 * Added a notice when another plugin has taken over wp_mail(), which previously left this plugin configured but silently not sending.
 
 = 0.2.0 =
-* Moved to a top-level Modern Mailer menu with three screens: Settings, Backup and Logs. The Logs entry carries a count when the retry queue is holding anything.
+* Moved to a top-level MME-Mail to SMTP menu with three screens: Settings, Backup and Logs. The Logs entry carries a count when the retry queue is holding anything.
 * The Google OAuth redirect URI is now `admin-post.php?action=mmoa_google_callback`, which does not change if the admin menu is ever reorganised.
 * Added a backup connection. When the primary fails, the message is retried immediately against a second, independently configured provider.
 * Added a retry queue. A send that fails for a transient reason - a network or DNS fault at the host, a throttle, a 5xx - is held and retried across later requests instead of being lost. Attempts back off from five minutes and stop after about two days.

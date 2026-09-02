@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Modern Mailer - OAuth SMTP for Microsoft 365 and Gmail
+ * Plugin Name:       MME-Mail to SMTP
  * Description:       Sends WordPress email through the Microsoft Graph and Gmail APIs using OAuth 2.0. App-only and service-account authentication mean there is no refresh token to expire and no periodic reauthorization. A backup connection and a retry queue mean a transient fault delays an email rather than losing it.
- * Version:           0.9.1
+ * Version:           0.10.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Author:            builtwithmtw
+ * Author:            MME-pro
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       modern-mailer-oauth
@@ -18,7 +18,7 @@ namespace ModernMailer;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION     = '0.9.1';
+const VERSION     = '0.10.0';
 const PLUGIN_FILE = __FILE__;
 
 define( 'ModernMailer\PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

@@ -127,6 +127,33 @@ const Resend = () => (
 	</svg>
 );
 
+const Zoho = () => (
+	<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+		{ /* Zoho's mark is a wordmark, which is illegible at 24px. What people
+		     actually recognise is the four-colour rule under it, so the tile is
+		     that rule plus an envelope - the service, not the company. */ }
+		<rect width="24" height="24" rx="5" fill="#fff" />
+		<rect
+			x=".5"
+			y=".5"
+			width="23"
+			height="23"
+			rx="4.5"
+			fill="none"
+			stroke="#000"
+			strokeOpacity=".1"
+		/>
+		<path
+			fill="#226DB4"
+			d="M4.5 7.1A1.5 1.5 0 0 1 6 5.6h12a1.5 1.5 0 0 1 1.5 1.5v6.9A1.5 1.5 0 0 1 18 15.5H6a1.5 1.5 0 0 1-1.5-1.5zM6 7.3v.3l6 3.8 6-3.8v-.3z"
+		/>
+		<rect x="4" y="17.4" width="4" height="2.2" fill="#E42527" />
+		<rect x="8" y="17.4" width="4" height="2.2" fill="#089949" />
+		<rect x="12" y="17.4" width="4" height="2.2" fill="#226DB4" />
+		<rect x="16" y="17.4" width="4" height="2.2" fill="#F9B21D" />
+	</svg>
+);
+
 const MARKS = {
 	// The merged tiles, and the legacy slugs a connection may still
 	// store until the migration runs.
@@ -143,6 +170,7 @@ const MARKS = {
 	brevo: Brevo,
 	smtp2go: Smtp2go,
 	resend: Resend,
+	zoho: Zoho,
 };
 
 /**

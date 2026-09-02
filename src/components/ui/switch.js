@@ -43,7 +43,7 @@ function Switch( { className, ...props } ) {
 			<SwitchPrimitive.Thumb
 				className={ cn(
 					'pointer-events-none block size-5 rounded-full bg-switch-thumb',
-					'shadow-[0_1px_2px_rgba(16,24,40,0.25)] ring-1 ring-black/5',
+					'shadow-[0_1px_2px_rgba(18,18,18,0.25)] ring-1 ring-black/5',
 					'transition-transform duration-150 ease-out',
 					'data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0'
 				) }

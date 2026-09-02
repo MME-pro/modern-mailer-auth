@@ -32,7 +32,7 @@ class Site_Health {
 	 */
 	public function add_tests( array $tests ): array {
 		$tests['direct']['mmoa_updates'] = [
-			'label' => __( 'Modern Mailer updates', 'modern-mailer-oauth' ),
+			'label' => __( 'MME-Mail to SMTP updates', 'modern-mailer-oauth' ),
 			'test'  => [ $this, 'run_update_test' ],
 		];
 
@@ -180,7 +180,7 @@ class Site_Health {
 			$result['label']          = __( 'Update checks are not getting through', 'modern-mailer-oauth' );
 			$result['description']    = '<p>' . sprintf(
 				/* translators: %s: GitHub repository, e.g. owner/name. */
-				esc_html__( 'This site could not reach the GitHub API to ask whether a newer version of Modern Mailer exists, so it will not offer updates for it. Usually that means outbound HTTPS requests are blocked, a security plugin is filtering them, or the API is rate limiting this server. The plugin keeps working; it simply cannot tell you when a fix is available. It checks %s.', 'modern-mailer-oauth' ),
+				esc_html__( 'This site could not reach the GitHub API to ask whether a newer version of MME-Mail to SMTP exists, so it will not offer updates for it. Usually that means outbound HTTPS requests are blocked, a security plugin is filtering them, or the API is rate limiting this server. The plugin keeps working; it simply cannot tell you when a fix is available. It checks %s.', 'modern-mailer-oauth' ),
 				'<code>' . esc_html( $status['repo'] ) . '</code>'
 			) . '</p>';
 
@@ -190,7 +190,7 @@ class Site_Health {
 		if ( version_compare( $status['latest'], $status['installed'], '>' ) ) {
 			$result['status']         = 'recommended';
 			$result['badge']['color'] = 'orange';
-			$result['label']          = __( 'A newer version of Modern Mailer is available', 'modern-mailer-oauth' );
+			$result['label']          = __( 'A newer version of MME-Mail to SMTP is available', 'modern-mailer-oauth' );
 			$result['description']    = '<p>' . sprintf(
 				/* translators: 1: installed version, 2: available version. */
 				esc_html__( 'Version %1$s is installed and %2$s has been released. Update from the Plugins screen.', 'modern-mailer-oauth' ),

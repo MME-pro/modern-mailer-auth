@@ -294,7 +294,7 @@ class Admin_Page {
 				$to,
 				sprintf(
 					/* translators: %s: site name. */
-					__( 'Modern Mailer test from %s', 'modern-mailer-oauth' ),
+					__( 'MME-Mail to SMTP test from %s', 'modern-mailer-oauth' ),
 					get_bloginfo( 'name' )
 				),
 				__( "This is a test message.\n\nIf you are reading it, the API connection is working.", 'modern-mailer-oauth' )

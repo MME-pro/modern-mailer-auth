@@ -239,7 +239,7 @@ const Nav = ( { health, queue } ) => {
 				<div className="flex flex-wrap items-start gap-x-6 gap-y-3">
 					<div className="min-w-0">
 						<h1 className="font-display text-[26px] font-normal leading-none tracking-[-0.02em] text-ink-foreground">
-							{ __( 'Modern Mailer', 'modern-mailer-oauth' ) }
+							{ __( 'MME-Mail to SMTP', 'modern-mailer-oauth' ) }
 						</h1>
 						<p className="mt-1.5 mb-0 text-xs tracking-[0.14em] text-ink-muted uppercase">
 							{ __( 'Authenticated delivery', 'modern-mailer-oauth' ) }
