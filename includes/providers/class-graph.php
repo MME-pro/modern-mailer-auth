@@ -86,12 +86,21 @@ class Graph extends Abstract_Provider {
 			Field::required( 'ms_tenant_id', __( 'Directory (tenant) ID', 'modern-mailer-oauth' ), __( 'From the Overview page of your Entra app registration.', 'modern-mailer-oauth' ) ),
 			Field::required( 'ms_client_id', __( 'Application (client) ID', 'modern-mailer-oauth' ) ),
 			Field::secret( 'ms_client_secret', __( 'Client secret', 'modern-mailer-oauth' ), __( 'Copy the secret Value, not the Secret ID. Entra shows the Value only once.', 'modern-mailer-oauth' ) ),
+			// Optional, and the code always treated it that way - sender()
+			// has fallen back to the From address since this field existed.
+			// Marked required, the form demanded the same address twice for
+			// everyone, to describe the ordinary case where the mailbox that
+			// sends and the address it sends from are the same thing.
+			//
+			// It earns its place in the case where they differ: the app signs
+			// in to one mailbox and sends from another it holds Send As rights
+			// over. That is worth keeping and is not worth asking everybody
+			// else about, so it is empty by default and says what empty means.
 			new Field(
 				key: 'ms_sender',
-				label: __( 'Send as mailbox', 'modern-mailer-oauth' ),
+				label: __( 'Send through a different mailbox', 'modern-mailer-oauth' ),
 				type: Field::EMAIL,
-				required: true,
-				help: __( 'A licensed or shared mailbox. Not a distribution list or a bare alias.', 'modern-mailer-oauth' )
+				help: __( 'Leave empty to send through the From address above, which is what almost every setup wants. Fill it in only to send through a licensed or shared mailbox that holds Send As permission for the From address. Not a distribution list or a bare alias.', 'modern-mailer-oauth' )
 			),
 			new Field(
 				key: 'ms_secret_expires',

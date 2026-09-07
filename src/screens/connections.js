@@ -16,6 +16,7 @@ import { useToast } from '../components/toast';
 import { Panel, Button, Badge, FormField, Spinner, Input, inputClass } from '../components/ui';
 import { cn } from '../lib/utils';
 import GoogleConnect from '../components/google-connect';
+import MicrosoftConnect from '../components/microsoft-connect';
 import OneClickConnect from '../components/one-click-connect';
 import ProviderForm, { missingRequired } from '../components/provider-form';
 import ProviderLogo from '../components/provider-logo';
@@ -368,6 +369,19 @@ const ConnectionPanel = ( { slot, categories, title } ) => {
 							oneClick={ data.one_click }
 							dirty={ dirty || data.provider !== provider }
 							heading={ __( 'Mailbox', 'modern-mailer-oauth' ) }
+						/>
+					) }
+
+					{ /* The delegated Azure app. Like the Gmail block above it
+					     follows the mode being edited rather than the stored
+					     one, so flipping the radio swaps the sign-in panel in
+					     straight away instead of after a save. The app-only
+					     mode shows nothing here on purpose: it mints its own
+					     tokens and there is no sign-in to offer. */ }
+					{ isMicrosoft && microsoftMode === 'own_signin' && (
+						<MicrosoftConnect
+							oauth={ data.ms_oauth }
+							dirty={ dirty || data.provider !== provider }
 						/>
 					) }
 

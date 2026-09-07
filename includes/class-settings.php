@@ -80,6 +80,13 @@ class Settings {
 		'google_account'    => [ '', null, 'text' ],
 
 		'ms_setup_mode'     => [ 'own_client', null, 'text' ],
+
+		// Written by the sign-in rather than typed, exactly like
+		// google_account above. It is here rather than declared as a field
+		// because it is not one: the connection screen already shows which
+		// mailbox signed in, and a second read-only copy of it on the form
+		// asks the reader to work out whether the two can disagree.
+		'msoauth_account'   => [ '', null, 'text' ],
 		'ms_account'        => [ '', null, 'text' ],
 	];
 

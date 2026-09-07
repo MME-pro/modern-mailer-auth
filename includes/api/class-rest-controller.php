@@ -819,6 +819,7 @@ class Rest_Controller {
 			'provider'  => (string) $scoped->get( 'provider' ),
 			'providers' => Provider_Registry::to_array( $scoped ),
 			'oauth'     => $this->oauth_payload( $slot ),
+			'ms_oauth'  => $this->ms_oauth_payload( $slot ),
 			'one_click' => $this->one_click_payload( $slot ),
 		];
 	}
@@ -854,6 +855,38 @@ class Rest_Controller {
 			'connect_url'     => $urls['connect'],
 			'disconnect_url'  => $urls['disconnect'],
 			'redirect_uri'    => \ModernMailer\Auth\Google_Consent::redirect_uri(),
+		];
+	}
+
+	/**
+	 * The same block for the delegated Microsoft connection.
+	 *
+	 * Returned for every connection rather than only one already set to
+	 * Microsoft, for the reason the Google block is: this is what tells an admin
+	 * the redirect URI to register in Entra and why they cannot sign in yet,
+	 * which they need while setting it up - that is, before the provider has
+	 * ever been saved.
+	 *
+	 * It carries the signed-in address as well, which the Google block has no
+	 * equivalent of. A delegated Microsoft connection can only send as that one
+	 * mailbox, so which mailbox it is happens to be the single most useful fact
+	 * about the connection.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function ms_oauth_payload( string $slot ): array {
+		$scoped = $this->plugin->settings->for_slot( $slot );
+		$urls   = \ModernMailer\Admin\Admin_Page::microsoft_urls( $slot );
+
+		return [
+			'connected'       => $this->plugin->ms_consent->is_connected( $slot ),
+			'account'         => $this->plugin->ms_consent->account( $slot ),
+			'has_credentials' => '' !== trim( (string) $scoped->get( 'msoauth_client_id' ) )
+				&& '' !== $scoped->secrets()->get( 'msoauth_client_sec' ),
+			'connect_url'     => $urls['connect'],
+			'disconnect_url'  => $urls['disconnect'],
+			'redirect_uri'    => \ModernMailer\Auth\Microsoft_Consent::redirect_uri(),
+			'revoke_help_url' => \ModernMailer\Auth\Microsoft_Consent::REVOKE_HELP_URL,
 		];
 	}
 

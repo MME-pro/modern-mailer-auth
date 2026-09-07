@@ -21,11 +21,11 @@ msgstr "Wählen Sie zuerst einen Anbieter für diese Verbindung."
 msgid "Verified. The credentials are valid and the mailbox is reachable."
 msgstr "Geprüft. Die Zugangsdaten sind gültig und das Postfach ist erreichbar."
 
-#: includes/api/class-rest-controller.php:424 admin/class-admin-page.php:279
+#: includes/api/class-rest-controller.php:424 admin/class-admin-page.php:289
 msgid "Enter a valid recipient address."
 msgstr "Geben Sie eine gültige Empfängeradresse ein."
 
-#: includes/api/class-rest-controller.php:446 admin/class-admin-page.php:297
+#: includes/api/class-rest-controller.php:446 admin/class-admin-page.php:307
 msgid "MME-Mail to SMTP test from %s"
 msgstr "MME-Mail-to-SMTP-Test von %s"
 
@@ -37,7 +37,7 @@ msgstr "Dies ist eine Testnachricht.\n\nWenn Sie sie lesen, funktioniert die Ver
 msgid "Accepted for delivery. If it does not arrive, check the log for what the provider said."
 msgstr "Zur Zustellung angenommen. Falls sie nicht ankommt, sehen Sie im Protokoll nach, was der Anbieter geantwortet hat."
 
-#: includes/api/class-rest-controller.php:460 admin/class-admin-page.php:314
+#: includes/api/class-rest-controller.php:460 admin/class-admin-page.php:324
 msgid "The test message could not be sent."
 msgstr "Die Testnachricht konnte nicht gesendet werden."
 
@@ -49,7 +49,7 @@ msgstr "Dieser Protokolleintrag existiert nicht."
 msgid "Attempted %1$d: %2$d delivered, %3$d still queued, %4$d abandoned."
 msgstr "%1$d versucht: %2$d zugestellt, %3$d noch in der Warteschlange, %4$d aufgegeben."
 
-#: includes/api/class-rest-controller.php:574 admin/class-admin-page.php:266
+#: includes/api/class-rest-controller.php:574 admin/class-admin-page.php:276
 msgid "Queue emptied. Anything it held is gone."
 msgstr "Warteschlange geleert. Alles, was darin lag, ist verloren."
 
@@ -69,7 +69,7 @@ msgstr "Verbindung entfernt, zusammen mit ihren gespeicherten Zugangsdaten."
 msgid "That connection cannot be removed."
 msgstr "Diese Verbindung kann nicht entfernt werden."
 
-#: includes/api/class-rest-controller.php:562 admin/class-admin-page.php:258
+#: includes/api/class-rest-controller.php:562 admin/class-admin-page.php:268
 msgid "%d abandoned message returned to the queue."
 msgid_plural "%d abandoned messages returned to the queue."
 msgstr[0] "%d aufgegebene Nachricht in die Warteschlange zurückgestellt."
@@ -119,11 +119,11 @@ msgstr "Der Einrichtungsdienst hat eine unerwartete Antwort zurückgegeben (HTTP
 msgid "Enter and save the OAuth client ID and client secret before connecting."
 msgstr "Geben Sie die OAuth-Client-ID und das Client-Secret ein und speichern Sie sie, bevor Sie sich verbinden."
 
-#: includes/auth/class-google-consent.php:146
+#: includes/auth/class-google-consent.php:146 includes/auth/class-microsoft-consent.php:195
 msgid "This authorization link has expired or did not originate here. Start the connection again."
 msgstr "Dieser Autorisierungslink ist abgelaufen oder stammt nicht von hier. Starten Sie die Verbindung erneut."
 
-#: includes/auth/class-google-consent.php:153
+#: includes/auth/class-google-consent.php:153 includes/auth/class-microsoft-consent.php:202
 msgid "This authorization was started by a different user account."
 msgstr "Diese Autorisierung wurde von einem anderen Benutzerkonto gestartet."
 
@@ -135,7 +135,7 @@ msgstr "Google hat den Zugriff nicht gewährt: %s"
 msgid "Google did not return an authorization code."
 msgstr "Google hat keinen Autorisierungscode zurückgegeben."
 
-#: includes/auth/class-google-consent.php:193 includes/auth/class-one-click.php:177
+#: includes/auth/class-google-consent.php:193 includes/auth/class-microsoft-consent.php:237 includes/auth/class-one-click.php:177
 msgid "That connection no longer exists, so the sign-in could not be saved. Start again from the connection you want to use."
 msgstr "Diese Verbindung existiert nicht mehr, die Anmeldung konnte deshalb nicht gespeichert werden. Beginnen Sie erneut bei der Verbindung, die Sie verwenden möchten."
 
@@ -167,7 +167,7 @@ msgstr "Der Zugriff wurde auf dem Zustimmungsbildschirm abgelehnt."
 msgid "Google refused the authorization: %s"
 msgstr "Google hat die Autorisierung verweigert: %s"
 
-#: includes/auth/class-google-consent.php:308 includes/providers/abstract-gmail.php:183 includes/providers/class-graph.php:504 includes/providers/class-mailgun.php:257
+#: includes/auth/class-google-consent.php:308 includes/auth/class-microsoft-consent.php:400 includes/providers/abstract-gmail.php:183 includes/providers/class-graph.php:513 includes/providers/class-mailgun.php:257 includes/providers/class-microsoft-oauth.php:357 includes/providers/class-microsoft-oauth.php:402
 msgid "no details supplied"
 msgstr "keine Angaben gemacht"
 
@@ -182,6 +182,54 @@ msgstr "Der private Schlüssel des Dienstkontos konnte nicht gelesen werden. Fü
 #: includes/auth/class-jwt-signer.php:66
 msgid "The authentication assertion could not be signed."
 msgstr "Die Authentifizierungs-Assertion konnte nicht signiert werden."
+
+#: includes/auth/class-microsoft-consent.php:133
+msgid "Enter and save the application ID and client secret before signing in."
+msgstr "Geben Sie Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
+
+#: includes/auth/class-microsoft-consent.php:211
+msgid "Microsoft did not grant access: %1$s %2$s"
+msgstr "Microsoft hat den Zugriff nicht gewährt: %1$s %2$s"
+
+#: includes/auth/class-microsoft-consent.php:223
+msgid "Microsoft did not return an authorization code."
+msgstr "Microsoft hat keinen Autorisierungscode zurückgegeben."
+
+#: includes/auth/class-microsoft-consent.php:372
+msgid "Microsoft authorized the connection but returned no refresh token, so sending would stop within the hour. Confirm that offline_access is among the delegated permissions on the app registration."
+msgstr "Microsoft hat die Verbindung autorisiert, aber kein Refresh-Token zurückgegeben – der Versand würde also innerhalb einer Stunde enden. Prüfen Sie, ob offline_access zu den delegierten Berechtigungen der App-Registrierung gehört."
+
+#: includes/auth/class-microsoft-consent.php:380
+msgid "The redirect URI does not match the app registration. Copy the exact value shown on this screen into the Entra app under Authentication, as a Web platform - not a Single-page application."
+msgstr "Die Redirect-URI stimmt nicht mit der App-Registrierung überein. Übernehmen Sie den auf dieser Seite angezeigten Wert exakt in die Entra-App unter „Authentifizierung“, als Plattform „Web“ – nicht als „Single-Page-Anwendung“."
+
+#: includes/auth/class-microsoft-consent.php:381
+msgid "Microsoft rejected the client secret. Copy the secret Value rather than the Secret ID - Entra shows the Value only once, immediately after you create it."
+msgstr "Microsoft hat das Client-Secret abgelehnt. Kopieren Sie den Wert („Value“) und nicht die Secret-ID – Entra zeigt den Wert nur ein einziges Mal an, direkt nach dem Erstellen."
+
+#: includes/auth/class-microsoft-consent.php:382
+msgid "Microsoft could not find that application. Check the Application (client) ID, and confirm the app registration allows accounts outside its own tenant if you are signing in with a personal account."
+msgstr "Microsoft konnte diese Anwendung nicht finden. Prüfen Sie die Anwendungs-ID (Client-ID) und stellen Sie sicher, dass die App-Registrierung Konten außerhalb des eigenen Mandanten zulässt, wenn Sie sich mit einem privaten Konto anmelden."
+
+#: includes/auth/class-microsoft-consent.php:383
+msgid "The account declined to grant the permissions requested, or an administrator has restricted user consent in this tenant. An administrator can grant it on the app registration instead."
+msgstr "Das Konto hat die angeforderten Berechtigungen nicht erteilt, oder eine Administratorin hat die Zustimmung durch Benutzer in diesem Mandanten eingeschränkt. Ersatzweise kann sie direkt an der App-Registrierung erteilt werden."
+
+#: includes/auth/class-microsoft-consent.php:384
+msgid "The app registration has no reply URL. Add the redirect URI shown on this screen under Authentication in Entra."
+msgstr "Die App-Registrierung hat keine Antwort-URL. Fügen Sie die auf dieser Seite angezeigte Redirect-URI in Entra unter „Authentifizierung“ hinzu."
+
+#: includes/auth/class-microsoft-consent.php:385
+msgid "The authorization code was already used. Start the connection again."
+msgstr "Der Autorisierungscode wurde bereits verwendet. Starten Sie die Verbindung erneut."
+
+#: includes/auth/class-microsoft-consent.php:386
+msgid "The authorization code expired before it could be exchanged. Start the connection again."
+msgstr "Der Autorisierungscode ist abgelaufen, bevor er eingelöst werden konnte. Starten Sie die Verbindung erneut."
+
+#: includes/auth/class-microsoft-consent.php:399
+msgid "Microsoft refused the authorization: %s"
+msgstr "Microsoft hat die Autorisierung abgelehnt: %s"
 
 #: includes/auth/class-one-click.php:67 includes/auth/class-one-click.php:230 includes/auth/class-one-click.php:268
 msgid "Unknown provider."
@@ -243,35 +291,35 @@ msgstr "Interner Fehler: Es wurde versucht, die Mail-API über eine ungültige A
 msgid "The request to the mail API could not be completed."
 msgstr "Die Anfrage an die Mail-API konnte nicht abgeschlossen werden."
 
-#: includes/class-plugin.php:182
+#: includes/class-plugin.php:185
 msgid "Every five minutes (MME-Mail to SMTP retry queue)"
 msgstr "Alle fünf Minuten (MME-Mail-to-SMTP-Wiederholungswarteschlange)"
 
-#: includes/class-provider-registry.php:150
+#: includes/class-provider-registry.php:151
 msgid "Not configured (WordPress default)"
 msgstr "Nicht konfiguriert (WordPress-Standard)"
 
-#: includes/class-provider-registry.php:175 includes/class-router.php:338 admin/views/settings.php:30
+#: includes/class-provider-registry.php:176 includes/class-router.php:338 admin/views/settings.php:30
 msgid "From address"
 msgstr "Absenderadresse"
 
-#: includes/class-provider-registry.php:178
+#: includes/class-provider-registry.php:179
 msgid "Must be a mailbox this connection is allowed to send as. Providers refuse, or silently rewrite, anything else."
 msgstr "Muss ein Postfach sein, unter dem diese Verbindung senden darf. Anbieter lehnen alles andere ab oder schreiben es stillschweigend um."
 
-#: includes/class-provider-registry.php:184 admin/views/settings.php:31
+#: includes/class-provider-registry.php:185 admin/views/settings.php:31
 msgid "From name"
 msgstr "Absendername"
 
-#: includes/class-provider-registry.php:185
+#: includes/class-provider-registry.php:186
 msgid "Shown as the sender. Left empty, WordPress uses the site name."
 msgstr "Wird als Absender angezeigt. Bleibt das Feld leer, verwendet WordPress den Namen der Website."
 
-#: includes/class-provider-registry.php:191
+#: includes/class-provider-registry.php:192
 msgid "Override what other plugins set"
 msgstr "Einstellungen anderer Plugins überschreiben"
 
-#: includes/class-provider-registry.php:194
+#: includes/class-provider-registry.php:195
 msgid "On, the address above is used even when a plugin sets its own. A plugin hardcoding a From address the connection may not send as is one of the commonest causes of mail that silently stops."
 msgstr "Ist dies aktiv, wird die Adresse oben auch dann verwendet, wenn ein Plugin eine eigene setzt. Ein Plugin, das eine Absenderadresse fest einträgt, unter der die Verbindung nicht senden darf, ist eine der häufigsten Ursachen dafür, dass E-Mails stillschweigend ausbleiben."
 
@@ -395,7 +443,7 @@ msgstr "Private @gmail.com-Konten, mit Ihrem eigenen OAuth-Client und einer einm
 msgid "Setup"
 msgstr "Einrichtung"
 
-#: includes/providers/class-gmail-oauth.php:76 includes/providers/class-google.php:86 includes/providers/class-microsoft.php:80
+#: includes/providers/class-gmail-oauth.php:76 includes/providers/class-google.php:86 includes/providers/class-microsoft.php:91
 msgid "One-click"
 msgstr "Ein Klick"
 
@@ -455,7 +503,7 @@ msgstr "Privater Schlüssel"
 msgid "The private_key value from the same JSON, including the BEGIN and END lines."
 msgstr "Der Wert private_key aus derselben JSON-Datei, einschließlich der BEGIN- und END-Zeilen."
 
-#: includes/providers/class-gmail-service-account.php:71 includes/providers/class-graph.php:91 admin/views/connection.php:50 admin/views/connection.php:86
+#: includes/providers/class-gmail-service-account.php:71 admin/views/connection.php:86
 msgid "Send as mailbox"
 msgstr "Senden als Postfach"
 
@@ -479,7 +527,7 @@ msgstr "Gmail und Google Workspace. Melden Sie sich an, um unter Ihrem eigenen P
 msgid "Service account"
 msgstr "Dienstkonto"
 
-#: includes/providers/class-google.php:94 includes/providers/class-microsoft.php:87
+#: includes/providers/class-google.php:94 includes/providers/class-microsoft.php:99
 msgid "How to connect"
 msgstr "Art der Verbindung"
 
@@ -511,115 +559,119 @@ msgstr "Verzeichnis-ID (Mandant)"
 msgid "From the Overview page of your Entra app registration."
 msgstr "Von der Übersichtsseite Ihrer Entra-App-Registrierung."
 
-#: includes/providers/class-graph.php:87 admin/views/connection.php:48
+#: includes/providers/class-graph.php:87 includes/providers/class-microsoft-oauth.php:111 admin/views/connection.php:48
 msgid "Application (client) ID"
 msgstr "Anwendungs-ID (Client)"
 
-#: includes/providers/class-graph.php:88 admin/views/connection.php:49
+#: includes/providers/class-graph.php:88 includes/providers/class-microsoft-oauth.php:117 admin/views/connection.php:49
 msgid "Client secret"
 msgstr "Client-Secret"
 
-#: includes/providers/class-graph.php:88 admin/views/connection.php:49
+#: includes/providers/class-graph.php:88 includes/providers/class-microsoft-oauth.php:121 admin/views/connection.php:49
 msgid "Copy the secret Value, not the Secret ID. Entra shows the Value only once."
 msgstr "Kopieren Sie den Wert des Secrets, nicht die Secret-ID. Entra zeigt den Wert nur ein einziges Mal an."
 
-#: includes/providers/class-graph.php:94
-msgid "A licensed or shared mailbox. Not a distribution list or a bare alias."
-msgstr "Ein lizenziertes oder freigegebenes Postfach. Keine Verteilerliste und kein bloßer Alias."
+#: includes/providers/class-graph.php:101 admin/views/connection.php:50
+msgid "Send through a different mailbox"
+msgstr "Über ein anderes Postfach senden"
 
-#: includes/providers/class-graph.php:98 admin/views/connection.php:53
+#: includes/providers/class-graph.php:103
+msgid "Leave empty to send through the From address above, which is what almost every setup wants. Fill it in only to send through a licensed or shared mailbox that holds Send As permission for the From address. Not a distribution list or a bare alias."
+msgstr "Leer lassen, um über die oben angegebene Absenderadresse zu senden – das ist in nahezu jeder Einrichtung gewünscht. Füllen Sie das Feld nur aus, um über ein lizenziertes oder freigegebenes Postfach zu senden, das die Berechtigung „Senden als“ für die Absenderadresse besitzt. Keine Verteilerliste und kein bloßer Alias."
+
+#: includes/providers/class-graph.php:107 admin/views/connection.php:53
 msgid "Secret expires"
 msgstr "Secret läuft ab"
 
-#: includes/providers/class-graph.php:100
+#: includes/providers/class-graph.php:109
 msgid "Entra secrets last at most 24 months. Record the date and you will be warned before it lapses instead of finding out when mail stops."
 msgstr "Entra-Secrets gelten höchstens 24 Monate. Halten Sie das Datum fest, dann werden Sie vor dem Ablauf gewarnt, statt es erst zu merken, wenn keine E-Mails mehr ankommen."
 
-#: includes/providers/class-graph.php:104
+#: includes/providers/class-graph.php:113
 msgid "Access is scoped to specific mailboxes"
 msgstr "Zugriff ist auf bestimmte Postfächer beschränkt"
 
-#: includes/providers/class-graph.php:106
+#: includes/providers/class-graph.php:115
 msgid "Mail.Send lets this app send as any mailbox in the tenant until you restrict it with New-ApplicationAccessPolicy."
 msgstr "Mail.Send erlaubt dieser App, unter jedem Postfach des Mandanten zu senden, bis Sie das mit New-ApplicationAccessPolicy einschränken."
 
-#: includes/providers/class-graph.php:121 includes/providers/class-graph.php:180
+#: includes/providers/class-graph.php:130 includes/providers/class-graph.php:189
 msgid "No sending mailbox is configured for Microsoft 365."
 msgstr "Für Microsoft 365 ist kein Absenderpostfach konfiguriert."
 
-#: includes/providers/class-graph.php:296
+#: includes/providers/class-graph.php:305
 msgid "This app registration has no Microsoft Graph application permissions at all. In Entra, open the app, go to API permissions, choose Add a permission, then Microsoft Graph, then Application permissions - not Delegated - and add Mail.Send. It only takes effect once you click Grant admin consent."
 msgstr "Diese App-Registrierung hat überhaupt keine Microsoft-Graph-Anwendungsberechtigungen. Öffnen Sie die App in Entra, gehen Sie zu „API-Berechtigungen“, wählen Sie „Berechtigung hinzufügen“, dann „Microsoft Graph“, dann „Anwendungsberechtigungen“ – nicht „Delegiert“ – und fügen Sie Mail.Send hinzu. Wirksam wird das erst, wenn Sie auf „Administratorzustimmung erteilen“ klicken."
 
-#: includes/providers/class-graph.php:299
+#: includes/providers/class-graph.php:308
 msgid "This app registration has admin consent for %s, but not for Mail.Send. Add Mail.Send under API permissions as an Application permission, then grant admin consent again."
 msgstr "Diese App-Registrierung hat Administratorzustimmung für %s, aber nicht für Mail.Send. Fügen Sie Mail.Send unter „API-Berechtigungen“ als Anwendungsberechtigung hinzu und erteilen Sie die Administratorzustimmung erneut."
 
-#: includes/providers/class-graph.php:306
+#: includes/providers/class-graph.php:315
 msgid "Credentials are valid and Mail.Send is granted, so this connection can send. The mailbox itself was not checked - that needs the User.Read.All permission, which sending does not require and this plugin does not ask for."
 msgstr "Die Zugangsdaten sind gültig und Mail.Send ist erteilt, diese Verbindung kann also senden. Das Postfach selbst wurde nicht geprüft – dafür wäre die Berechtigung User.Read.All nötig, die zum Senden nicht gebraucht wird und die dieses Plugin nicht anfordert."
 
-#: includes/providers/class-graph.php:325
+#: includes/providers/class-graph.php:334
 msgid "Microsoft 365 is missing a tenant ID, application ID, or client secret."
 msgstr "Bei Microsoft 365 fehlt die Mandanten-ID, die Anwendungs-ID oder das Client-Secret."
 
-#: includes/providers/class-graph.php:407
+#: includes/providers/class-graph.php:416
 msgid "The client secret is wrong. Note that Entra shows the secret Value and the secret ID side by side, and only the Value works here."
 msgstr "Das Client-Secret ist falsch. Beachten Sie, dass Entra den Wert des Secrets und die Secret-ID nebeneinander anzeigt und hier nur der Wert funktioniert."
 
-#: includes/providers/class-graph.php:408
+#: includes/providers/class-graph.php:417
 msgid "The client secret has expired. Create a new one in Entra and update it here."
 msgstr "Das Client-Secret ist abgelaufen. Erstellen Sie in Entra ein neues und tragen Sie es hier ein."
 
-#: includes/providers/class-graph.php:409
+#: includes/providers/class-graph.php:418
 msgid "No application with this ID exists in this tenant. Check the Application (client) ID and that you are pointing at the right tenant."
 msgstr "In diesem Mandanten existiert keine Anwendung mit dieser ID. Prüfen Sie die Anwendungs-ID (Client) und ob Sie auf den richtigen Mandanten zeigen."
 
-#: includes/providers/class-graph.php:410
+#: includes/providers/class-graph.php:419
 msgid "The tenant ID is not valid. Use the Directory (tenant) ID from your app registration overview."
 msgstr "Die Mandanten-ID ist ungültig. Verwenden Sie die Verzeichnis-ID (Mandant) aus der Übersicht Ihrer App-Registrierung."
 
-#: includes/providers/class-graph.php:411
+#: includes/providers/class-graph.php:420
 msgid "The tenant was not found. Check the Directory (tenant) ID."
 msgstr "Der Mandant wurde nicht gefunden. Prüfen Sie die Verzeichnis-ID (Mandant)."
 
-#: includes/providers/class-graph.php:412
+#: includes/providers/class-graph.php:421
 msgid "The requested scope was rejected. Confirm the app has the Mail.Send application permission with admin consent granted."
 msgstr "Der angeforderte Bereich wurde abgelehnt. Stellen Sie sicher, dass die App die Anwendungsberechtigung Mail.Send mit erteilter Administratorzustimmung besitzt."
 
-#: includes/providers/class-graph.php:425
+#: includes/providers/class-graph.php:434
 msgid "Microsoft rejected the credentials: %s"
 msgstr "Microsoft hat die Zugangsdaten abgelehnt: %s"
 
-#: includes/providers/class-graph.php:447
+#: includes/providers/class-graph.php:456
 msgid "The application is not allowed to send as %s. This almost always means the Exchange access policy has not been applied, or was scoped to a group this mailbox is not in."
 msgstr "Die Anwendung darf nicht unter %s senden. Das bedeutet fast immer, dass die Exchange-Zugriffsrichtlinie nicht angewendet wurde oder auf eine Gruppe beschränkt ist, in der dieses Postfach nicht enthalten ist."
 
-#: includes/providers/class-graph.php:459
+#: includes/providers/class-graph.php:468
 msgid "Microsoft 365 has no mailbox for %s. Check the address, and note that it must be a licensed mailbox or a shared mailbox - not a distribution list or an alias on its own."
 msgstr "Microsoft 365 hat kein Postfach für %s. Prüfen Sie die Adresse und beachten Sie, dass es ein lizenziertes oder freigegebenes Postfach sein muss – keine Verteilerliste und kein alleinstehender Alias."
 
-#: includes/providers/class-graph.php:467
+#: includes/providers/class-graph.php:476
 msgid "This mailbox cannot be used with the Graph API. That usually means it is on-premises or in a dedicated or hybrid deployment."
 msgstr "Dieses Postfach kann nicht mit der Graph-API verwendet werden. Das bedeutet meist, dass es lokal betrieben wird oder in einer dedizierten beziehungsweise hybriden Umgebung liegt."
 
-#: includes/providers/class-graph.php:473
+#: includes/providers/class-graph.php:482
 msgid "The message is larger than Microsoft 365 accepts in a single request. Reduce the attachment size."
 msgstr "Die Nachricht ist größer, als Microsoft 365 in einer einzelnen Anfrage annimmt. Verringern Sie die Größe des Anhangs."
 
-#: includes/providers/class-graph.php:480
+#: includes/providers/class-graph.php:489
 msgid "Microsoft 365 is throttling this application. The message was not sent; try again shortly."
 msgstr "Microsoft 365 drosselt diese Anwendung. Die Nachricht wurde nicht gesendet; versuchen Sie es in Kürze erneut."
 
-#: includes/providers/class-graph.php:487
+#: includes/providers/class-graph.php:496
 msgid "Microsoft rejected the access token. Confirm the Mail.Send application permission is present and that admin consent has been granted."
 msgstr "Microsoft hat das Zugriffstoken abgelehnt. Stellen Sie sicher, dass die Anwendungsberechtigung Mail.Send vorhanden ist und die Administratorzustimmung erteilt wurde."
 
-#: includes/providers/class-graph.php:494
+#: includes/providers/class-graph.php:503
 msgid "The message is too large for a single Graph request. Reduce the attachment size."
 msgstr "Die Nachricht ist zu groß für eine einzelne Graph-Anfrage. Verringern Sie die Größe des Anhangs."
 
-#: includes/providers/class-graph.php:502
+#: includes/providers/class-graph.php:511
 msgid "Microsoft Graph returned HTTP %1$d: %2$s"
 msgstr "Microsoft Graph hat HTTP %1$d zurückgegeben: %2$s"
 
@@ -679,21 +731,77 @@ msgstr "Mailgun kennt in der Region %2$s keine Domain %1$s. Fast immer liegt das
 msgid "Mailgun returned HTTP %1$d: %2$s"
 msgstr "Mailgun hat HTTP %1$d zurückgegeben: %2$s"
 
-#: includes/providers/class-microsoft.php:42 src/components/one-click-connect.js:32
+#: includes/providers/class-microsoft-oauth.php:64 includes/providers/class-microsoft-oauth.php:84
+msgid "Microsoft (legacy)"
+msgstr "Microsoft (Legacy)"
+
+#: includes/providers/class-microsoft-oauth.php:85
+msgid "Your own Entra app plus a one-time sign-in. Needs an application ID and a client secret but no tenant ID and no administrator, and sends as the mailbox that signed in. It holds a refresh token, which expires if left idle and is revoked by a password or MFA change."
+msgstr "Ihre eigene Entra-App plus eine einmalige Anmeldung. Benötigt Anwendungs-ID und Client-Secret, aber keine Mandanten-ID und keine Administratorin, und sendet als das angemeldete Postfach. Sie hält ein Refresh-Token, das bei längerer Nichtnutzung abläuft und durch eine Passwort- oder MFA-Änderung widerrufen wird."
+
+#: includes/providers/class-microsoft-oauth.php:113
+msgid "From the Overview page of your Entra app registration. Register it as a Web platform and add the redirect URI shown below."
+msgstr "Von der Übersichtsseite Ihrer Entra-App-Registrierung. Registrieren Sie sie als Plattform „Web“ und fügen Sie die unten angezeigte Redirect-URI hinzu."
+
+#: includes/providers/class-microsoft-oauth.php:218
+msgid "Signed in as %2$s, but this connection sends from %1$s. Microsoft will refuse that unless %2$s has Send As permission for it."
+msgstr "Angemeldet als %2$s, diese Verbindung sendet aber von %1$s. Microsoft lehnt das ab, sofern %2$s nicht die Berechtigung „Senden als“ dafür besitzt."
+
+#: includes/providers/class-microsoft-oauth.php:278
+msgid "The Microsoft application ID or client secret is missing."
+msgstr "Die Microsoft-Anwendungs-ID oder das Client-Secret fehlt."
+
+#: includes/providers/class-microsoft-oauth.php:285
+msgid "No Microsoft account is connected. Use the sign-in button on the connection screen."
+msgstr "Es ist kein Microsoft-Konto verbunden. Verwenden Sie die Anmelde-Schaltfläche auf der Verbindungsseite."
+
+#: includes/providers/class-microsoft-oauth.php:340
+msgid "The Microsoft sign-in for this connection is no longer valid, so nothing can be sent through it. This happens when the account password changed, multi-factor authentication was enrolled, a Conditional Access policy changed, or the connection went unused for about ninety days. Sign in again on the connection screen."
+msgstr "Die Microsoft-Anmeldung dieser Verbindung ist nicht mehr gültig, es kann darüber also nichts gesendet werden. Das passiert, wenn das Kontopasswort geändert wurde, eine Multi-Faktor-Authentifizierung eingerichtet wurde, sich eine Richtlinie für bedingten Zugriff geändert hat oder die Verbindung rund neunzig Tage ungenutzt blieb. Melden Sie sich auf der Verbindungsseite erneut an."
+
+#: includes/providers/class-microsoft-oauth.php:348
+msgid "Microsoft rejected the client secret. If it was rotated in Entra, paste the new Value here and save."
+msgstr "Microsoft hat das Client-Secret abgelehnt. Falls es in Entra erneuert wurde, fügen Sie hier den neuen Wert ein und speichern Sie."
+
+#: includes/providers/class-microsoft-oauth.php:356
+msgid "Microsoft would not issue an access token: %s"
+msgstr "Microsoft hat kein Zugriffstoken ausgestellt: %s"
+
+#: includes/providers/class-microsoft-oauth.php:375
+msgid "Microsoft refused to send as %s. A signed-in connection may only send as its own mailbox, or as an address that mailbox holds Send As permission for."
+msgstr "Microsoft hat den Versand als %s abgelehnt. Eine angemeldete Verbindung darf nur als ihr eigenes Postfach senden oder als eine Adresse, für die dieses Postfach die Berechtigung „Senden als“ besitzt."
+
+#: includes/providers/class-microsoft-oauth.php:384
+msgid "That account has no Exchange Online mailbox, so Graph cannot send from it. It needs a licence that includes Exchange."
+msgstr "Dieses Konto hat kein Exchange-Online-Postfach, Graph kann davon also nicht senden. Es benötigt eine Lizenz, die Exchange enthält."
+
+#: includes/providers/class-microsoft-oauth.php:391
+msgid "Microsoft is throttling this mailbox. The message stays in the queue and will be retried."
+msgstr "Microsoft drosselt dieses Postfach. Die Nachricht bleibt in der Warteschlange und wird erneut versucht."
+
+#: includes/providers/class-microsoft-oauth.php:400
+msgid "Microsoft refused the message (HTTP %1$d): %2$s"
+msgstr "Microsoft hat die Nachricht abgelehnt (HTTP %1$d): %2$s"
+
+#: includes/providers/class-microsoft.php:46 src/components/one-click-connect.js:32
 msgid "Microsoft"
 msgstr "Microsoft"
 
-#: includes/providers/class-microsoft.php:43
+#: includes/providers/class-microsoft.php:47
 msgid "Microsoft 365 and Outlook. Sign in to send as your own mailbox, or register an Azure application to send as any address in the tenant with nothing that expires but the secret."
 msgstr "Microsoft 365 und Outlook. Melden Sie sich an, um unter Ihrem eigenen Postfach zu senden, oder registrieren Sie eine Azure-Anwendung, um unter jeder Adresse des Mandanten zu senden – dabei läuft nichts ab außer dem Secret."
 
-#: includes/providers/class-microsoft.php:83
-msgid "My own Azure app"
-msgstr "Meine eigene Azure-App"
+#: includes/providers/class-microsoft.php:94
+msgid "Graph API"
+msgstr "Graph API"
 
-#: includes/providers/class-microsoft.php:91
-msgid "One-click signs in as a person and sends as that mailbox, with nothing to register in Azure. Your own Azure app sends as any address in the tenant and has no refresh token to be revoked, but needs an administrator to register it. Either way, mail goes directly from this site to Microsoft."
-msgstr "Ein Klick meldet sich als Person an und sendet unter deren Postfach, in Azure ist nichts zu registrieren. Ihre eigene Azure-App sendet unter jeder Adresse des Mandanten und hat kein Refresh-Token, das widerrufen werden könnte, muss aber von einem Administrator registriert werden. In beiden Fällen gehen die E-Mails direkt von dieser Website an Microsoft."
+#: includes/providers/class-microsoft.php:95
+msgid "Legacy"
+msgstr "Legacy"
+
+#: includes/providers/class-microsoft.php:103
+msgid "Graph API is the one to prefer: an app registration authenticates as itself, sends as any address in the tenant, and has no refresh token to expire - but registering it needs an administrator who can grant tenant-wide permission. Legacy is the older delegated pattern: a person signs in once, it needs no administrator and no tenant ID and works for personal Outlook accounts, but it sends only as the mailbox that signed in and holds a refresh token that a password or MFA change revokes. One-click is that same delegated trade-off with nothing to register at all. Whichever you choose, mail goes directly from this site to Microsoft."
+msgstr "„Graph API“ ist vorzuziehen: Eine App-Registrierung authentifiziert sich selbst, sendet als jede Adresse im Mandanten und hat kein Refresh-Token, das ablaufen könnte – ihre Registrierung erfordert aber eine Administratorin, die mandantenweite Berechtigungen erteilen kann. „Legacy“ ist das ältere delegierte Verfahren: Eine Person meldet sich einmalig an, es braucht weder Administratorin noch Mandanten-ID und funktioniert auch mit privaten Outlook-Konten, sendet dafür nur als das angemeldete Postfach und hält ein Refresh-Token, das eine Passwort- oder MFA-Änderung widerruft. „Ein Klick“ ist derselbe delegierte Kompromiss, nur ganz ohne Registrierung. Wofür Sie sich auch entscheiden: Die E-Mails gehen direkt von dieser Website an Microsoft."
 
 #: includes/providers/class-outlook.php:53 includes/providers/class-outlook.php:73
 msgid "Outlook"
@@ -1023,115 +1131,123 @@ msgstr "SSL (Port 465)"
 msgid "TLS (port 587)"
 msgstr "TLS (Port 587)"
 
-#: admin/class-admin-page.php:107
+#: admin/class-admin-page.php:117
 msgid "Email is not being delivered."
 msgstr "E-Mails werden nicht zugestellt."
 
-#: admin/class-admin-page.php:110
+#: admin/class-admin-page.php:120
 msgid "Review mail settings"
 msgstr "E-Mail-Einstellungen prüfen"
 
-#: admin/class-admin-page.php:149 src/screens/settings.js:29
+#: admin/class-admin-page.php:159 src/screens/settings.js:29
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
 
-#: admin/class-admin-page.php:202
+#: admin/class-admin-page.php:212
 msgid "Choose a provider first."
 msgstr "Wählen Sie zuerst einen Anbieter."
 
-#: admin/class-admin-page.php:220
+#: admin/class-admin-page.php:230
 msgid "Backup connection verified. Credentials are valid and the mailbox is reachable."
 msgstr "Ersatzverbindung geprüft. Die Zugangsdaten sind gültig und das Postfach ist erreichbar."
 
-#: admin/class-admin-page.php:221
+#: admin/class-admin-page.php:231
 msgid "Connection verified. Credentials are valid and the mailbox is reachable."
 msgstr "Verbindung geprüft. Die Zugangsdaten sind gültig und das Postfach ist erreichbar."
 
-#: admin/class-admin-page.php:242
+#: admin/class-admin-page.php:252
 msgid "Attempted %1$d queued message(s): %2$d delivered, %3$d still queued, %4$d abandoned."
 msgstr "%1$d Nachricht(en) aus der Warteschlange versucht: %2$d zugestellt, %3$d noch in der Warteschlange, %4$d aufgegeben."
 
-#: admin/class-admin-page.php:270
+#: admin/class-admin-page.php:280
 msgid "Unknown queue action."
 msgstr "Unbekannte Warteschlangenaktion."
 
-#: admin/class-admin-page.php:300
+#: admin/class-admin-page.php:310
 msgid "This is a test message.\n\nIf you are reading it, the API connection is working."
 msgstr "Dies ist eine Testnachricht.\n\nWenn Sie sie lesen, funktioniert die API-Verbindung."
 
-#: admin/class-admin-page.php:307
+#: admin/class-admin-page.php:317
 msgid "Test message accepted by the provider."
 msgstr "Testnachricht vom Anbieter angenommen."
 
-#: admin/class-admin-page.php:351
+#: admin/class-admin-page.php:361
 msgid "Google account disconnected."
 msgstr "Google-Konto getrennt."
 
-#: admin/class-admin-page.php:359 admin/class-admin-page.php:437 admin/class-admin-page.php:769
+#: admin/class-admin-page.php:405
+msgid "Microsoft account disconnected here. Microsoft cannot revoke a single sign-in remotely, so remove this app under My Applications in your Microsoft account if you want the grant withdrawn as well."
+msgstr "Microsoft-Konto hier getrennt. Microsoft kann eine einzelne Anmeldung nicht aus der Ferne widerrufen – entfernen Sie diese App daher unter „Meine Apps“ in Ihrem Microsoft-Konto, wenn auch die Berechtigung entzogen werden soll."
+
+#: admin/class-admin-page.php:414 admin/class-admin-page.php:445 admin/class-admin-page.php:523 admin/class-admin-page.php:870
 msgid "You are not allowed to change these settings."
 msgstr "Sie sind nicht berechtigt, diese Einstellungen zu ändern."
 
-#: admin/class-admin-page.php:382
+#: admin/class-admin-page.php:434
+msgid "Microsoft account connected to %s. Send a test email to confirm delivery."
+msgstr "Microsoft-Konto mit %s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung zu bestätigen."
+
+#: admin/class-admin-page.php:468
 msgid "Google account connected to %s. Send a test email to confirm delivery."
 msgstr "Google-Konto mit %s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung zu bestätigen."
 
-#: admin/class-admin-page.php:423
+#: admin/class-admin-page.php:509
 msgid "Disconnected here, but the setup service could not be told: %s"
 msgstr "Hier getrennt, der Einrichtungsdienst konnte aber nicht benachrichtigt werden: %s"
 
-#: admin/class-admin-page.php:429
+#: admin/class-admin-page.php:515
 msgid "Account disconnected."
 msgstr "Konto getrennt."
 
-#: admin/class-admin-page.php:461
+#: admin/class-admin-page.php:547
 msgid "Connected %1$s to %2$s. Send a test email to confirm delivery."
 msgstr "%1$s mit %2$s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung zu bestätigen."
 
-#: admin/class-admin-page.php:467
+#: admin/class-admin-page.php:553
 msgid "Account connected to %s. Send a test email to confirm delivery."
 msgstr "Konto mit %s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung zu bestätigen."
 
-#: admin/class-admin-page.php:569 src/components/google-connect.js:85 src/components/one-click-connect.js:80
+#: admin/class-admin-page.php:670 src/components/google-connect.js:85 src/components/one-click-connect.js:80
 msgid "Account"
 msgstr "Konto"
 
-#: admin/class-admin-page.php:574 src/components/google-connect.js:92
+#: admin/class-admin-page.php:675 src/components/google-connect.js:92 src/components/microsoft-connect.js:116
 msgid "Connected. A refresh token is stored for this connection."
 msgstr "Verbunden. Für diese Verbindung ist ein Refresh-Token gespeichert."
 
-#: admin/class-admin-page.php:579
+#: admin/class-admin-page.php:680
 msgid "Not connected. Save the client ID and secret first, then sign in to grant access."
 msgstr "Nicht verbunden. Speichern Sie zuerst Client-ID und Secret, melden Sie sich dann an, um den Zugriff zu gewähren."
 
-#: admin/class-admin-page.php:604
+#: admin/class-admin-page.php:705
 msgid "Disconnect Google account"
 msgstr "Google-Konto trennen"
 
-#: admin/class-admin-page.php:605 src/components/google-button.js:63
+#: admin/class-admin-page.php:706 src/components/google-button.js:63
 msgid "Sign in with Google"
 msgstr "Mit Google anmelden"
 
-#: admin/class-admin-page.php:705
+#: admin/class-admin-page.php:806
 msgid "Set in wp-config.php, so it cannot be edited here."
 msgstr "In wp-config.php festgelegt und daher hier nicht bearbeitbar."
 
-#: admin/class-admin-page.php:728
+#: admin/class-admin-page.php:829
 msgid "defined in wp-config.php"
 msgstr "in wp-config.php definiert"
 
-#: admin/class-admin-page.php:729
+#: admin/class-admin-page.php:830
 msgid "This is the recommended place to keep it."
 msgstr "Das ist der empfohlene Aufbewahrungsort."
 
-#: admin/class-admin-page.php:736 src/components/provider-form.js:272
+#: admin/class-admin-page.php:837 src/components/provider-form.js:272
 msgid "Stored. Leave blank to keep it."
 msgstr "Gespeichert. Leer lassen, um ihn beizubehalten."
 
-#: admin/class-admin-page.php:737
+#: admin/class-admin-page.php:838
 msgid "Not set"
 msgstr "Nicht gesetzt"
 
-#: admin/class-admin-page.php:760
+#: admin/class-admin-page.php:861
 msgid "Libsodium is unavailable, so this will be stored unencrypted. Put it in wp-config.php instead."
 msgstr "Libsodium ist nicht verfügbar, dies wird daher unverschlüsselt gespeichert. Hinterlegen Sie es stattdessen in wp-config.php."
 
@@ -1308,8 +1424,8 @@ msgid "Uses app-only authentication, so there is no sign-in prompt and no token 
 msgstr "Verwendet eine reine App-Authentifizierung, es gibt also keine Anmeldeaufforderung und kein Token, das abläuft und neu autorisiert werden muss. Erfordert ein Microsoft-365-Geschäfts- oder -Schulkonto; private outlook.com-Adressen können dieses Verfahren nicht nutzen."
 
 #: admin/views/connection.php:50
-msgid "A licensed or shared mailbox. Not a distribution list."
-msgstr "Ein lizenziertes oder freigegebenes Postfach. Keine Verteilerliste."
+msgid "Leave empty to send through the From address above. Fill it in only to send through a licensed or shared mailbox that holds Send As permission for it."
+msgstr "Leer lassen, um über die oben angegebene Absenderadresse zu senden. Füllen Sie das Feld nur aus, um über ein lizenziertes oder freigegebenes Postfach zu senden, das dafür die Berechtigung „Senden als“ besitzt."
 
 #: admin/views/connection.php:58
 msgid "Entra secrets last at most 24 months. Record the expiry date and you will be warned before it lapses instead of finding out when mail stops."
@@ -1355,7 +1471,7 @@ msgstr "Dies verwendet Ihren eigenen OAuth-Client aus Ihrem eigenen Google-Cloud
 msgid "From Credentials in your Google Cloud project. It must be a Web application client."
 msgstr "Aus „Anmeldedaten“ in Ihrem Google-Cloud-Projekt. Es muss ein Web-Anwendungs-Client sein."
 
-#: admin/views/connection.php:107 src/components/google-connect.js:72
+#: admin/views/connection.php:107 src/components/google-connect.js:72 src/components/microsoft-connect.js:77
 msgid "Redirect URI"
 msgstr "Weiterleitungs-URI"
 
@@ -1459,7 +1575,7 @@ msgstr "Nur Umschlagdaten und Fehler – Nachrichteninhalte werden hier niemals 
 msgid "When"
 msgstr "Wann"
 
-#: admin/views/logs.php:160 src/screens/connections.js:255 src/screens/logs.js:334 src/screens/routing.js:141
+#: admin/views/logs.php:160 src/screens/connections.js:256 src/screens/logs.js:334 src/screens/routing.js:141
 msgid "Connection"
 msgstr "Verbindung"
 
@@ -1607,7 +1723,7 @@ msgstr "GPL-2.0-or-later"
 msgid "Built and maintained by <a>MME-pro</a>"
 msgstr "Entwickelt und gepflegt von <a>MME-pro</a>"
 
-#: src/components/google-connect.js:44
+#: src/components/google-connect.js:44 src/components/microsoft-connect.js:87
 msgid "Copy redirect URI"
 msgstr "Weiterleitungs-URI kopieren"
 
@@ -1619,7 +1735,7 @@ msgstr "Tragen Sie genau diesen Wert bei Ihrem OAuth-Client in der Google-Cloud-
 msgid "This revokes the grant at Google and forgets it here. Sending through this connection will stop until you sign in again. Continue?"
 msgstr "Dies widerruft die Freigabe bei Google und vergisst sie hier. Der Versand über diese Verbindung endet, bis Sie sich erneut anmelden. Fortfahren?"
 
-#: src/components/google-connect.js:119 src/components/one-click-connect.js:117 src/screens/connections.js:333
+#: src/components/google-connect.js:119 src/components/microsoft-connect.js:143 src/components/one-click-connect.js:117 src/screens/connections.js:334
 msgid "Disconnect"
 msgstr "Trennen"
 
@@ -1627,7 +1743,7 @@ msgstr "Trennen"
 msgid "Enter the client ID and secret above and save them before signing in."
 msgstr "Geben Sie oben Client-ID und Secret ein und speichern Sie sie, bevor Sie sich anmelden."
 
-#: src/components/google-connect.js:141 src/components/one-click-connect.js:127
+#: src/components/google-connect.js:141 src/components/microsoft-connect.js:165 src/components/one-click-connect.js:127
 msgid "You have unsaved changes. Signing in leaves this page and they will be lost."
 msgstr "Sie haben ungespeicherte Änderungen. Die Anmeldung verlässt diese Seite und die Änderungen gehen verloren."
 
@@ -1690,6 +1806,34 @@ msgstr "Schließen"
 #: src/components/microsoft-button.js:51
 msgid "Sign in with Microsoft"
 msgstr "Mit Microsoft anmelden"
+
+#: src/components/microsoft-connect.js:80
+msgid "Add this exact value to your app registration in Entra, under Authentication, as a Web platform. Not a Single-page application - that registration refuses to issue a token here and reports it as a CORS error, which explains nothing."
+msgstr "Fügen Sie genau diesen Wert Ihrer App-Registrierung in Entra unter „Authentifizierung“ hinzu, als Plattform „Web“. Nicht als „Single-Page-Anwendung“ – diese Registrierung stellt hier kein Token aus und meldet das als CORS-Fehler, was nichts erklärt."
+
+#: src/components/microsoft-connect.js:93 src/screens/connections.js:371
+msgid "Mailbox"
+msgstr "Postfach"
+
+#: src/components/microsoft-connect.js:108
+msgid "Signed in as <b>%s</b>. This connection can send as that mailbox."
+msgstr "Angemeldet als <b>%s</b>. Diese Verbindung kann als dieses Postfach senden."
+
+#: src/components/microsoft-connect.js:133
+msgid "This forgets the sign-in here and sending through this connection will stop. Microsoft cannot revoke a single sign-in remotely, so the grant itself stays until you remove it in your Microsoft account. Continue?"
+msgstr "Damit wird die Anmeldung hier verworfen und der Versand über diese Verbindung endet. Microsoft kann eine einzelne Anmeldung nicht aus der Ferne widerrufen – die Berechtigung bleibt also bestehen, bis Sie sie in Ihrem Microsoft-Konto entfernen. Fortfahren?"
+
+#: src/components/microsoft-connect.js:153
+msgid "Enter the application ID and client secret above and save them before signing in."
+msgstr "Geben Sie oben Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
+
+#: src/components/microsoft-connect.js:182
+msgid "The prompt asks only for permission to send mail and to read your own address, using your own app registration. This plugin never requests read access to the mailbox, and no third party sees the tokens."
+msgstr "Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden und Ihre eigene Adresse zu lesen – über Ihre eigene App-Registrierung. Dieses Plugin fordert niemals Lesezugriff auf das Postfach an, und keine dritte Partei sieht die Tokens."
+
+#: src/components/microsoft-connect.js:192
+msgid "To withdraw the grant at Microsoft as well, remove this application under My Applications:"
+msgstr "Um die Berechtigung auch bei Microsoft zu entziehen, entfernen Sie diese Anwendung unter „Meine Apps“:"
 
 #: src/components/nav.js:21
 msgid "Dashboard"
@@ -1787,99 +1931,95 @@ msgstr "In die Zwischenablage kopieren"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: src/screens/connections.js:46 src/screens/connections.js:80
+#: src/screens/connections.js:47 src/screens/connections.js:81
 msgid "Coming soon"
 msgstr "Demnächst"
 
-#: src/screens/connections.js:104
+#: src/screens/connections.js:105
 msgid "Every message is attempted here first, unless a routing rule sends it elsewhere."
 msgstr "Jede Nachricht wird zuerst hier versucht, sofern keine Weiterleitungsregel sie anderswohin schickt."
 
-#: src/screens/connections.js:111
+#: src/screens/connections.js:112
 msgid "Tried immediately when the connection that was chosen fails. Use a different provider - two connections sharing one identity endpoint go down together."
 msgstr "Wird sofort versucht, wenn die gewählte Verbindung ausfällt. Verwenden Sie einen anderen Anbieter – zwei Verbindungen, die sich einen Identitätsendpunkt teilen, fallen gemeinsam aus."
 
-#: src/screens/connections.js:117
+#: src/screens/connections.js:118
 msgid "Used only for messages a routing rule sends here. Set those up under Routing."
 msgstr "Wird nur für Nachrichten verwendet, die eine Weiterleitungsregel hierher schickt. Diese richten Sie unter „Weiterleitung“ ein."
 
-#: src/screens/connections.js:190
+#: src/screens/connections.js:191
 msgid "Connection saved."
 msgstr "Verbindung gespeichert."
 
-#: src/screens/connections.js:229
+#: src/screens/connections.js:230
 msgid "Fill in %s before verifying."
 msgstr "Füllen Sie %s aus, bevor Sie prüfen."
 
-#: src/screens/connections.js:282
+#: src/screens/connections.js:283
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: src/screens/connections.js:303
+#: src/screens/connections.js:304
 msgid "Save connection"
 msgstr "Verbindung speichern"
 
-#: src/screens/connections.js:307
+#: src/screens/connections.js:308
 msgid "Verify"
 msgstr "Prüfen"
 
-#: src/screens/connections.js:322
+#: src/screens/connections.js:323
 msgid "This clears the provider and every credential on this connection, and withdraws any account it is signed in to. Mail routed here will stop until it is set up again. Continue?"
 msgstr "Dies löscht den Anbieter und sämtliche Zugangsdaten dieser Verbindung und meldet jedes verbundene Konto ab. Hierher geleitete E-Mails werden nicht mehr zugestellt, bis die Verbindung neu eingerichtet ist. Fortfahren?"
 
-#: src/screens/connections.js:370
-msgid "Mailbox"
-msgstr "Postfach"
-
-#: src/screens/connections.js:409
+#: src/screens/connections.js:423
 msgid "Send a test message"
 msgstr "Testnachricht senden"
 
-#: src/screens/connections.js:410
+#: src/screens/connections.js:424
 msgid "Goes out over the primary connection. There is deliberately no test through the backup, because the backup is only reached when the primary fails."
 msgstr "Geht über die primäre Verbindung hinaus. Es gibt bewusst keinen Test über die Ersatzverbindung, weil diese nur erreicht wird, wenn die primäre ausfällt."
 
-#: src/screens/connections.js:418
+#: src/screens/connections.js:432
 msgid "Recipient"
 msgstr "Empfänger"
 
-#: src/screens/connections.js:432
+#: src/screens/connections.js:446
 msgid "Send test"
 msgstr "Test senden"
 
-#: src/screens/connections.js:471
+#: src/screens/connections.js:485
 msgid "Connection added. Choose a provider for it."
 msgstr "Verbindung hinzugefügt. Wählen Sie einen Anbieter dafür."
 
-#: src/screens/connections.js:513
+#: src/screens/connections.js:527
 msgid "Not configured"
 msgstr "Nicht konfiguriert"
 
-#: src/screens/connections.js:531
+#: src/screens/connections.js:545
 msgid "Remove %s"
 msgstr "%s entfernen"
 
-#: src/screens/connections.js:543
+#: src/screens/connections.js:557
 msgid "Remove %s and its stored credentials? Any routing rule using it will be deleted too."
 msgstr "%s und die gespeicherten Zugangsdaten entfernen? Jede Weiterleitungsregel, die sie verwendet, wird ebenfalls gelöscht."
 
-#: src/screens/connections.js:566
+#: src/screens/connections.js:580
 msgid "Connection name"
 msgstr "Name der Verbindung"
 
-#: src/screens/connections.js:573
+#: src/screens/connections.js:587
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: src/screens/connections.js:576
+#: src/screens/connections.js:590
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/screens/connections.js:589
+#: src/screens/connections.js:603
 msgid "Connection limit reached"
 msgstr "Verbindungsgrenze erreicht"
 
-#: src/screens/connections.js:590
+#: src/screens/connections.js:604
 msgid "Add connection"
 msgstr "Verbindung hinzufügen"
 

@@ -82,6 +82,7 @@ class Provider_Registry {
 			// reordering the tiles above cannot accidentally disturb them.
 			Providers\Graph::class,
 			Providers\Outlook::class,
+			Providers\Microsoft_OAuth::class,
 			Providers\Gmail_Service_Account::class,
 			Providers\Gmail_OAuth::class,
 		];

@@ -19,14 +19,18 @@ defined( 'ABSPATH' ) || exit;
  * The two ways in are genuinely different, and the difference matters enough to
  * explain on the form rather than bury in two tiles that looked alike:
  *
- * - **One-click** signs in as a person and sends only as that mailbox. It needs
- *   nothing registered in Azure and works for personal Outlook accounts with no
- *   tenant at all, but it holds a refresh token, which can be revoked.
- * - **Your own Azure app** is app-only. An administrator registers an
- *   application and grants Mail.Send, and the site mints tokens from a client
- *   credential. Nothing expires but the secret, and it can send as any mailbox
- *   in the tenant - which is what a business sending from a shared address
- *   wants, and which needs somebody with the authority to consent.
+ * - **Graph API** is app-only. An administrator registers an application and
+ *   grants Mail.Send, and the site mints tokens from a client credential.
+ *   Nothing expires but the secret, and it can send as any mailbox in the
+ *   tenant - which is what a business sending from a shared address wants, and
+ *   which needs somebody with the authority to consent.
+ * - **Legacy** is the delegated pattern that came before it. A person signs in
+ *   once with an app registration that needs no tenant ID and no administrator,
+ *   and mail goes out as their own mailbox. It holds a refresh token, which is
+ *   the failure this plugin exists to avoid - so it is here for the people who
+ *   cannot get tenant-admin consent, not as an easier alternative.
+ * - **One-click** is the same delegated trade-off with nothing registered in
+ *   Azure at all, the credential coming from the setup service instead.
  *
  * Neither is a lesser version of the other, so the form presents them as a
  * choice about circumstances rather than a recommendation.
@@ -61,7 +65,14 @@ class Microsoft extends Abstract_Merged_Provider {
 	 * transport declares none.
 	 */
 	protected static function transports(): array {
-		$out = [ One_Click::MODE_OWN_CLIENT => Graph::class ];
+		$out = [
+			One_Click::MODE_OWN_CLIENT => Graph::class,
+
+			// Always offered. It depends on nothing but an app registration
+			// the admin makes themselves, so unlike one-click there is no
+			// service that could be absent and make it unusable.
+			Microsoft_OAuth::MODE     => Microsoft_OAuth::class,
+		];
 
 		// Offered only where a broker exists to answer. Without one the
 		// one-click transport could never obtain a credential, and a mode that
@@ -80,7 +91,8 @@ class Microsoft extends Abstract_Merged_Provider {
 			$options[ One_Click::MODE_ONE_CLICK ] = __( 'One-click', 'modern-mailer-oauth' );
 		}
 
-		$options[ One_Click::MODE_OWN_CLIENT ] = __( 'My own Azure app', 'modern-mailer-oauth' );
+		$options[ One_Click::MODE_OWN_CLIENT ] = __( 'Graph API', 'modern-mailer-oauth' );
+		$options[ Microsoft_OAuth::MODE ]      = __( 'Legacy', 'modern-mailer-oauth' );
 
 		return new Field(
 			key: self::mode_key(),
@@ -88,7 +100,7 @@ class Microsoft extends Abstract_Merged_Provider {
 			type: Field::RADIO,
 			options: $options,
 			default: self::default_mode(),
-			help: __( 'One-click signs in as a person and sends as that mailbox, with nothing to register in Azure. Your own Azure app sends as any address in the tenant and has no refresh token to be revoked, but needs an administrator to register it. Either way, mail goes directly from this site to Microsoft.', 'modern-mailer-oauth' )
+			help: __( 'Graph API is the one to prefer: an app registration authenticates as itself, sends as any address in the tenant, and has no refresh token to expire - but registering it needs an administrator who can grant tenant-wide permission. Legacy is the older delegated pattern: a person signs in once, it needs no administrator and no tenant ID and works for personal Outlook accounts, but it sends only as the mailbox that signed in and holds a refresh token that a password or MFA change revokes. One-click is that same delegated trade-off with nothing to register at all. Whichever you choose, mail goes directly from this site to Microsoft.', 'modern-mailer-oauth' )
 		);
 	}
 }

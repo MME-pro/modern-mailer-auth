@@ -1,5 +1,5 @@
 {
-	"translation-revision-date": "2026-09-02T12:23:45.765Z",
+	"translation-revision-date": "2026-09-07T07:06:06.027Z",
 	"generator": "tools/i18n.mjs",
 	"domain": "messages",
 	"locale_data": {
@@ -201,6 +201,27 @@
 			"Sign in with Microsoft": [
 				"Mit Microsoft anmelden"
 			],
+			"Add this exact value to your app registration in Entra, under Authentication, as a Web platform. Not a Single-page application - that registration refuses to issue a token here and reports it as a CORS error, which explains nothing.": [
+				"Fügen Sie genau diesen Wert Ihrer App-Registrierung in Entra unter „Authentifizierung“ hinzu, als Plattform „Web“. Nicht als „Single-Page-Anwendung“ – diese Registrierung stellt hier kein Token aus und meldet das als CORS-Fehler, was nichts erklärt."
+			],
+			"Mailbox": [
+				"Postfach"
+			],
+			"Signed in as <b>%s</b>. This connection can send as that mailbox.": [
+				"Angemeldet als <b>%s</b>. Diese Verbindung kann als dieses Postfach senden."
+			],
+			"This forgets the sign-in here and sending through this connection will stop. Microsoft cannot revoke a single sign-in remotely, so the grant itself stays until you remove it in your Microsoft account. Continue?": [
+				"Damit wird die Anmeldung hier verworfen und der Versand über diese Verbindung endet. Microsoft kann eine einzelne Anmeldung nicht aus der Ferne widerrufen – die Berechtigung bleibt also bestehen, bis Sie sie in Ihrem Microsoft-Konto entfernen. Fortfahren?"
+			],
+			"Enter the application ID and client secret above and save them before signing in.": [
+				"Geben Sie oben Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
+			],
+			"The prompt asks only for permission to send mail and to read your own address, using your own app registration. This plugin never requests read access to the mailbox, and no third party sees the tokens.": [
+				"Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden und Ihre eigene Adresse zu lesen – über Ihre eigene App-Registrierung. Dieses Plugin fordert niemals Lesezugriff auf das Postfach an, und keine dritte Partei sieht die Tokens."
+			],
+			"To withdraw the grant at Microsoft as well, remove this application under My Applications:": [
+				"Um die Berechtigung auch bei Microsoft zu entziehen, entfernen Sie diese Anwendung unter „Meine Apps“:"
+			],
 			"Dashboard": [
 				"Übersicht"
 			],
@@ -302,9 +323,6 @@
 			],
 			"This clears the provider and every credential on this connection, and withdraws any account it is signed in to. Mail routed here will stop until it is set up again. Continue?": [
 				"Dies löscht den Anbieter und sämtliche Zugangsdaten dieser Verbindung und meldet jedes verbundene Konto ab. Hierher geleitete E-Mails werden nicht mehr zugestellt, bis die Verbindung neu eingerichtet ist. Fortfahren?"
-			],
-			"Mailbox": [
-				"Postfach"
 			],
 			"Send a test message": [
 				"Testnachricht senden"

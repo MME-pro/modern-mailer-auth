@@ -45,7 +45,6 @@
   "This checks the credentials and the mailbox without sending anything. There is deliberately no \"test through the backup\" button: the backup is only reached when the primary fails, and forcing that would mean breaking the primary.": "Dies prüft die Zugangsdaten und das Postfach, ohne etwas zu senden. Es gibt bewusst keine Schaltfläche „Über die Ersatzverbindung testen“: Die Ersatzverbindung wird nur erreicht, wenn die primäre ausfällt, und das zu erzwingen hieße, die primäre kaputtzumachen.",
   "Provider": "Anbieter",
   "Uses app-only authentication, so there is no sign-in prompt and no token that expires and needs reauthorizing. Requires a Microsoft 365 work or school account; personal outlook.com addresses cannot use this method.": "Verwendet eine reine App-Authentifizierung, es gibt also keine Anmeldeaufforderung und kein Token, das abläuft und neu autorisiert werden muss. Erfordert ein Microsoft-365-Geschäfts- oder -Schulkonto; private outlook.com-Adressen können dieses Verfahren nicht nutzen.",
-  "A licensed or shared mailbox. Not a distribution list.": "Ein lizenziertes oder freigegebenes Postfach. Keine Verteilerliste.",
   "Entra secrets last at most 24 months. Record the expiry date and you will be warned before it lapses instead of finding out when mail stops.": "Entra-Secrets gelten höchstens 24 Monate. Halten Sie das Ablaufdatum fest, dann werden Sie vor dem Ablauf gewarnt, statt es erst zu merken, wenn keine E-Mails mehr ankommen.",
   "Access scoping": "Zugriffsbeschränkung",
   "I have restricted this application to specific mailboxes": "Ich habe diese Anwendung auf bestimmte Postfächer beschränkt",
@@ -128,5 +127,7 @@
   "This message was accepted by the provider, so there is no diagnostic report. Reports are kept for failures only.": "Diese Nachricht wurde vom Anbieter angenommen, es gibt daher keinen Diagnosebericht. Berichte werden nur bei Fehlern aufbewahrt.",
   "No diagnostic report was recorded for this failure. Entries from before this feature existed have none.": "Für diesen Fehler wurde kein Diagnosebericht aufgezeichnet. Einträge aus der Zeit vor dieser Funktion haben keinen.",
   "The conversation with the mail server. Credentials are replaced before this is stored.": "Der Dialog mit dem Mailserver. Zugangsdaten werden ersetzt, bevor dies gespeichert wird.",
-  "Copied": "Kopiert"
+  "Copied": "Kopiert",
+  "Microsoft account disconnected here. Microsoft cannot revoke a single sign-in remotely, so remove this app under My Applications in your Microsoft account if you want the grant withdrawn as well.": "Microsoft-Konto hier getrennt. Microsoft kann eine einzelne Anmeldung nicht aus der Ferne widerrufen – entfernen Sie diese App daher unter „Meine Apps“ in Ihrem Microsoft-Konto, wenn auch die Berechtigung entzogen werden soll.",
+  "Microsoft account connected to %s. Send a test email to confirm delivery.": "Microsoft-Konto mit %s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung zu bestätigen."
 }

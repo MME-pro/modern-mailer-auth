@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.10.1
+Stable tag: 0.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.11.0 =
+* Added a third way to connect Microsoft, for people who cannot register an application in Azure. It needs only an application ID and a client secret - no tenant ID and no administrator - and sends as the mailbox that signs in. It is also the only Microsoft option that works with a personal Outlook or Hotmail account.
+* The Microsoft connection choices are now named One-click, Graph API and Legacy. Graph API is unchanged and is still the one to prefer: it has nothing that expires but the secret. Legacy is the sign-in option above, and it is named that because it keeps a token that a password change, a new multi-factor setup or ninety days of silence will invalidate - the very problem this plugin was written to remove. Choose it only where Graph API cannot be used.
+* The Microsoft 365 form no longer asks for the sending mailbox twice. It was always optional in practice - left empty it uses the From address, which is what nearly every site wants - so it is now marked optional and explains the one case that needs it: sending through a shared mailbox that has Send As permission for your From address.
+* Existing Microsoft connections are unaffected. Only the labels changed; nothing needs reconfiguring.
 
 = 0.10.1 =
 * Fixed the screen going blank when you press Save with a browser translation switched on. Chrome's translation rewrites the page in a way the interface could not follow, and the moment anything on screen changed it gave up and left nothing behind. Translated pages now save normally.

@@ -47,7 +47,7 @@ $panel_class = 'mmoa-panel-' . ( '' === $slot ? 'primary' : $slot );
 		$this->field( 'ms_tenant_id', __( 'Directory (tenant) ID', 'modern-mailer-oauth' ), __( 'From the Overview page of your Entra app registration.', 'modern-mailer-oauth' ), 'text', $slot );
 		$this->field( 'ms_client_id', __( 'Application (client) ID', 'modern-mailer-oauth' ), '', 'text', $slot );
 		$this->secret_field( 'ms_client_secret', __( 'Client secret', 'modern-mailer-oauth' ), __( 'Copy the secret Value, not the Secret ID. Entra shows the Value only once.', 'modern-mailer-oauth' ), false, $slot );
-		$this->field( 'ms_sender', __( 'Send as mailbox', 'modern-mailer-oauth' ), __( 'A licensed or shared mailbox. Not a distribution list.', 'modern-mailer-oauth' ), 'email', $slot );
+		$this->field( 'ms_sender', __( 'Send through a different mailbox', 'modern-mailer-oauth' ), __( 'Leave empty to send through the From address above. Fill it in only to send through a licensed or shared mailbox that holds Send As permission for it.', 'modern-mailer-oauth' ), 'email', $slot );
 		?>
 		<tr>
 			<th scope="row"><label for="<?php echo esc_attr( $field_name( 'ms_secret_expires' ) ); ?>"><?php esc_html_e( 'Secret expires', 'modern-mailer-oauth' ); ?></label></th>

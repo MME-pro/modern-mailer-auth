@@ -13,6 +13,7 @@ use ModernMailer\Admin\Site_Health;
 use ModernMailer\Api\Rest_Controller;
 use ModernMailer\Auth\Broker;
 use ModernMailer\Auth\Google_Consent;
+use ModernMailer\Auth\Microsoft_Consent;
 use ModernMailer\Auth\One_Click;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -43,6 +44,7 @@ class Plugin {
 	public Site_Identity $identity;
 	public Broker $broker;
 	public Google_Consent $consent;
+	public Microsoft_Consent $ms_consent;
 	public One_Click $one_click;
 	public Dispatcher $dispatcher;
 
@@ -67,6 +69,7 @@ class Plugin {
 		$this->identity   = new Site_Identity();
 		$this->broker     = new Broker( $this->http, $this->identity );
 		$this->consent    = new Google_Consent( $this->settings, $this->http, $this->connections );
+		$this->ms_consent = new Microsoft_Consent( $this->settings, $this->http, $this->connections );
 		$this->one_click  = new One_Click( $this->settings, $this->broker, $this->connections, $this->tokens );
 		$this->dispatcher = new Dispatcher(
 			$this->settings,

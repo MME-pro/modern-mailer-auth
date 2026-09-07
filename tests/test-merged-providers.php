@@ -204,9 +204,19 @@ foreach ( Provider_Registry::class_for( 'microsoft' )::fields() as $field ) {
 	$solo[ $field->key ] = $field;
 }
 
-check( 'the selector is gone', ! isset( $solo['ms_setup_mode'] ) );
-check( 'but the credentials are still published', isset( $solo['ms_tenant_id'], $solo['ms_client_id'], $solo['ms_client_secret'] ), implode( ',', array_keys( $solo ) ) );
-check( 'and none of them depends on the vanished field', [] === ( $solo['ms_tenant_id']->depends ?? null ), var_export( $solo['ms_tenant_id']->depends ?? null, true ) );
+// Microsoft no longer demonstrates the single-option case. Since the delegated
+// sign-in mode arrived it has two ways in that need no broker at all - the
+// app-only Azure app and the signed-in one - so with the broker off it keeps
+// its selector and keeps its gates, exactly as Google does.
+check( 'Microsoft keeps a selector, because two of its modes need no broker', isset( $solo['ms_setup_mode'] ) );
+check(
+	'and it offers precisely the two that do not',
+	[ 'own_client', 'own_signin' ] === array_keys( $solo['ms_setup_mode']->options ?? [] ),
+	implode( ',', array_keys( $solo['ms_setup_mode']->options ?? [] ) )
+);
+check( 'the credentials are still published', isset( $solo['ms_tenant_id'], $solo['ms_client_id'], $solo['ms_client_secret'] ), implode( ',', array_keys( $solo ) ) );
+check( 'and stay gated to the mode that uses them', 'own_client' === ( $solo['ms_tenant_id']->depends['value'] ?? '' ), var_export( $solo['ms_tenant_id']->depends ?? null, true ) );
+check( 'the delegated credentials are gated to theirs', 'own_signin' === ( $solo['msoauth_client_id']->depends['value'] ?? '' ) );
 check( 'the one-click transport is not offered', ! in_array( 'outlook', array_column( Provider_Registry::to_array( $plugin->settings ), 'slug' ), true ) );
 
 // Google keeps a real choice even without the broker, so it keeps its gates.
@@ -220,6 +230,65 @@ check( 'and its fields stay gated', One_Click::MODE_OWN_CLIENT === ( $duo['googl
 
 remove_filter( 'mmoa_broker_url', $off );
 Provider_Registry::flush();
+
+echo "
+=== 7c. A tile with genuinely one mode drops the selector and the gates ===
+";
+// Asserted against a stub rather than a real tile. This is the regression that
+// once emptied the entire Microsoft form - a single-option radio was dropped
+// and left every credential depending on a field no longer being rendered, so
+// each resolved against nothing, decided it did not apply, and hid itself.
+//
+// Microsoft used to be the only place that shape occurred and no longer is, so
+// testing it through whichever tile happens to have one mode this month would
+// be testing a coincidence. The invariant belongs to Abstract_Merged_Provider,
+// so it is tested there.
+$one_mode = new class() extends ModernMailer\Providers\Abstract_Merged_Provider {
+	public function __construct() {}
+
+	public static function slug(): string {
+		return 'stub_single';
+	}
+
+	public static function describe(): array {
+		return [ 'label' => 'Stub', 'summary' => '', 'docs' => '', 'category' => 'oauth', 'raw_mime' => true ];
+	}
+
+	protected static function mode_key(): string {
+		return 'stub_setup_mode';
+	}
+
+	protected static function default_mode(): string {
+		return 'only';
+	}
+
+	protected static function transports(): array {
+		return [ 'only' => ModernMailer\Providers\Graph::class ];
+	}
+
+	protected static function mode_field(): ModernMailer\Field {
+		return new ModernMailer\Field(
+			key: self::mode_key(),
+			label: 'How to connect',
+			type: ModernMailer\Field::RADIO,
+			options: [ 'only' => 'The only way' ],
+			default: 'only'
+		);
+	}
+};
+
+$stub = [];
+foreach ( $one_mode::fields() as $field ) {
+	$stub[ $field->key ] = $field;
+}
+
+check( 'the selector is gone', ! isset( $stub['stub_setup_mode'] ) );
+check( 'but the fields are still published', isset( $stub['ms_tenant_id'] ), implode( ',', array_keys( $stub ) ) );
+check(
+	'and none of them depends on the vanished field',
+	[] === ( $stub['ms_tenant_id']->depends ?? null ),
+	var_export( $stub['ms_tenant_id']->depends ?? null, true )
+);
 
 echo "\n=== 8. Sending through the merged tile reaches the right endpoints ===\n";
 $plugin->settings->update( [
