@@ -119,11 +119,11 @@ msgstr "Der Einrichtungsdienst hat eine unerwartete Antwort zurückgegeben (HTTP
 msgid "Enter and save the OAuth client ID and client secret before connecting."
 msgstr "Geben Sie die OAuth-Client-ID und das Client-Secret ein und speichern Sie sie, bevor Sie sich verbinden."
 
-#: includes/auth/class-google-consent.php:146 includes/auth/class-microsoft-consent.php:195
+#: includes/auth/class-google-consent.php:146 includes/auth/class-microsoft-consent.php:310
 msgid "This authorization link has expired or did not originate here. Start the connection again."
 msgstr "Dieser Autorisierungslink ist abgelaufen oder stammt nicht von hier. Starten Sie die Verbindung erneut."
 
-#: includes/auth/class-google-consent.php:153 includes/auth/class-microsoft-consent.php:202
+#: includes/auth/class-google-consent.php:153 includes/auth/class-microsoft-consent.php:317
 msgid "This authorization was started by a different user account."
 msgstr "Diese Autorisierung wurde von einem anderen Benutzerkonto gestartet."
 
@@ -135,7 +135,7 @@ msgstr "Google hat den Zugriff nicht gewährt: %s"
 msgid "Google did not return an authorization code."
 msgstr "Google hat keinen Autorisierungscode zurückgegeben."
 
-#: includes/auth/class-google-consent.php:193 includes/auth/class-microsoft-consent.php:237 includes/auth/class-one-click.php:177
+#: includes/auth/class-google-consent.php:193 includes/auth/class-microsoft-consent.php:352 includes/auth/class-one-click.php:177
 msgid "That connection no longer exists, so the sign-in could not be saved. Start again from the connection you want to use."
 msgstr "Diese Verbindung existiert nicht mehr, die Anmeldung konnte deshalb nicht gespeichert werden. Beginnen Sie erneut bei der Verbindung, die Sie verwenden möchten."
 
@@ -167,7 +167,7 @@ msgstr "Der Zugriff wurde auf dem Zustimmungsbildschirm abgelehnt."
 msgid "Google refused the authorization: %s"
 msgstr "Google hat die Autorisierung verweigert: %s"
 
-#: includes/auth/class-google-consent.php:308 includes/auth/class-microsoft-consent.php:400 includes/providers/abstract-gmail.php:183 includes/providers/class-graph.php:513 includes/providers/class-mailgun.php:257 includes/providers/class-microsoft-oauth.php:357 includes/providers/class-microsoft-oauth.php:402
+#: includes/auth/class-google-consent.php:308 includes/auth/class-microsoft-consent.php:515 includes/providers/abstract-gmail.php:183 includes/providers/class-graph.php:513 includes/providers/class-mailgun.php:257 includes/providers/class-microsoft-oauth.php:357 includes/providers/class-microsoft-oauth.php:402
 msgid "no details supplied"
 msgstr "keine Angaben gemacht"
 
@@ -183,51 +183,51 @@ msgstr "Der private Schlüssel des Dienstkontos konnte nicht gelesen werden. Fü
 msgid "The authentication assertion could not be signed."
 msgstr "Die Authentifizierungs-Assertion konnte nicht signiert werden."
 
-#: includes/auth/class-microsoft-consent.php:133
+#: includes/auth/class-microsoft-consent.php:248
 msgid "Enter and save the application ID and client secret before signing in."
 msgstr "Geben Sie Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
 
-#: includes/auth/class-microsoft-consent.php:211
+#: includes/auth/class-microsoft-consent.php:326
 msgid "Microsoft did not grant access: %1$s %2$s"
 msgstr "Microsoft hat den Zugriff nicht gewährt: %1$s %2$s"
 
-#: includes/auth/class-microsoft-consent.php:223
+#: includes/auth/class-microsoft-consent.php:338
 msgid "Microsoft did not return an authorization code."
 msgstr "Microsoft hat keinen Autorisierungscode zurückgegeben."
 
-#: includes/auth/class-microsoft-consent.php:372
+#: includes/auth/class-microsoft-consent.php:487
 msgid "Microsoft authorized the connection but returned no refresh token, so sending would stop within the hour. Confirm that offline_access is among the delegated permissions on the app registration."
 msgstr "Microsoft hat die Verbindung autorisiert, aber kein Refresh-Token zurückgegeben – der Versand würde also innerhalb einer Stunde enden. Prüfen Sie, ob offline_access zu den delegierten Berechtigungen der App-Registrierung gehört."
 
-#: includes/auth/class-microsoft-consent.php:380
+#: includes/auth/class-microsoft-consent.php:495
 msgid "The redirect URI does not match the app registration. Copy the exact value shown on this screen into the Entra app under Authentication, as a Web platform - not a Single-page application."
 msgstr "Die Redirect-URI stimmt nicht mit der App-Registrierung überein. Übernehmen Sie den auf dieser Seite angezeigten Wert exakt in die Entra-App unter „Authentifizierung“, als Plattform „Web“ – nicht als „Single-Page-Anwendung“."
 
-#: includes/auth/class-microsoft-consent.php:381
+#: includes/auth/class-microsoft-consent.php:496
 msgid "Microsoft rejected the client secret. Copy the secret Value rather than the Secret ID - Entra shows the Value only once, immediately after you create it."
 msgstr "Microsoft hat das Client-Secret abgelehnt. Kopieren Sie den Wert („Value“) und nicht die Secret-ID – Entra zeigt den Wert nur ein einziges Mal an, direkt nach dem Erstellen."
 
-#: includes/auth/class-microsoft-consent.php:382
+#: includes/auth/class-microsoft-consent.php:497
 msgid "Microsoft could not find that application. Check the Application (client) ID, and confirm the app registration allows accounts outside its own tenant if you are signing in with a personal account."
 msgstr "Microsoft konnte diese Anwendung nicht finden. Prüfen Sie die Anwendungs-ID (Client-ID) und stellen Sie sicher, dass die App-Registrierung Konten außerhalb des eigenen Mandanten zulässt, wenn Sie sich mit einem privaten Konto anmelden."
 
-#: includes/auth/class-microsoft-consent.php:383
+#: includes/auth/class-microsoft-consent.php:498
 msgid "The account declined to grant the permissions requested, or an administrator has restricted user consent in this tenant. An administrator can grant it on the app registration instead."
 msgstr "Das Konto hat die angeforderten Berechtigungen nicht erteilt, oder eine Administratorin hat die Zustimmung durch Benutzer in diesem Mandanten eingeschränkt. Ersatzweise kann sie direkt an der App-Registrierung erteilt werden."
 
-#: includes/auth/class-microsoft-consent.php:384
+#: includes/auth/class-microsoft-consent.php:499
 msgid "The app registration has no reply URL. Add the redirect URI shown on this screen under Authentication in Entra."
 msgstr "Die App-Registrierung hat keine Antwort-URL. Fügen Sie die auf dieser Seite angezeigte Redirect-URI in Entra unter „Authentifizierung“ hinzu."
 
-#: includes/auth/class-microsoft-consent.php:385
+#: includes/auth/class-microsoft-consent.php:500
 msgid "The authorization code was already used. Start the connection again."
 msgstr "Der Autorisierungscode wurde bereits verwendet. Starten Sie die Verbindung erneut."
 
-#: includes/auth/class-microsoft-consent.php:386
+#: includes/auth/class-microsoft-consent.php:501
 msgid "The authorization code expired before it could be exchanged. Start the connection again."
 msgstr "Der Autorisierungscode ist abgelaufen, bevor er eingelöst werden konnte. Starten Sie die Verbindung erneut."
 
-#: includes/auth/class-microsoft-consent.php:399
+#: includes/auth/class-microsoft-consent.php:514
 msgid "Microsoft refused the authorization: %s"
 msgstr "Microsoft hat die Autorisierung abgelehnt: %s"
 
@@ -291,7 +291,7 @@ msgstr "Interner Fehler: Es wurde versucht, die Mail-API über eine ungültige A
 msgid "The request to the mail API could not be completed."
 msgstr "Die Anfrage an die Mail-API konnte nicht abgeschlossen werden."
 
-#: includes/class-plugin.php:185
+#: includes/class-plugin.php:193
 msgid "Every five minutes (MME-Mail to SMTP retry queue)"
 msgstr "Alle fünf Minuten (MME-Mail-to-SMTP-Wiederholungswarteschlange)"
 
@@ -1211,7 +1211,7 @@ msgstr "Konto mit %s verbunden. Senden Sie eine Test-E-Mail, um die Zustellung z
 msgid "Account"
 msgstr "Konto"
 
-#: admin/class-admin-page.php:675 src/components/google-connect.js:92 src/components/microsoft-connect.js:116
+#: admin/class-admin-page.php:675 src/components/google-connect.js:92 src/components/microsoft-connect.js:133
 msgid "Connected. A refresh token is stored for this connection."
 msgstr "Verbunden. Für diese Verbindung ist ein Refresh-Token gespeichert."
 
@@ -1471,7 +1471,7 @@ msgstr "Dies verwendet Ihren eigenen OAuth-Client aus Ihrem eigenen Google-Cloud
 msgid "From Credentials in your Google Cloud project. It must be a Web application client."
 msgstr "Aus „Anmeldedaten“ in Ihrem Google-Cloud-Projekt. Es muss ein Web-Anwendungs-Client sein."
 
-#: admin/views/connection.php:107 src/components/google-connect.js:72 src/components/microsoft-connect.js:77
+#: admin/views/connection.php:107 src/components/google-connect.js:72 src/components/microsoft-connect.js:78
 msgid "Redirect URI"
 msgstr "Weiterleitungs-URI"
 
@@ -1723,7 +1723,7 @@ msgstr "GPL-2.0-or-later"
 msgid "Built and maintained by <a>MME-pro</a>"
 msgstr "Entwickelt und gepflegt von <a>MME-pro</a>"
 
-#: src/components/google-connect.js:44 src/components/microsoft-connect.js:87
+#: src/components/google-connect.js:44 src/components/microsoft-connect.js:104
 msgid "Copy redirect URI"
 msgstr "Weiterleitungs-URI kopieren"
 
@@ -1735,7 +1735,7 @@ msgstr "Tragen Sie genau diesen Wert bei Ihrem OAuth-Client in der Google-Cloud-
 msgid "This revokes the grant at Google and forgets it here. Sending through this connection will stop until you sign in again. Continue?"
 msgstr "Dies widerruft die Freigabe bei Google und vergisst sie hier. Der Versand über diese Verbindung endet, bis Sie sich erneut anmelden. Fortfahren?"
 
-#: src/components/google-connect.js:119 src/components/microsoft-connect.js:143 src/components/one-click-connect.js:117 src/screens/connections.js:334
+#: src/components/google-connect.js:119 src/components/microsoft-connect.js:160 src/components/one-click-connect.js:117 src/screens/connections.js:334
 msgid "Disconnect"
 msgstr "Trennen"
 
@@ -1743,7 +1743,7 @@ msgstr "Trennen"
 msgid "Enter the client ID and secret above and save them before signing in."
 msgstr "Geben Sie oben Client-ID und Secret ein und speichern Sie sie, bevor Sie sich anmelden."
 
-#: src/components/google-connect.js:141 src/components/microsoft-connect.js:165 src/components/one-click-connect.js:127
+#: src/components/google-connect.js:141 src/components/microsoft-connect.js:182 src/components/one-click-connect.js:127
 msgid "You have unsaved changes. Signing in leaves this page and they will be lost."
 msgstr "Sie haben ungespeicherte Änderungen. Die Anmeldung verlässt diese Seite und die Änderungen gehen verloren."
 
@@ -1807,31 +1807,43 @@ msgstr "Schließen"
 msgid "Sign in with Microsoft"
 msgstr "Mit Microsoft anmelden"
 
-#: src/components/microsoft-connect.js:80
+#: src/components/microsoft-connect.js:81
 msgid "Add this exact value to your app registration in Entra, under Authentication, as a Web platform. Not a Single-page application - that registration refuses to issue a token here and reports it as a CORS error, which explains nothing."
 msgstr "Fügen Sie genau diesen Wert Ihrer App-Registrierung in Entra unter „Authentifizierung“ hinzu, als Plattform „Web“. Nicht als „Single-Page-Anwendung“ – diese Registrierung stellt hier kein Token aus und meldet das als CORS-Fehler, was nichts erklärt."
 
-#: src/components/microsoft-connect.js:93 src/screens/connections.js:371
+#: src/components/microsoft-connect.js:95
+msgid "This address contains a query string, because this site uses Plain permalinks. Entra will only accept it if the app registration is set to Accounts in any organizational directory - it refuses a query string on any registration that also admits personal Microsoft accounts. Switching permalinks to any other setting gives a plain address that every registration accepts."
+msgstr "Diese Adresse enthält einen Query-String, weil diese Website einfache Permalinks verwendet. Entra akzeptiert sie nur, wenn die App-Registrierung auf „Konten in einem beliebigen Organisationsverzeichnis“ eingestellt ist – bei jeder Registrierung, die auch private Microsoft-Konten zulässt, wird ein Query-String abgelehnt. Stellen Sie die Permalinks auf eine beliebige andere Einstellung um, dann entsteht eine einfache Adresse, die jede Registrierung akzeptiert."
+
+#: src/components/microsoft-connect.js:110 src/screens/connections.js:371
 msgid "Mailbox"
 msgstr "Postfach"
 
-#: src/components/microsoft-connect.js:108
+#: src/components/microsoft-connect.js:125
 msgid "Signed in as <b>%s</b>. This connection can send as that mailbox."
 msgstr "Angemeldet als <b>%s</b>. Diese Verbindung kann als dieses Postfach senden."
 
-#: src/components/microsoft-connect.js:133
+#: src/components/microsoft-connect.js:150
 msgid "This forgets the sign-in here and sending through this connection will stop. Microsoft cannot revoke a single sign-in remotely, so the grant itself stays until you remove it in your Microsoft account. Continue?"
 msgstr "Damit wird die Anmeldung hier verworfen und der Versand über diese Verbindung endet. Microsoft kann eine einzelne Anmeldung nicht aus der Ferne widerrufen – die Berechtigung bleibt also bestehen, bis Sie sie in Ihrem Microsoft-Konto entfernen. Fortfahren?"
 
-#: src/components/microsoft-connect.js:153
+#: src/components/microsoft-connect.js:170
 msgid "Enter the application ID and client secret above and save them before signing in."
 msgstr "Geben Sie oben Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
 
-#: src/components/microsoft-connect.js:182
+#: src/components/microsoft-connect.js:201
+msgid "Sign in as the mailbox this connection will send from, not as your administrator account. An administrator account with no mailbox of its own connects successfully and then fails on the first send."
+msgstr "Melden Sie sich mit dem Postfach an, aus dem diese Verbindung senden soll – nicht mit Ihrem Administratorkonto. Ein Administratorkonto ohne eigenes Postfach verbindet sich erfolgreich und scheitert dann beim ersten Sendeversuch."
+
+#: src/components/microsoft-connect.js:207
+msgid "If Microsoft offers \"Consent on behalf of your organization\" at the prompt, tick it. That grants the permission once for the whole tenant, so the sending mailbox is not asked to consent separately."
+msgstr "Wenn Microsoft in der Abfrage „Im Namen Ihrer Organisation zustimmen“ anbietet, setzen Sie dort das Häkchen. Damit wird die Berechtigung einmalig für den gesamten Mandanten erteilt, und das sendende Postfach muss nicht noch einmal gesondert zustimmen."
+
+#: src/components/microsoft-connect.js:224
 msgid "The prompt asks only for permission to send mail and to read your own address, using your own app registration. This plugin never requests read access to the mailbox, and no third party sees the tokens."
 msgstr "Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden und Ihre eigene Adresse zu lesen – über Ihre eigene App-Registrierung. Dieses Plugin fordert niemals Lesezugriff auf das Postfach an, und keine dritte Partei sieht die Tokens."
 
-#: src/components/microsoft-connect.js:192
+#: src/components/microsoft-connect.js:234
 msgid "To withdraw the grant at Microsoft as well, remove this application under My Applications:"
 msgstr "Um die Berechtigung auch bei Microsoft zu entziehen, entfernen Sie diese Anwendung unter „Meine Apps“:"
 

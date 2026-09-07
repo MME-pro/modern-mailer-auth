@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.11.0
+Stable tag: 0.11.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.11.1 =
+* Fixed the redirect address for the Legacy Microsoft connection, which Microsoft would not accept. It contained a question mark, and Entra refuses any address with one on an app registration that allows personal Outlook.com accounts - so the address shown on screen could not be saved into the very app registration people were told to create. It now reads like /mmoa-microsoft-callback/, which every kind of registration accepts. **If you already set up a Legacy connection, copy the new address from the connection screen into your Entra app, otherwise signing in will report AADSTS50011.**
+* Sites using Plain permalinks cannot serve that address, so they keep the old one and the screen now says which account types their app registration must be limited to. Previously it handed over an address that Microsoft would simply refuse, with nothing to explain why.
+* The connection screen now says to sign in with the mailbox that will send the email, rather than with an administrator account. An administrator account without a mailbox of its own connects successfully and then fails on the first message, which reads as a broken connection rather than the wrong account.
+* Closed a fault on the new address that let any visitor trigger a PHP error by crafting the URL.
 
 = 0.11.0 =
 * Added a third way to connect Microsoft, for people who cannot register an application in Azure. It needs only an application ID and a client secret - no tenant ID and no administrator - and sends as the mailbox that signs in. It is also the only Microsoft option that works with a personal Outlook or Hotmail account.

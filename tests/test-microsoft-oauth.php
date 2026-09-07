@@ -147,7 +147,47 @@ check(
 	Microsoft_Consent::redirect_uri() === ( $query['redirect_uri'] ?? '' ),
 	(string) ( $query['redirect_uri'] ?? '' )
 );
-check( 'the redirect URI points at admin-post, not at a menu page', false !== strpos( Microsoft_Consent::redirect_uri(), 'admin-post.php' ) );
+// The rule that forced this shape, and the reason it is not admin-post.php
+// the way the Google one is: Entra refuses to register a redirect URI
+// containing a query string for any app registration that admits personal
+// Microsoft accounts, and that is the audience needed for Outlook.com. The
+// portal rejects it outright - "url may not contain a query string" - so a
+// regression here does not fail at runtime, it stops somebody completing the
+// setup at all.
+$original_permalinks = get_option( 'permalink_structure' );
+update_option( 'permalink_structure', '/%postname%/' );
+
+check( 'with permalinks on, the redirect URI is a plain path', Microsoft_Consent::has_clean_route() );
+check(
+	'and carries no query string, which Entra would refuse',
+	null === wp_parse_url( Microsoft_Consent::redirect_uri(), PHP_URL_QUERY ),
+	Microsoft_Consent::redirect_uri()
+);
+check(
+	'it is the route the rewrite rule serves',
+	false !== strpos( Microsoft_Consent::redirect_uri(), Microsoft_Consent::ROUTE ),
+	Microsoft_Consent::redirect_uri()
+);
+check(
+	'and the rule and the address agree on the path',
+	false !== strpos( Microsoft_Consent::rewrite_pattern(), Microsoft_Consent::ROUTE ),
+	Microsoft_Consent::rewrite_pattern()
+);
+
+// With permalinks Plain there is nothing to rewrite, so the only address
+// available is the admin-post one. It still works - for a registration
+// limited to work or school accounts - and the screen says so rather than
+// handing over a URI that cannot be registered.
+update_option( 'permalink_structure', '' );
+
+check( 'with Plain permalinks there is no clean route', ! Microsoft_Consent::has_clean_route() );
+check(
+	'and it falls back to admin-post rather than offering a path that 404s',
+	false !== strpos( Microsoft_Consent::redirect_uri(), 'admin-post.php' ),
+	Microsoft_Consent::redirect_uri()
+);
+
+update_option( 'permalink_structure', $original_permalinks );
 check( 'it forces the account chooser', 'select_account' === ( $query['prompt'] ?? '' ) );
 check( 'it carries a state parameter', '' !== (string) ( $query['state'] ?? '' ) );
 

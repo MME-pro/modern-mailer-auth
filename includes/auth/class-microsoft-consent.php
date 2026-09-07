@@ -75,8 +75,27 @@ class Microsoft_Consent {
 	 */
 	public const REVOKE_HELP_URL = 'https://myapps.microsoft.com';
 
-	/** The admin-post action Microsoft's redirect lands on. */
+	/** The admin-post action the callback is ultimately handled by. */
 	public const CALLBACK_ACTION = 'mmoa_microsoft_callback';
+
+	/**
+	 * The public path Microsoft is told to return to.
+	 *
+	 * A path rather than a query string, and that is the entire reason it
+	 * exists. Entra refuses to register a redirect URI containing a query
+	 * string for any app whose sign-in audience includes personal Microsoft
+	 * accounts - which is precisely the audience to choose if Outlook.com and
+	 * Hotmail mailboxes are meant to work. The admin-post URL this used to hand
+	 * out could therefore not be registered by the apps most likely to want it,
+	 * and the portal rejects it outright: "url may not contain a query string".
+	 *
+	 * Google has no such restriction, which is why the Gmail flow can point
+	 * straight at admin-post.php and this one cannot.
+	 */
+	public const ROUTE = 'mmoa-microsoft-callback';
+
+	/** The query var the rewrite rule sets, private to the forwarder. */
+	private const QUERY_VAR = 'mmoa_ms_callback';
 
 	/**
 	 * Exactly what is needed and nothing more.
@@ -115,7 +134,113 @@ class Microsoft_Consent {
 	 * and returns an error naming CORS, which explains nothing.
 	 */
 	public static function redirect_uri(): string {
-		return admin_url( 'admin-post.php?action=' . self::CALLBACK_ACTION );
+		return self::has_clean_route()
+			? home_url( '/' . self::ROUTE . '/' )
+			: admin_url( 'admin-post.php?action=' . self::CALLBACK_ACTION );
+	}
+
+	/**
+	 * Whether this site can serve a path-shaped callback at all.
+	 *
+	 * Rewrite rules need a permalink structure. With permalinks set to Plain
+	 * there is nothing to rewrite, so the only address available is the
+	 * admin-post one - which works, but only for an app registration limited to
+	 * work or school accounts. The screen says so rather than handing over a URI
+	 * that Entra is going to refuse.
+	 */
+	public static function has_clean_route(): bool {
+		return '' !== (string) get_option( 'permalink_structure' );
+	}
+
+	/**
+	 * Serve the path, and forward it into the handler that already exists.
+	 *
+	 * The forwarder is deliberately thin. Handling the callback here would mean
+	 * a second copy of the capability check, the state check and the redirect
+	 * back into the app - and this request arrives on the front end, where the
+	 * admin classes are not loaded at all. Bouncing into admin-post.php instead
+	 * puts it back where the tested handler already lives, with cookies and
+	 * is_admin() behaving normally, and keeps one implementation of the part
+	 * that matters.
+	 *
+	 * The authorization code survives the hop because it travels in the query
+	 * string, which the redirect carries over untouched. Nothing is exchanged
+	 * here, and nothing is stored.
+	 */
+	public static function register_routes(): void {
+		add_action( 'init', [ self::class, 'add_rewrite' ] );
+
+		add_filter(
+			'query_vars',
+			static function ( array $vars ): array {
+				$vars[] = self::QUERY_VAR;
+
+				return $vars;
+			}
+		);
+
+		add_action( 'template_redirect', [ self::class, 'forward' ] );
+	}
+
+	/**
+	 * Register the rule, and rebuild the rewrite table only when it is missing.
+	 *
+	 * Flushing unconditionally on init is a well-known way to make every
+	 * request on a site rebuild its rewrite table, and the cost of that lands
+	 * on visitors rather than on whoever wrote the line. Checking first means
+	 * it happens once, after the update that introduced the rule.
+	 */
+	public static function add_rewrite(): void {
+		$pattern = self::rewrite_pattern();
+
+		add_rewrite_rule( $pattern, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
+
+		$rules = get_option( 'rewrite_rules' );
+
+		if ( is_array( $rules ) && ! isset( $rules[ $pattern ] ) ) {
+			flush_rewrite_rules( false );
+		}
+	}
+
+	/**
+	 * Built rather than written out, so the rule and the check that looks for
+	 * it can never disagree about what was registered.
+	 */
+	public static function rewrite_pattern(): string {
+		return '^' . self::ROUTE . '/?' . '$';
+	}
+
+	public static function forward(): void {
+		if ( '' === (string) get_query_var( self::QUERY_VAR ) ) {
+			return;
+		}
+
+		// Everything Microsoft sent, carried across unchanged. Sanitizing here
+		// would be the wrong place: the handler this lands on validates every
+		// parameter it uses and ignores the rest, and re-encoding a code or a
+		// state on the way past could only corrupt them.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$query = (array) wp_unslash( $_GET );
+
+		unset( $query[ self::QUERY_VAR ] );
+
+		// Scalars only, and this is not fussiness. This route is public, so
+		// anyone can request it with ?code[]=x, and rawurlencode() handed an
+		// array is a TypeError in PHP 8 - a fatal on a URL a stranger controls.
+		// Microsoft only ever sends scalars, so dropping the rest costs nothing
+		// real and the handler ignores anything it does not recognise anyway.
+		$forward = [];
+
+		foreach ( $query as $key => $value ) {
+			if ( is_scalar( $value ) ) {
+				$forward[ $key ] = rawurlencode( (string) $value );
+			}
+		}
+
+		$forward['action'] = self::CALLBACK_ACTION;
+
+		wp_safe_redirect( add_query_arg( $forward, admin_url( 'admin-post.php' ) ) );
+		exit;
 	}
 
 	/**

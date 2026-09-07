@@ -886,6 +886,12 @@ class Rest_Controller {
 			'connect_url'     => $urls['connect'],
 			'disconnect_url'  => $urls['disconnect'],
 			'redirect_uri'    => \ModernMailer\Auth\Microsoft_Consent::redirect_uri(),
+
+			// Whether that URI is the path-shaped one. It is not, on a site
+			// with permalinks set to Plain, and the difference decides which
+			// app registrations can accept it - so the screen has to be able
+			// to say which of the two it just handed over.
+			'clean_redirect'  => \ModernMailer\Auth\Microsoft_Consent::has_clean_route(),
 			'revoke_help_url' => \ModernMailer\Auth\Microsoft_Consent::REVOKE_HELP_URL,
 		];
 	}

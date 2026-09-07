@@ -101,6 +101,14 @@ class Plugin {
 			( new Updater( $this->http ) )->register();
 		}
 
+		// The delegated Microsoft callback is served from a path rather than
+		// from admin-post.php, because Entra refuses a redirect URI with a
+		// query string whenever the app registration admits personal Microsoft
+		// accounts. Registered unconditionally: the request arrives on the
+		// front end, where is_admin() is false and the admin classes below are
+		// not loaded at all.
+		Microsoft_Consent::register_routes();
+
 		( new Site_Health( $this ) )->register();
 
 		// Registered unconditionally, not only in the admin: rest_api_init fires
@@ -326,6 +334,12 @@ class Plugin {
 	public static function activate(): void {
 		Logger::install();
 		Queue::install();
+
+		// The rule has to exist before the table is rebuilt, so it is added
+		// here rather than left to the init hook that will not run again
+		// before the flush.
+		Microsoft_Consent::add_rewrite();
+		flush_rewrite_rules( false );
 
 		if ( ! wp_next_scheduled( Logger::CRON_HOOK ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', Logger::CRON_HOOK );

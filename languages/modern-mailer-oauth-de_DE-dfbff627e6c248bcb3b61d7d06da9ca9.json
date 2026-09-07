@@ -1,5 +1,5 @@
 {
-	"translation-revision-date": "2026-09-07T07:06:06.027Z",
+	"translation-revision-date": "2026-09-07T10:57:43.847Z",
 	"generator": "tools/i18n.mjs",
 	"domain": "messages",
 	"locale_data": {
@@ -204,6 +204,9 @@
 			"Add this exact value to your app registration in Entra, under Authentication, as a Web platform. Not a Single-page application - that registration refuses to issue a token here and reports it as a CORS error, which explains nothing.": [
 				"Fügen Sie genau diesen Wert Ihrer App-Registrierung in Entra unter „Authentifizierung“ hinzu, als Plattform „Web“. Nicht als „Single-Page-Anwendung“ – diese Registrierung stellt hier kein Token aus und meldet das als CORS-Fehler, was nichts erklärt."
 			],
+			"This address contains a query string, because this site uses Plain permalinks. Entra will only accept it if the app registration is set to Accounts in any organizational directory - it refuses a query string on any registration that also admits personal Microsoft accounts. Switching permalinks to any other setting gives a plain address that every registration accepts.": [
+				"Diese Adresse enthält einen Query-String, weil diese Website einfache Permalinks verwendet. Entra akzeptiert sie nur, wenn die App-Registrierung auf „Konten in einem beliebigen Organisationsverzeichnis“ eingestellt ist – bei jeder Registrierung, die auch private Microsoft-Konten zulässt, wird ein Query-String abgelehnt. Stellen Sie die Permalinks auf eine beliebige andere Einstellung um, dann entsteht eine einfache Adresse, die jede Registrierung akzeptiert."
+			],
 			"Mailbox": [
 				"Postfach"
 			],
@@ -215,6 +218,12 @@
 			],
 			"Enter the application ID and client secret above and save them before signing in.": [
 				"Geben Sie oben Anwendungs-ID und Client-Secret ein und speichern Sie sie, bevor Sie sich anmelden."
+			],
+			"Sign in as the mailbox this connection will send from, not as your administrator account. An administrator account with no mailbox of its own connects successfully and then fails on the first send.": [
+				"Melden Sie sich mit dem Postfach an, aus dem diese Verbindung senden soll – nicht mit Ihrem Administratorkonto. Ein Administratorkonto ohne eigenes Postfach verbindet sich erfolgreich und scheitert dann beim ersten Sendeversuch."
+			],
+			"If Microsoft offers \"Consent on behalf of your organization\" at the prompt, tick it. That grants the permission once for the whole tenant, so the sending mailbox is not asked to consent separately.": [
+				"Wenn Microsoft in der Abfrage „Im Namen Ihrer Organisation zustimmen“ anbietet, setzen Sie dort das Häkchen. Damit wird die Berechtigung einmalig für den gesamten Mandanten erteilt, und das sendende Postfach muss nicht noch einmal gesondert zustimmen."
 			],
 			"The prompt asks only for permission to send mail and to read your own address, using your own app registration. This plugin never requests read access to the mailbox, and no third party sees the tokens.": [
 				"Die Abfrage bittet nur um die Berechtigung, E-Mails zu senden und Ihre eigene Adresse zu lesen – über Ihre eigene App-Registrierung. Dieses Plugin fordert niemals Lesezugriff auf das Postfach an, und keine dritte Partei sieht die Tokens."

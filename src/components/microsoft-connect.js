@@ -1,6 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
-import { CheckCircle2, Copy, Check, TriangleAlert, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Copy, Check, TriangleAlert, ShieldCheck, Info } from 'lucide-react';
 import { Button, Separator, Alert, AlertDescription } from './ui';
 import { MicrosoftButton } from './microsoft-button';
 
@@ -64,6 +64,7 @@ const MicrosoftConnect = ( { oauth, dirty } ) => {
 		connect_url: connectUrl,
 		disconnect_url: disconnectUrl,
 		redirect_uri: redirectUri,
+		clean_redirect: cleanRedirect,
 		revoke_help_url: revokeHelpUrl,
 	} = oauth;
 
@@ -82,6 +83,22 @@ const MicrosoftConnect = ( { oauth, dirty } ) => {
 							'modern-mailer-oauth'
 						) }
 					</p>
+
+					{ /* The one setup failure that cannot be diagnosed from the
+					     error Entra gives. It rejects the URI at the portal, so it
+					     never becomes a runtime problem - it becomes somebody
+					     unable to finish the form and with no idea why. */ }
+					{ ! cleanRedirect && (
+						<Alert variant="warning">
+							<TriangleAlert />
+							<AlertDescription>
+								{ __(
+									'This address contains a query string, because this site uses Plain permalinks. Entra will only accept it if the app registration is set to Accounts in any organizational directory - it refuses a query string on any registration that also admits personal Microsoft accounts. Switching permalinks to any other setting gives a plain address that every registration accepts.',
+									'modern-mailer-oauth'
+								) }
+							</AlertDescription>
+						</Alert>
+					) }
 					<CopyField
 						value={ redirectUri }
 						label={ __( 'Copy redirect URI', 'modern-mailer-oauth' ) }
@@ -169,6 +186,31 @@ const MicrosoftConnect = ( { oauth, dirty } ) => {
 									</AlertDescription>
 								</Alert>
 							) }
+
+							{ /* Both sentences come from watching a real setup fail.
+							     The instinct is to sign in as the administrator -
+							     it is the account that can consent - and an
+							     administrator account frequently has no mailbox,
+							     so the connection is made and then dies on the
+							     first send. The consent tick is what makes the
+							     second attempt work without a second prompt. */ }
+							<Alert variant="info">
+								<Info />
+								<AlertDescription>
+									<p className="m-0">
+										{ __(
+											'Sign in as the mailbox this connection will send from, not as your administrator account. An administrator account with no mailbox of its own connects successfully and then fails on the first send.',
+											'modern-mailer-oauth'
+										) }
+									</p>
+									<p className="mt-2 mb-0">
+										{ __(
+											'If Microsoft offers "Consent on behalf of your organization" at the prompt, tick it. That grants the permission once for the whole tenant, so the sending mailbox is not asked to consent separately.',
+											'modern-mailer-oauth'
+										) }
+									</p>
+								</AlertDescription>
+							</Alert>
 
 							<div>
 								<MicrosoftButton
