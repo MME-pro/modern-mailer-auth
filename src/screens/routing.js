@@ -85,8 +85,14 @@ const ConditionRow = ( { condition, vocabulary, onChange, onRemove, canRemove, i
 			onChange={ ( e ) => onChange( { ...condition, value: e.target.value } ) }
 		/>
 
+		{ /* A non-breaking space rather than an empty string, so the joiner is
+		     always a text node with something in it. Emptying it made React
+		     remove the node instead of rewriting it, and a removal is the one
+		     operation a browser translator can turn into a thrown error - see
+		     lib/translation-guard.js. The span itself stays either way, because
+		     its width is what keeps the delete button in line down the list. */ }
 		<span className="text-xs font-medium text-muted-foreground w-8 text-center">
-			{ isLast ? '' : __( 'and', 'modern-mailer-oauth' ) }
+			{ isLast ? ' ' : __( 'and', 'modern-mailer-oauth' ) }
 		</span>
 
 		<Button

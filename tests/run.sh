@@ -37,4 +37,15 @@ for test in test-graph.php test-failures.php test-gmail.php test-resilience.php 
 	"$PHP" "${ARGS[@]}" "$test" || status=1
 done
 
+# The browser-side guard. Node rather than PHP because the fault it prevents is
+# entirely in the browser - a translator rewriting the DOM under React - and
+# nothing about it reaches WordPress. Skipped rather than failed where node is
+# absent, so this stays runnable on a box with only PHP on it.
+if command -v node >/dev/null 2>&1; then
+	echo "--- translation-guard.test.mjs ---"
+	node translation-guard.test.mjs || status=1
+else
+	echo "--- translation-guard.test.mjs (skipped: no node) ---"
+fi
+
 exit "$status"

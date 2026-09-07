@@ -4,7 +4,7 @@ Tags: smtp, wp_mail, microsoft 365, gmail, oauth
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.10.0
+Stable tag: 0.10.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,10 @@ Your Google Cloud consent screen is still in Testing status, which expires refre
 About 2 MB in this version. Both APIs cap a single request at 4-5 MB, and a message on this path is base64-encoded twice, so the usable payload is roughly half the nominal limit. Oversized messages are rejected before sending with a message saying so. Chunked upload for larger attachments is planned.
 
 == Changelog ==
+
+= 0.10.1 =
+* Fixed the screen going blank when you press Save with a browser translation switched on. Chrome's translation rewrites the page in a way the interface could not follow, and the moment anything on screen changed it gave up and left nothing behind. Translated pages now save normally.
+* If a screen does ever fail, it now says so and offers to reload, instead of showing an empty page. It also says whether your change was saved - it almost always was, because the failure happens after the save has been sent and answered.
 
 = 0.10.0 =
 * The plugin is now called MME-Mail to SMTP. Only the name changes - your connections, credentials and logs are untouched, and the entry in the Plugins list simply reads differently after the update.

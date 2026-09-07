@@ -1,5 +1,5 @@
 {
-	"translation-revision-date": "2026-09-02T07:52:58.131Z",
+	"translation-revision-date": "2026-09-02T12:23:45.765Z",
 	"generator": "tools/i18n.mjs",
 	"domain": "messages",
 	"locale_data": {
@@ -113,6 +113,21 @@
 			],
 			"Alert address": [
 				"Benachrichtigungsadresse"
+			],
+			"This screen stopped responding.": [
+				"Diese Seite reagiert nicht mehr."
+			],
+			"Your change was most likely saved - the screen failed while redrawing itself, which happens after the save has already been sent and answered. Reload to see the current settings.": [
+				"Ihre Änderung wurde höchstwahrscheinlich gespeichert – die Seite ist beim Neuzeichnen ausgefallen, und das geschieht erst, nachdem das Speichern gesendet und beantwortet wurde. Laden Sie neu, um die aktuellen Einstellungen zu sehen."
+			],
+			"If you are using a browser translation, this is the usual cause: it rewrites the page in a way the interface cannot always follow. Turning it off for this screen avoids it.": [
+				"Falls Sie eine Browser-Übersetzung verwenden, ist das die übliche Ursache: Sie schreibt die Seite so um, dass die Oberfläche nicht immer folgen kann. Schalten Sie sie für diese Seite ab, dann tritt es nicht auf."
+			],
+			"Reload this screen": [
+				"Seite neu laden"
+			],
+			"Technical detail": [
+				"Technische Details"
 			],
 			"Version %s": [
 				"Version %s"

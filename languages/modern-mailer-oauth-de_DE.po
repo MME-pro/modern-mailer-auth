@@ -1459,7 +1459,7 @@ msgstr "Nur Umschlagdaten und Fehler – Nachrichteninhalte werden hier niemals 
 msgid "When"
 msgstr "Wann"
 
-#: admin/views/logs.php:160 src/screens/connections.js:255 src/screens/logs.js:334 src/screens/routing.js:135
+#: admin/views/logs.php:160 src/screens/connections.js:255 src/screens/logs.js:334 src/screens/routing.js:141
 msgid "Connection"
 msgstr "Verbindung"
 
@@ -1574,6 +1574,26 @@ msgstr "Eine Testnachricht geht über die primäre Verbindung hinaus. Richten Si
 #: admin/views/settings.php:125
 msgid "Logs"
 msgstr "Protokolle"
+
+#: src/components/error-boundary.js:54
+msgid "This screen stopped responding."
+msgstr "Diese Seite reagiert nicht mehr."
+
+#: src/components/error-boundary.js:58
+msgid "Your change was most likely saved - the screen failed while redrawing itself, which happens after the save has already been sent and answered. Reload to see the current settings."
+msgstr "Ihre Änderung wurde höchstwahrscheinlich gespeichert – die Seite ist beim Neuzeichnen ausgefallen, und das geschieht erst, nachdem das Speichern gesendet und beantwortet wurde. Laden Sie neu, um die aktuellen Einstellungen zu sehen."
+
+#: src/components/error-boundary.js:65
+msgid "If you are using a browser translation, this is the usual cause: it rewrites the page in a way the interface cannot always follow. Turning it off for this screen avoids it."
+msgstr "Falls Sie eine Browser-Übersetzung verwenden, ist das die übliche Ursache: Sie schreibt die Seite so um, dass die Oberfläche nicht immer folgen kann. Schalten Sie sie für diese Seite ab, dann tritt es nicht auf."
+
+#: src/components/error-boundary.js:76
+msgid "Reload this screen"
+msgstr "Seite neu laden"
+
+#: src/components/error-boundary.js:82
+msgid "Technical detail"
+msgstr "Technische Details"
 
 #: src/components/footer.js:33
 msgid "Version %s"
@@ -2003,99 +2023,99 @@ msgstr "Wert"
 msgid "Value to match"
 msgstr "Zu vergleichender Wert"
 
-#: src/screens/routing.js:89
+#: src/screens/routing.js:95
 msgid "and"
 msgstr "und"
 
-#: src/screens/routing.js:96
+#: src/screens/routing.js:102
 msgid "Remove condition"
 msgstr "Bedingung entfernen"
 
-#: src/screens/routing.js:131
+#: src/screens/routing.js:137
 msgid "Send with"
 msgstr "Senden über"
 
-#: src/screens/routing.js:141
+#: src/screens/routing.js:147
 msgid "— Select a connection —"
 msgstr "— Verbindung auswählen —"
 
-#: src/screens/routing.js:146
+#: src/screens/routing.js:152
 msgid " (not configured)"
 msgstr " (nicht konfiguriert)"
 
-#: src/screens/routing.js:152
+#: src/screens/routing.js:158
 msgid "if the following conditions are met…"
 msgstr "wenn die folgenden Bedingungen erfüllt sind …"
 
-#: src/screens/routing.js:160
+#: src/screens/routing.js:166
 msgid "Move up"
 msgstr "Nach oben"
 
-#: src/screens/routing.js:169
+#: src/screens/routing.js:175
 msgid "Move down"
 msgstr "Nach unten"
 
-#: src/screens/routing.js:177
+#: src/screens/routing.js:183
 msgid "Remove rule"
 msgstr "Regel entfernen"
 
-#: src/screens/routing.js:190
+#: src/screens/routing.js:196
 msgid "This connection has no provider set, so nothing can be sent through it. Messages matching this rule fall back to the primary connection until it is configured."
 msgstr "Für diese Verbindung ist kein Anbieter gesetzt, es kann also nichts darüber gesendet werden. Nachrichten, die auf diese Regel passen, weichen auf die primäre Verbindung aus, bis sie konfiguriert ist."
 
-#: src/screens/routing.js:204
+#: src/screens/routing.js:210
 msgid "or"
 msgstr "oder"
 
-#: src/screens/routing.js:245
+#: src/screens/routing.js:251
 msgid "And"
 msgstr "Und"
 
-#: src/screens/routing.js:260
+#: src/screens/routing.js:266
 msgid "Add new group"
 msgstr "Neue Gruppe hinzufügen"
 
-#: src/screens/routing.js:290
+#: src/screens/routing.js:296
 msgid "Routing saved."
 msgstr "Weiterleitung gespeichert."
 
-#: src/screens/routing.js:323
+#: src/screens/routing.js:329
 msgid "Smart routing"
 msgstr "Intelligente Weiterleitung"
 
-#: src/screens/routing.js:324
+#: src/screens/routing.js:330
 msgid "Send some email through a different connection based on what it is. Anything that matches no rule goes out through the primary connection."
 msgstr "Bestimmte E-Mails je nach Inhalt über eine andere Verbindung senden. Alles, was auf keine Regel passt, geht über die primäre Verbindung hinaus."
 
-#: src/screens/routing.js:334 src/screens/routing.js:410
+#: src/screens/routing.js:340 src/screens/routing.js:416
 msgid "Save routing"
 msgstr "Weiterleitung speichern"
 
-#: src/screens/routing.js:342
+#: src/screens/routing.js:348
 msgid "Enable smart routing"
 msgstr "Intelligente Weiterleitung aktivieren"
 
-#: src/screens/routing.js:343
+#: src/screens/routing.js:349
 msgid "While this is off the rules below are kept but ignored, and every message goes through the primary connection."
 msgstr "Solange dies aus ist, bleiben die Regeln unten erhalten, werden aber ignoriert, und jede Nachricht geht über die primäre Verbindung."
 
-#: src/screens/routing.js:354
+#: src/screens/routing.js:360
 msgid "No rules yet"
 msgstr "Noch keine Regeln"
 
-#: src/screens/routing.js:358 src/screens/routing.js:387
+#: src/screens/routing.js:364 src/screens/routing.js:393
 msgid "Add rule"
 msgstr "Regel hinzufügen"
 
-#: src/screens/routing.js:362
+#: src/screens/routing.js:368
 msgid "A rule sends matching email through a connection of your choosing - receipts through a transactional sender, a newsletter through somewhere else."
 msgstr "Eine Regel sendet passende E-Mails über eine Verbindung Ihrer Wahl – Belege über einen Transaktionsversender, einen Newsletter über einen anderen Weg."
 
-#: src/screens/routing.js:397
+#: src/screens/routing.js:403
 msgid "Rules are checked from the top down and the first match wins, so put the most specific rules first. Anything matching none of them uses the primary connection."
 msgstr "Regeln werden von oben nach unten geprüft und der erste Treffer gewinnt – stellen Sie die spezifischsten Regeln also nach vorn. Alles, was auf keine passt, verwendet die primäre Verbindung."
 
-#: src/screens/routing.js:401
+#: src/screens/routing.js:407
 msgid "Your primary connection is used for every message that matches none of the rules above."
 msgstr "Ihre primäre Verbindung wird für jede Nachricht verwendet, die auf keine der Regeln oben passt."
 
